@@ -13,3 +13,11 @@ class IssueSerializer(serializers.ModelSerializer):
     class  Meta:
         model=Issue
         fields=['issue_id','title','description','status','priority','created_at','updated_at','student','assigned_to','resolved_by','attachment','Lecturer_comment','resolved_at']
+class IssueCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=Issue
+        fields=['title','description','priority','attachment']
+    def create(self,validated_data):
+        request=self.context.get('request')
+        validated_data['student']=request.user#assign logged-in user as a student
+        return super().create(validated_data)
