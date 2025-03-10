@@ -74,3 +74,32 @@ class Issue(models.Model):
 
     def __str__(self):
         return self.title
+    
+    def resolve(self, user, comment=None):
+        self.status = 'resolved'
+        self.resolved_by = user
+        self.resolved_at = timezone.now()
+        if comment:
+            self.lecturer_comment = comment
+        self.save()
+
+class Notifications(models.Model):
+    NOTIFICATION_TYPES = (
+        ('issue_update', 'Issue Update'),
+        ('issue_assigned', 'Issue Assigned'),
+        ('announcement', 'Announcement'),
+    )
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    type = models.CharField(max_length=15, choices=NOTIFICATION_TYPES)
+    title = models.CharField(max_length=200)
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    read = models.BooleanField(default=False)
+    related_issue = models.ForeignKey(Issue, on_delete=models.CASCADE, null=True, blank=True)
+
+    def __str__(self):
+        return self.title
+    
+    class Meta:
+        ordering = ['-created_at']
