@@ -2,14 +2,8 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.utils import timezone
 
-class Timestamp(models.Model):
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
-    class Meta:
-        abstract = True
-
-class Department(Timestamp):
+class Department(models.Modal):
     FACULTIES = (
         ('computer_science', 'Computer Science'),
         ('software_engineering', 'Software Engineering'),
