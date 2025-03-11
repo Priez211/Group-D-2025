@@ -3,7 +3,7 @@ from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.utils import timezone
 
 
-class Department(models.Modal):
+class Department(models.Model):
     FACULTIES = (
         ('computer_science', 'Computer Science'),
         ('software_engineering', 'Software Engineering'),
