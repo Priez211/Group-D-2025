@@ -1,8 +1,8 @@
 from django.shortcuts import render
 from rest_framework import viewsets,permissions
-from .models import Issue
+from .models import Issue,Department
 from rest_framework.permissions import IsAuthenticated
-from .serializers import IssueSerializer,UserSerializer
+from .serializers import IssueSerializer,UserSerializer,DepartmentSerializer
 from django.http import JsonResponse
 from django.contrib.auth import get_user_model
 from .permissions import IsRegistrar,Islecturer,Isstudent,IsOwnerOrReadOnly
@@ -26,7 +26,9 @@ class IssueViewSet(viewsets.ModelViewSet):
         return super().get_permissions
     def perform_create(self,serializer):
         serializer.save(student=self.request.user)# auto assigns issue to the logged in student
-    
+class DepartmentViewSet(viewsets.ModelViewSet):
+    queryset=Department.objects.all()
+    Serializer_class=DepartmentSerializer
     
 
 
