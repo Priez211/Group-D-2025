@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import LandingPage from './components/LandingPage';
-import Dashboard from './components/Dashboard';
+import Home from './components/Home';
+import StudentDashboard from './components/StudentDashboard';
 import LecturerDashboard from './components/LecturerDashboard';
 import RegistrarDashboard from './components/RegistrarDashboard';
 import IssueDetails from './components/IssueDetails';
