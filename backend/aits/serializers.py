@@ -1,8 +1,8 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from .models import Issue
+from .models import Issue, Department
 User=get_user_model()
-class UserSerializer(serializers.ModelsSerializer):
+class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model=User
         fields=['id','username','user_type','department','staff_id','student_number']
@@ -21,3 +21,8 @@ class IssueCreateSerializer(serializers.ModelSerializer):
         request=self.context.get('request')
         validated_data['student']=request.user#assign logged-in user as a student
         return super().create(validated_data)
+
+class DepartmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=Department
+        fields=['deparment_id','name','faculty']
