@@ -23,7 +23,7 @@ const App = () => {
       return <Navigate to="/login" />;
     }
     if (allowedRoles.length > 0 && !allowedRoles.includes(userRole)) {
-      return <Navigate to="/dashboard" />;
+      return <Navigate to="/studentdashboard" />;
     }
     return children;
   };
@@ -38,10 +38,10 @@ const App = () => {
 
         {/* Student Routes */}
         <Route
-          path="/dashboard"
+          path="/studentdashboard"
           element={
             <ProtectedRoute allowedRoles={['student']}>
-              <Dashboard />
+              <StudentDashboard />
             </ProtectedRoute>
           }
         />
