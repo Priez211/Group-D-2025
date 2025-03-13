@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from .models import Issue, Department
+from .models import Issue, Department,Notifications
 User=get_user_model()
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -12,7 +12,7 @@ class IssueSerializer(serializers.ModelSerializer):
     resolved_by=UserSerializer(read_only=True)
     class  Meta:
         model=Issue
-        fields=['issue_id','title','description','status','priority','created_at','updated_at','student','assigned_to','resolved_by','attachment','Lecturer_comment','resolved_at']
+        fields=['id','title','description','status','priority','created_at','updated_at','student','assigned_to','resolved_by','lecturer_comment','attachment','resolved_at']
 class IssueCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model=Issue
@@ -25,4 +25,8 @@ class IssueCreateSerializer(serializers.ModelSerializer):
 class DepartmentSerializer(serializers.ModelSerializer):
     class Meta:
         model=Department
-        fields=['deparment_id','name','faculty']
+        fields=['id','name','faculty']
+class NotificationsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=Notifications
+        fields=['id', 'user', 'type', 'title', 'message', 'created_at', 'read', 'related_issue']
