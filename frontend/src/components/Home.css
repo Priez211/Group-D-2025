@@ -1,0 +1,260 @@
+.home-page {
+    min-height: 100vh;
+    background-color: #fff;
+  }
+  
+  /* Top Navigation */
+  .top-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 24px;
+    background: #fff;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .nav-logo a {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: #000;
+    gap: 8px;
+  }
+  
+  .logo-icon {
+    width: 24px;
+    height: 24px;
+    color: #000;
+  }
+  
+  .nav-logo span {
+    font-size: 20px;
+    font-weight: 600;
+  }
+  
+  .nav-profile img {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+  }
+  
+  /* Hero Section */
+  .hero-section {
+    position: relative;
+    height: 400px;
+    background-image: url('/graduation-bg.jpg');
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: #fff;
+    margin-bottom: 48px;
+  }
+  
+  .hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+  }
+  
+  .hero-content {
+    position: relative;
+    z-index: 1;
+    padding: 0 24px;
+  }
+  
+  .hero-content h1 {
+    font-size: 48px;
+    font-weight: 700;
+    margin-bottom: 16px;
+  }
+  
+  .hero-content p {
+    font-size: 20px;
+    margin-bottom: 32px;
+  }
+  
+  .hero-buttons {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+  }
+  
+  .btn {
+    padding: 12px 24px;
+    border-radius: 24px;
+    font-size: 16px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s ease;
+  }
+  
+  .btn-primary {
+    background-color: #0066FF;
+    color: #fff;
+  }
+  
+  .btn-primary:hover {
+    background-color: #0052cc;
+  }
+  
+  .btn-secondary {
+    background-color: #fff;
+    color: #000;
+  }
+  
+  .btn-secondary:hover {
+    background-color: #f0f0f0;
+  }
+  
+  /* Help Section */
+  .help-section {
+    padding: 48px 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .help-section h2 {
+    font-size: 32px;
+    font-weight: 600;
+    margin-bottom: 32px;
+    text-align: center;
+  }
+  
+  .help-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 24px;
+    margin-top: 32px;
+  }
+  
+  .help-card {
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 24px;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.2s ease;
+  }
+  
+  .help-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  .card-icon {
+    width: 48px;
+    height: 48px;
+    background-color: #f0f7ff;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+  }
+  
+  .card-icon svg {
+    font-size: 24px;
+    color: #0066FF;
+  }
+  
+  .help-card h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  
+  .help-card p {
+    font-size: 14px;
+    color: #666;
+    line-height: 1.5;
+  }
+  
+  /* Contact Section */
+  .contact-section {
+    padding: 48px 24px;
+    background-color: #f8f9fa;
+  }
+  
+  .contact-section h2 {
+    font-size: 32px;
+    font-weight: 600;
+    margin-bottom: 32px;
+    text-align: center;
+  }
+  
+  .contact-info {
+    max-width: 800px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 32px;
+  }
+  
+  .contact-item {
+    text-align: center;
+  }
+  
+  .contact-item h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  
+  .contact-item p {
+    font-size: 16px;
+    color: #333;
+    margin-bottom: 4px;
+  }
+  
+  .contact-item .subtitle {
+    font-size: 14px;
+    color: #666;
+  }
+  
+  .link-text {
+    color: #0066FF;
+    text-decoration: none;
+    font-weight: 500;
+  }
+  
+  .link-text:hover {
+    text-decoration: underline;
+  }
+  
+  /* Responsive Styles */
+  @media screen and (max-width: 768px) {
+    .hero-section {
+      height: 300px;
+    }
+  
+    .hero-content h1 {
+      font-size: 36px;
+    }
+  
+    .hero-content p {
+      font-size: 18px;
+    }
+  
+    .help-section,
+    .contact-section {
+      padding: 32px 16px;
+    }
+  
+    .help-cards {
+      grid-template-columns: 1fr;
+    }
+  
+    .contact-info {
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+  } 
