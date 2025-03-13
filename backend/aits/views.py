@@ -1,8 +1,8 @@
 from django.shortcuts import render
 from rest_framework import viewsets,permissions
-from .models import Issue,Department
+from .models import Issue,Department,Notifications
 from rest_framework.permissions import IsAuthenticated
-from .serializers import IssueSerializer,UserSerializer,DepartmentSerializer
+from .serializers import IssueSerializer,UserSerializer,DepartmentSerializer,NotificationsSerializer
 from django.http import JsonResponse
 from django.contrib.auth import get_user_model
 from .permissions import IsRegistrar,Islecturer,Isstudent,IsOwnerOrReadOnly
@@ -23,12 +23,24 @@ class IssueViewSet(viewsets.ModelViewSet):
             return [IsOwnerOrReadOnly()]
         elif self.action in ['list','retrieve']:
             return[permissions.IsAuthenticated()]
-        return super().get_permissions
+        return super().get_permissions()
     def perform_create(self,serializer):
-        serializer.save(student=self.request.user)# auto assigns issue to the logged in student
+        # auto assigns issue to the logged in student
+        if hasattr(self.request.user,'student'):
+            serializer.save(student=self.request.user)
+        else:
+            raise permissions.PermissionDenied("Only students can create issues.")
 class DepartmentViewSet(viewsets.ModelViewSet):
     queryset=Department.objects.all()
-    Serializer_class=DepartmentSerializer
+    serializer_class=DepartmentSerializer
+class NotificationsViewSet(viewsets.ModelViewSet):
+    queryset=Notifications.objects.all()
+    serializer_class=NotificationsSerializer
+    permission_classes=[permissions.IsAuthenticated]
+    def get_query(self):
+        user=self.request.user
+        return Notifications.objects.filter(user=user).order_by('-created_at')
+
     
 
 
