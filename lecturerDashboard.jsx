@@ -1,53 +1,42 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { FaHome, FaQuestionCircle, FaUsers, FaCog } from 'react-icons/fa';
-import '../static/css/RegistrarDashboard.css';
+import '../static/css/LecturerDashboard.css';
 
-const RegistrarDashboard = () => {
-  const [activeFilter, setActiveFilter] = useState('All');
-  
+const LecturerDashboard = () => {
   const issues = [
     {
       id: 1,
-      issue: 'Mark issue',
-      status: 'Open',
+      issue: 'Mark Issue',
+      status: 'Pending',
       priority: 'High',
-      submissionDate: 'Jan 14'
+      submissionDate: 'Jun 14'
     },
     {
       id: 2,
-      issue: 'GRM-560',
-      status: 'Open',
+      issue: 'Request for a re-do',
+      status: 'Resolved',
       priority: 'Low',
       submissionDate: 'Jul 29'
     },
     {
       id: 3,
-      issue: 'SYS-301',
-      status: 'Open',
+      issue: 'Wrong marks',
+      status: 'Pending',
       priority: 'Medium',
       submissionDate: 'Sep 12'
     },
     {
       id: 4,
-      issue: 'QA-482',
-      status: 'Open',
+      issue: 'Missing mark',
+      status: 'Pending',
       priority: 'High',
       submissionDate: 'Oct 20'
-    },
-    {
-      id: 5,
-      issue: 'UX-578',
-      status: 'Open',
-      priority: 'Low',
-      submissionDate: 'Nov 1'
     }
   ];
 
-  const filters = ['All', 'Pending', 'Resolved', 'High Priority', 'Medium Priority', 'Low Priority'];
-
   return (
-    <div className="registrar-dashboard">
+    <div className="lecturer-dashboard">
       <nav className="top-nav">
         <div className="nav-logo">
           <Link to="/">
@@ -65,15 +54,15 @@ const RegistrarDashboard = () => {
       <div className="page-content">
         <aside className="sidebar">
           <nav className="side-nav">
-            <Link to="/registrar-dashboard" className="nav-item active">
+            <Link to="/lecturer-dashboard" className="nav-item active">
               <FaHome />
               <span>Home</span>
             </Link>
-            <Link to="/registrar-issues" className="nav-item">
+            <Link to="/lecturer-issues" className="nav-item">
               <FaQuestionCircle />
               <span>Issues</span>
             </Link>
-            <Link to="/registrar-students" className="nav-item">
+            <Link to="/lecturer-students" className="nav-item">
               <FaUsers />
               <span>Students</span>
             </Link>
@@ -86,23 +75,13 @@ const RegistrarDashboard = () => {
 
         <main className="main-content">
           <div className="dashboard-header">
-            <h1>Registrar's Dashboard</h1>
+            <h1>Lecturer Dashboard</h1>
           </div>
 
           <section className="issues-section">
             <h2>Issues</h2>
-            <p className="subtitle">All reported issues are listed below.</p>
-            
             <div className="filter-tabs">
-              {filters.map(filter => (
-                <button
-                  key={filter}
-                  className={`filter-tab ${activeFilter === filter ? 'active' : ''}`}
-                  onClick={() => setActiveFilter(filter)}
-                >
-                  {filter}
-                </button>
-              ))}
+              <button className="filter-tab active">All</button>
             </div>
 
             <div className="issues-table">
@@ -113,7 +92,7 @@ const RegistrarDashboard = () => {
                     <th>Status</th>
                     <th>Priority</th>
                     <th>Submission Date</th>
-                    <th>Actions</th>
+                    <th></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -148,4 +127,4 @@ const RegistrarDashboard = () => {
   );
 };
 
-export default RegistrarDashboard; 
+export default LecturerDashboard; 

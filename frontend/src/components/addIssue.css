@@ -1,0 +1,250 @@
+.add-issue-page {
+    min-height: 100vh;
+    background-color: #f8f9fa;
+  }
+  
+  /* Top Navigation */
+  .top-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 24px;
+    background: #fff;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .nav-logo a {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: #000;
+    gap: 8px;
+  }
+  
+  .logo-icon {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .nav-logo span {
+    font-size: 20px;
+    font-weight: 600;
+  }
+  
+  .nav-profile img {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+  }
+  
+  /* Page Layout */
+  .page-content {
+    display: flex;
+    min-height: calc(100vh - 57px);
+  }
+  
+  /* Sidebar */
+  .sidebar {
+    width: 240px;
+    background: #fff;
+    border-right: 1px solid #eee;
+    padding: 24px 0;
+  }
+  
+  .side-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 24px;
+    color: #666;
+    text-decoration: none;
+    transition: all 0.2s ease;
+  }
+  
+  .nav-item:hover {
+    background-color: #f8f9fa;
+    color: #000;
+  }
+  
+  .nav-item.active {
+    background-color: #f0f7ff;
+    color: #0066FF;
+    font-weight: 500;
+  }
+  
+  .nav-item svg {
+    font-size: 18px;
+  }
+  
+  /* Main Content */
+  .main-content {
+    flex: 1;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* Form Styles */
+  .issue-form {
+    max-width: 800px;
+    margin: 0 auto;
+    width: 100%;
+  }
+  
+  .issue-form h1 {
+    font-size: 24px;
+    font-weight: 600;
+    color: #000;
+    margin-bottom: 32px;
+  }
+  
+  .form-group {
+    margin-bottom: 24px;
+  }
+  
+  .form-group label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: #000;
+    margin-bottom: 8px;
+  }
+  
+  .form-group select,
+  .form-group textarea,
+  .file-name-display {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    color: #333;
+    background-color: #fff;
+  }
+  
+  .form-group select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23666' viewBox='0 0 16 16'%3E%3Cpath d='M8 10.5l-4-4h8l-4 4z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 32px;
+  }
+  
+  .form-group textarea {
+    resize: vertical;
+    min-height: 120px;
+  }
+  
+  /* File Input Styling */
+  .file-input-wrapper {
+    display: flex;
+    gap: 12px;
+  }
+  
+  .file-name-display {
+    flex: 1;
+    background-color: #fff;
+    cursor: default;
+  }
+  
+  .file-input-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background-color: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .file-input-label:hover {
+    background-color: #f0f7ff;
+    border-color: #0066FF;
+  }
+  
+  .attach-icon {
+    font-size: 18px;
+    color: #666;
+  }
+  
+  .hidden-file-input {
+    display: none;
+  }
+  
+  /* Submit Button */
+  .submit-button {
+    width: 100%;
+    padding: 12px;
+    background-color: #0066FF;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  
+  .submit-button:hover {
+    background-color: #0052cc;
+  }
+  
+  /* Footer */
+  .form-footer {
+    margin-top: auto;
+    text-align: center;
+    padding-top: 32px;
+    color: #666;
+    font-size: 14px;
+  }
+  
+  .footer-links {
+    margin-top: 8px;
+  }
+  
+  .footer-links a {
+    color: #666;
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+  
+  .footer-links a:hover {
+    color: #000;
+  }
+  
+  .separator {
+    margin: 0 8px;
+    color: #ddd;
+  }
+  
+  /* Responsive Styles */
+  @media screen and (max-width: 768px) {
+    .page-content {
+      flex-direction: column;
+    }
+  
+    .sidebar {
+      width: 100%;
+      border-right: none;
+      border-bottom: 1px solid #eee;
+      padding: 16px 0;
+    }
+  
+    .main-content {
+      padding: 24px 16px;
+    }
+  
+    .nav-item {
+      padding: 12px 16px;
+    }
+  } 
