@@ -11,8 +11,15 @@ class Department(models.Model):
         ('library_and_information', 'Library And Information'),
     )
 
+    DEPARTMENT_NAMES = (
+        ('computer_science', 'Computer Science'),
+        ('software_engineering', 'Software Engineering'),
+        ('information_technology', 'Information Technology'),
+        ('library_and_information', 'Library And Information'),
+    )
+
     department_id = models.CharField(max_length=10, unique=True)
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, choices= DEPARTMENT_NAMES, default='computer_science')
     faculty = models.CharField(max_length=50, choices=FACULTIES)
 
     def __str__(self):
@@ -21,12 +28,7 @@ class Department(models.Model):
     class Meta:
         ordering = ['name']
 
-DEPARTMENT_CHOICES = [
-    ('computer_science', 'Computer Science'),
-    ('software_engineering', 'Software Engineering'),
-    ('information_technology', 'Information Technology'),
-    ('library_and_information', 'Library And Information'),
-]
+
 
 class User(AbstractUser):
     USER_TYPES = (
@@ -36,7 +38,7 @@ class User(AbstractUser):
     )
 
     user_type = models.CharField(max_length=10, choices=USER_TYPES)
-    department = models.CharField(max_length=50, choices=DEPARTMENT_CHOICES)
+    department = models.ForeignKey(Department, max_length=50, on_delete=models.CASCADE)
     staff_id = models.CharField(max_length=20, null=True, blank=True)
     student_number = models.CharField(max_length=20, null=True, blank=True)
 
