@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from .models import Issue, Department,Notifications
+from rest_framework_simplejwt.tokens import RefreshToken
 User=get_user_model()
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -30,3 +31,19 @@ class NotificationsSerializer(serializers.ModelSerializer):
     class Meta:
         model=Notifications
         fields=['id', 'user', 'type', 'title', 'message', 'created_at', 'read', 'related_issue']
+class LoginSerializer(serializers.Serializer):
+    username=serializers.CharField()
+    password=serializers.CharField(write_only=True)
+
+    def validate(self,data):
+        from django.contrib.auth import authenticate
+        User=authenticate(username=data['username'],password=data['password'])
+        if User is None:
+            raise serializers.ValidationError('Invalid credentials')
+        refresh=RefreshToken.for_user(User)
+        return{
+            'user':UserSerializer(User).data,
+            'access_token':str(refresh.access_token),
+            'refresh_token':str(refresh),
+                      }
+        
