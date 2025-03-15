@@ -1,4 +1,5 @@
 from django.shortcuts import render
+<<<<<<< HEAD
 from rest_framework import viewsets,permissions
 from .models import Issue,Department,Notifications
 from rest_framework.permissions import IsAuthenticated
@@ -68,4 +69,7 @@ class LoginView(APIView):
 
 
 
+=======
+from rest_framwork import viewsets, status, permissions
+>>>>>>> 106f53fe2516bc28261fdab31a3158698547a161
 
