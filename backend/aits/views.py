@@ -7,6 +7,15 @@ from django.http import JsonResponse
 from django.contrib.auth import get_user_model
 from .permissions import IsRegistrar,Islecturer,Isstudent,IsOwnerOrReadOnly
 from rest_framework.authentication import TokenAuthentication
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from django.contrib.auth import authenticate
+from .serializers import LoginSerializer
+from rest_framework.decorators import permission_classes, authentication_classes
+
+
 # Create your views here.
 User=get_user_model()
 class UserViewSet(viewsets.ModelViewSet):
@@ -40,6 +49,20 @@ class NotificationsViewSet(viewsets.ModelViewSet):
     def get_query(self):
         user=self.request.user
         return Notifications.objects.filter(user=user).order_by('-created_at')
+class LoginView(APIView):
+    def post(self,request):
+        serializer=LoginSerializer(data=request.data)
+        if serializer.is_valid(): 
+           return Response(serializer.validated_data,status=status.HTTP_200_OK)
+        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+    @authentication_classes([JWTAuthentication])
+    @permission_classes([IsAuthenticated])
+    def protected_view(request):
+        return Response({'message':"You are authenticated"})
+    
+    
+    
+
 
     
 
