@@ -84,6 +84,7 @@ class Issue(models.Model):
         ('high', 'High'),
     )
 
+    
     title = models.CharField(max_length=200)
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='missing_mark')
     description = models.TextField()
