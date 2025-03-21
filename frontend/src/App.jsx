@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Home from './components/Home';
-import StudentDashboard from './components/StudentDashboard';
+import studentDashboard from './components/StudentDashboard';
 import LecturerDashboard from './components/LecturerDashboard';
 import RegistrarDashboard from './components/RegistrarDashboard';
 import IssueDetails from './components/IssueDetails';
@@ -23,7 +23,7 @@ const App = () => {
       return <Navigate to="/login" />;
     }
     if (allowedRoles.length > 0 && !allowedRoles.includes(userRole)) {
-      return <Navigate to="/studentdashboard" />;
+      return <Navigate to="/studentDashboard" />;
     }
     return children;
   };
@@ -38,7 +38,7 @@ const App = () => {
 
         {/* Student Routes */}
         <Route
-          path="/studentdashboard"
+          path="/studentDashboard"
           element={
             <ProtectedRoute allowedRoles={['student']}>
               <StudentDashboard />

@@ -41,6 +41,8 @@ class User(AbstractUser):
     department = models.ForeignKey(Department, max_length=50, on_delete=models.CASCADE)
     staff_id = models.CharField(max_length=20, null=True, blank=True)
     student_number = models.CharField(max_length=20, null=True, blank=True)
+    name = models.CharField(max_length=55,)
+    email = models.EmailField(max_length=55)
 
     # Unique related_name attributes to avoid clashes
     groups = models.ManyToManyField(
@@ -89,14 +91,12 @@ class Issue(models.Model):
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='missing_mark')
     description = models.TextField()
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+    student = models.ForeignKey(User, on_delete=models.CASCADE, related_name='submitted_issues', limit_choices_to={'user_type': 'student'})
     priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default='medium')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
-    student = models.ForeignKey(User, on_delete=models.CASCADE, related_name='submitted_issues', limit_choices_to={'user_type': 'student'})
-    assigned_to = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_issues', limit_choices_to={'user_type': 'lecturer'})
-    
     attachment = models.FileField(upload_to='issue_attachments/', null=True, blank=True)
+    assigned_to = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_issues', limit_choices_to={'user_type': 'lecturer'})
     lecturer_comment = models.TextField(null=True, blank=True)
     resolved_at = models.DateTimeField(null=True, blank=True)
     resolved_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='resolved_issues')
