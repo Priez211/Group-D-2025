@@ -13,7 +13,7 @@ class IssueSerializer(serializers.ModelSerializer):
     resolved_by=UserSerializer(read_only=True)
     class  Meta:
         model=Issue
-        fields=['id','title','description','status','priority','created_at','updated_at','student','assigned_to','resolved_by','lecturer_comment','attachment','resolved_at']
+        fields=['id','title','description','status','priority','created_at','updated_at','student','assigned_to','resolved_by','lecturer_comment','attachment','resolved_at','semester','yearOfstudy','courseunit']
 class IssueCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model=Issue
