@@ -26,7 +26,7 @@ class IssueCreateSerializer(serializers.ModelSerializer):
 class DepartmentSerializer(serializers.ModelSerializer):
     class Meta:
         model=Department
-        fields=['id','name','faculty']
+        fields=['id','name']
 class NotificationsSerializer(serializers.ModelSerializer):
     class Meta:
         model=Notifications
