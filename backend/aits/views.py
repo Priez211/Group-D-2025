@@ -3,8 +3,7 @@ from django.shortcuts import render
 from rest_framework import viewsets,permissions,status
 from .models import Issue,Department,Notifications,Student,AcademicRegistrar,Lecturer
 from rest_framework.permissions import IsAuthenticated
-from .serializers import IssueSerializer,UserSerializer,DepartmentSerializer,NotificationsSerializer,LoginSerializer,StudentSerializer,AcademicRegistrarSerializer,LecturerSerializer
-from django.http import JsonResponse
+from .serializers import IssueSerializer,UserSerializer,DepartmentSerializer,NotificationsSerializer,LoginSerializer,StudentSerializer,AcademicRegistrarSerializer,LecturerSerializer,LogoutSerializer
 from django.contrib.auth import get_user_model
 from .permissions import IsRegistrar,Isstudent,IsOwnerOrReadOnly
 from rest_framework.authentication import TokenAuthentication
@@ -13,10 +12,43 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.contrib.auth import authenticate
 from rest_framework.decorators import permission_classes, authentication_classes
+from rest_framework_simplejwt.tokens import RefreshToken
 
 
 # Create your views here.
 User=get_user_model()
+class LoginView(APIView):
+    def post(self,request):
+        serializer=LoginSerializer(data=request.data)
+        if serializer.is_valid(): 
+           username=serializer.validated_data['username']
+           password=serializer.validated_data['password']
+           User=authenticate(username=username,password=password)
+           if User:
+               refresh=RefreshToken.for_user(User)
+               #Determines the user role
+               role="Unknown"
+               if hasattr(User,'student'):
+                   role="Student"
+               elif hasattr(User,'registrar'):
+                   role="Academic Registrar"
+               elif hasattr(User,'lecturer'):
+                   role="Lecturer"
+               return Response({
+                   'refresh':str(refresh),
+                   'access':str(refresh.access_token),
+                   'role':role,
+                   'user_id':User.id,
+                   'username':User.username
+               },status=status.HTTP_200_OK)
+           return Response({"error":"Invalid credentials"},status=status.HTTP_401_UNAUTHORIZED)
+        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+    @authentication_classes([JWTAuthentication])
+    @permission_classes([IsAuthenticated])
+    def protected_view(request):
+        return Response({'message':"You are authenticated"})
+    
+
 class UserViewSet(viewsets.ModelViewSet):
     queryset=User.objects.all()
     serializer_class=UserSerializer
@@ -48,17 +80,6 @@ class NotificationsViewSet(viewsets.ModelViewSet):
     def get_query(self):
         user=self.request.user
         return Notifications.objects.filter(user=user).order_by('-created_at')
-class LoginView(APIView):
-    def post(self,request):
-        serializer=LoginSerializer(data=request.data)
-        if serializer.is_valid(): 
-           return Response(serializer.validated_data,status=status.HTTP_200_OK)
-        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
-    @authentication_classes([JWTAuthentication])
-    @permission_classes([IsAuthenticated])
-    def protected_view(request):
-        return Response({'message':"You are authenticated"})
-    
 class StudentViewSet(viewsets.ModelViewSet):
     queryset=Student.objects.all()
     serializer_class=StudentSerializer
@@ -73,6 +94,14 @@ class LecturerViewSet(viewsets.ModelViewSet):
     queryset=Lecturer.objects.all()
     serializer_class=LecturerSerializer
     permission_classes=[permissions.IsAuthenticated]
+class LogoutView(APIView):
     
+    ##Handles user logout by blacklisting the refresh token.
+    permission_classes=[permissions.IsAuthenticated]
+    def post(self,request):
+        serializer=LogoutSerializer(data=request.data)
+        if serializer.is_valid():
+            return Response({"message":"Logged out successfully"},status=status.HTTP_205_RESET_CONTENT)
+        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
 
