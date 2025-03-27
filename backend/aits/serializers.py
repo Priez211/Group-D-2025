@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from .models import Issue, Department,Notifications
+from .models import Issue, Department,Notifications,Student,AcademicRegistrar,Lecturer
 from rest_framework_simplejwt.tokens import RefreshToken
 User=get_user_model()
 class UserSerializer(serializers.ModelSerializer):
@@ -13,7 +13,7 @@ class IssueSerializer(serializers.ModelSerializer):
     resolved_by=UserSerializer(read_only=True)
     class  Meta:
         model=Issue
-        fields=['id','title','description','status','priority','created_at','updated_at','student','assigned_to','resolved_by','lecturer_comment','attachment','resolved_at','semester','yearOfstudy','courseunit']
+        fields=['id','title','description','status','priority','created_at','updated_at','student','assigned_to','resolved_by','lecturer_comment','attachment','resolved_at','semester','yearOfStudy','courseUnit']
 class IssueCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model=Issue
@@ -28,6 +28,8 @@ class DepartmentSerializer(serializers.ModelSerializer):
         model=Department
         fields=['id','name']
 class NotificationsSerializer(serializers.ModelSerializer):
+    recipient=UserSerializer()
+    related_issue=IssueSerializer()
     class Meta:
         model=Notifications
         fields=['id', 'user', 'type', 'title', 'message', 'created_at', 'read', 'related_issue']
@@ -46,4 +48,19 @@ class LoginSerializer(serializers.Serializer):
             'access_token':str(refresh.access_token),
             'refresh_token':str(refresh),
                       }
+class StudentSerializer(serializers.ModelSerializer):
+    user=UserSerializer()
+    class Meta:
+        model=Student
+        fields='__all__'
+class AcademicRegistrarSerializer(serializers.ModelSerializer):
+    user=UserSerializer()
+    class Meta:
+        model=AcademicRegistrar
+        fields='__all__'
+class LecturerSerializer(serializers.ModelSerializer):
+    user=UserSerializer()
+    class Meta:
+        model=Lecturer
+        fields='__all__'
         
