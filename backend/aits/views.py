@@ -1,18 +1,17 @@
 
 from django.shortcuts import render
 from rest_framework import viewsets,permissions,status
-from .models import Issue,Department,Notifications
+from .models import Issue,Department,Notifications,Student,AcademicRegistrar,Lecturer
 from rest_framework.permissions import IsAuthenticated
-from .serializers import IssueSerializer,UserSerializer,DepartmentSerializer,NotificationsSerializer
+from .serializers import IssueSerializer,UserSerializer,DepartmentSerializer,NotificationsSerializer,LoginSerializer,StudentSerializer,AcademicRegistrarSerializer,LecturerSerializer
 from django.http import JsonResponse
 from django.contrib.auth import get_user_model
-from .permissions import IsRegistrar,Islecturer,Isstudent,IsOwnerOrReadOnly
+from .permissions import IsRegistrar,Isstudent,IsOwnerOrReadOnly
 from rest_framework.authentication import TokenAuthentication
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.contrib.auth import authenticate
-from .serializers import LoginSerializer
 from rest_framework.decorators import permission_classes, authentication_classes
 
 
@@ -60,6 +59,20 @@ class LoginView(APIView):
     def protected_view(request):
         return Response({'message':"You are authenticated"})
     
+class StudentViewSet(viewsets.ModelViewSet):
+    queryset=Student.objects.all()
+    serializer_class=StudentSerializer
+    permission_classes=[permissions.IsAuthenticated]
+    
+class AcademicRegistrarViewSet(viewsets.ModelViewSet):
+    queryset=AcademicRegistrar.objects.all()
+    serializer_class=AcademicRegistrarSerializer
+    permission_classes=[permissions.IsAuthenticated]
+
+class LecturerViewSet(viewsets.ModelViewSet):
+    queryset=Lecturer.objects.all()
+    serializer_class=LecturerSerializer
+    permission_classes=[permissions.IsAuthenticated]
     
 
 
