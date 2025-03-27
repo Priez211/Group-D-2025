@@ -43,10 +43,21 @@ class LoginSerializer(serializers.Serializer):
         if User is None:
             raise serializers.ValidationError('Invalid credentials')
         refresh=RefreshToken.for_user(User)
+        role="Unknown"
+        if hasattr(User,'student'):
+            role="Student"
+        elif hasattr(User,'registrar'):
+            role="AAcaddemic Registrar"
+        elif hasattr(User,'lecturer'):
+            role="Lecturer"
+
         return{
-            'user':UserSerializer(User).data,
-            'access_token':str(refresh.access_token),
+            'access':str(refresh.access_token),
             'refresh_token':str(refresh),
+            'role':role,
+            'user_id':User.id,
+            'username':User.username,
+
                       }
 class StudentSerializer(serializers.ModelSerializer):
     user=UserSerializer()
@@ -63,4 +74,12 @@ class LecturerSerializer(serializers.ModelSerializer):
     class Meta:
         model=Lecturer
         fields='__all__'
+class LogoutSerializer(serializers.ModelSerializer):
+    #validaates the refresh token
+    def validate(self,data):
+        try:
+            RefreshToken(data["refresh"]).blacklist()
+        except Exception as e:
+            raise serializers.ValidationError('Invalid or expired token')
+        return data
         
