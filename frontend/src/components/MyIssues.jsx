@@ -1,125 +1,181 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { FaHome, FaQuestionCircle, FaUsers, FaCog } from 'react-icons/fa';
-import '../static/css/LecturerDashboard.css';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { getStudentIssues } from '../services/api';
+import UserProfile from './UserProfile';
+import NotificationBadge from './NotificationBadge';
+import '../statics/Dashboard.css';
 
-const LecturerDashboard = () => {
-  const issues = [
-    {
-      id: 1,
-      issue: 'Mark Issue',
-      status: 'Pending',
-      priority: 'High',
-      submissionDate: 'Jun 14'
-    },
-    {
-      id: 2,
-      issue: 'Request for a re-do',
-      status: 'Resolved',
-      priority: 'Low',
-      submissionDate: 'Jul 29'
-    },
-    {
-      id: 3,
-      issue: 'Wrong marks',
-      status: 'Pending',
-      priority: 'Medium',
-      submissionDate: 'Sep 12'
-    },
-    {
-      id: 4,
-      issue: 'Missing mark',
-      status: 'Pending',
-      priority: 'High',
-      submissionDate: 'Oct 20'
+const MyIssues = () => {
+  const navigate = useNavigate();
+  const [issues, setIssues] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const userData = JSON.parse(localStorage.getItem('user'));
+    if (!userData) {
+      navigate('/login');
+      return;
     }
-  ];
+    setUser(userData);
+    fetchIssues();
+  }, [navigate]);
+
+  const fetchIssues = async () => {
+    try {
+      const data = await getStudentIssues();
+      console.log('Fetched issues data:', JSON.stringify(data, null, 2));
+      if (Array.isArray(data)) {
+        setIssues(data);
+      } else if (data && typeof data === 'object') {
+        // If the data is wrapped in an object, try to find the issues array
+        const issuesArray = data.issues || data.data || [];
+        setIssues(issuesArray);
+      } else {
+        setIssues([]);
+      }
+      setError('');
+    } catch (err) {
+      setError('Failed to fetch issues. Please try again later.');
+      console.error('Error fetching issues:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAddNewIssue = () => {
+    navigate('/add-issue');
+  };
+
+  const handleIssueClick = (issueId) => {
+    console.log('Clicking issue with full details:', issueId);
+    if (!issueId) {
+      console.error('No issue ID provided');
+      return;
+    }
+    navigate(`/issue/${issueId}`);
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'open':
+        return 'gray';
+      case 'in_progress':
+        return 'blue';
+      case 'resolved':
+        return 'green';
+      default:
+        return 'gray';
+    }
+  };
+
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+
+  const formatCategory = (category) => {
+    if (!category) return '';
+    // Split by underscore or space, capitalize each word, then join with space
+    return category
+      .split(/[_\s]/)
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
+  };
 
   return (
-    <div className="lecturer-dashboard">
-      <nav className="top-nav">
-        <div className="nav-logo">
-          <Link to="/">
-            <img src="/graduation-cap.png" alt="AiTs Logo" className="logo-icon" />
-            <span>AiTs</span>
-          </Link>
+    <div className="dashboard-container">
+      {/* Header */}
+      <header className="dashboard-header">
+        <div className="logo">
+          <span className="graduation-icon">👨‍🎓</span>
+          <h1>AITs</h1>
         </div>
-        <div className="nav-profile">
-          <Link to="/profile">
-            <img src="/profile-placeholder.png" alt="Profile" />
-          </Link>
+        <div className="user-menu">
+          <UserProfile user={user} />
         </div>
-      </nav>
+      </header>
 
-      <div className="page-content">
-        <aside className="sidebar">
-          <nav className="side-nav">
-            <Link to="/lecturer-dashboard" className="nav-item active">
-              <FaHome />
-              <span>Home</span>
-            </Link>
-            <Link to="/lecturer-issues" className="nav-item">
-              <FaQuestionCircle />
-              <span>Issues</span>
-            </Link>
-            <Link to="/lecturer-students" className="nav-item">
-              <FaUsers />
-              <span>Students</span>
-            </Link>
-            <Link to="/settings" className="nav-item">
-              <FaCog />
-              <span>Settings</span>
-            </Link>
-          </nav>
-        </aside>
+      <div className="dashboard-layout">
+        {/* Sidebar Navigation */}
+        <nav className="dashboard-nav">
+          <ul>
+            <li onClick={() => navigate('/dashboard')}>
+              <span>🏠</span>
+              Home
+            </li>
+            <li className="active">
+              <span>📝</span>
+              My Issues
+            </li>
+            <li onClick={() => navigate('/notifications')} className="notification-item">
+              <span>🔔</span>
+              Notifications
+              <NotificationBadge />
+            </li>
+            <li>
+              <span>⚙️</span>
+              Settings
+            </li>
+          </ul>
+        </nav>
 
-        <main className="main-content">
-          <div className="dashboard-header">
-            <h1>Lecturer Dashboard</h1>
+        {/* Main Content */}
+        <main className="dashboard-main">
+          <div className="page-header">
+            <h1>My Issues</h1>
+            <button className="add-issue-button" onClick={handleAddNewIssue}>
+              <span>➕</span> Add New Issue
+            </button>
           </div>
-
-          <section className="issues-section">
-            <h2>Issues</h2>
-            <div className="filter-tabs">
-              <button className="filter-tab active">All</button>
-            </div>
-
-            <div className="issues-table">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Issue</th>
-                    <th>Status</th>
-                    <th>Priority</th>
-                    <th>Submission Date</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {issues.map(issue => (
-                    <tr key={issue.id}>
-                      <td>{issue.issue}</td>
-                      <td>
-                        <span className={`status-badge ${issue.status.toLowerCase()}`}>
-                          {issue.status}
-                        </span>
-                      </td>
-                      <td>
-                        <span className={`priority-badge ${issue.priority.toLowerCase()}`}>
-                          {issue.priority}
-                        </span>
-                      </td>
-                      <td>{issue.submissionDate}</td>
-                      <td>
-                        <Link to={`/issue/${issue.id}`} className="view-details">
-                          View details
-                        </Link>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+          
+          <section className="all-issues">
+            {loading ? (
+              <div className="loading-spinner">Loading...</div>
+            ) : error ? (
+              <div className="error-message">{error}</div>
+            ) : (
+              <div className="issues-list">
+                {issues.length === 0 ? (
+                  <div className="no-issues">No issues found. Create your first issue!</div>
+                ) : (
+                  [...issues]
+                    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+                    .map((issue) => {
+                      console.log('Rendering issue:', JSON.stringify(issue, null, 2));
+                      const issueId = issue._id || issue.id || issue.issue_id;
+                      return (
+                        <div 
+                          key={issueId} 
+                          className="issue-card"
+                          onClick={() => handleIssueClick(issueId)}
+                          style={{ cursor: 'pointer' }}
+                        >
+                          <div className="issue-content">
+                            <div className="issue-header">
+                              <h3>{formatCategory(issue.title || issue.category)}</h3>
+                              <div className="issue-metadata">
+                                <div className={`issue-status-circle ${getStatusColor(issue.status)}`} />
+                                <span className="issue-date">{formatDate(issue.created_at)}</span>
+                              </div>
+                            </div>
+                            <p className="issue-description">{issue.description}</p>
+                            <div className="issue-status">
+                              <span className={`status-badge ${issue.status}`}>
+                                {formatCategory(issue.status || '')}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })
+                )}
+              </div>
+            )}
           </section>
         </main>
       </div>
@@ -127,4 +183,4 @@ const LecturerDashboard = () => {
   );
 };
 
-export default LecturerDashboard; 
+export default MyIssues; 
