@@ -1,250 +1,67 @@
-.lecturer-dashboard {
-    min-height: 100vh;
-    background-color: #f8f9fa;
-  }
-  
-  /* Top Navigation */
-  .top-nav {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 24px;
-    background: #fff;
-    border-bottom: 1px solid #eee;
-  }
-  
-  .nav-logo a {
-    display: flex;
-    align-items: center;
-    text-decoration: none;
-    color: #000;
-    gap: 8px;
-  }
-  
-  .logo-icon {
-    width: 24px;
-    height: 24px;
-  }
-  
-  .nav-logo span {
-    font-size: 20px;
-    font-weight: 600;
-  }
-  
-  .nav-profile img {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    cursor: pointer;
-  }
-  
-  /* Page Layout */
-  .page-content {
-    display: flex;
-    min-height: calc(100vh - 57px);
-  }
-  
-  /* Sidebar */
-  .sidebar {
-    width: 240px;
-    background: #fff;
-    border-right: 1px solid #eee;
-    padding: 24px 0;
-  }
-  
-  .side-nav {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-  
-  .nav-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 24px;
-    color: #666;
-    text-decoration: none;
-    transition: all 0.2s ease;
-  }
-  
-  .nav-item:hover {
-    background-color: #f8f9fa;
-    color: #000;
-  }
-  
-  .nav-item.active {
-    background-color: #f0f7ff;
-    color: #0066FF;
-    font-weight: 500;
-  }
-  
-  .nav-item svg {
-    font-size: 18px;
-  }
-  
-  /* Main Content */
-  .main-content {
-    flex: 1;
-    padding: 40px;
-  }
-  
-  .dashboard-header {
-    margin-bottom: 32px;
-  }
-  
-  .dashboard-header h1 {
-    font-size: 24px;
-    font-weight: 600;
-    color: #000;
-  }
-  
-  /* Issues Section */
-  .issues-section h2 {
-    font-size: 18px;
-    font-weight: 600;
-    color: #000;
-    margin-bottom: 16px;
-  }
-  
-  .filter-tabs {
-    margin-bottom: 24px;
-    border-bottom: 1px solid #eee;
-  }
-  
-  .filter-tab {
-    padding: 8px 16px;
-    font-size: 14px;
-    color: #666;
-    background: none;
-    border: none;
-    border-bottom: 2px solid transparent;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-  
-  .filter-tab.active {
-    color: #0066FF;
-    border-bottom-color: #0066FF;
-  }
-  
-  /* Table Styles */
-  .issues-table {
-    background: #fff;
-    border-radius: 8px;
-    border: 1px solid #eee;
-    overflow: hidden;
-  }
-  
-  table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-  
-  th {
-    text-align: left;
-    padding: 16px;
-    font-size: 14px;
-    font-weight: 500;
-    color: #666;
-    background-color: #f8f9fa;
-    border-bottom: 1px solid #eee;
-  }
-  
-  td {
-    padding: 16px;
-    font-size: 14px;
-    color: #333;
-    border-bottom: 1px solid #eee;
-  }
-  
-  tr:last-child td {
-    border-bottom: none;
-  }
-  
-  /* Status Badges */
-  .status-badge {
-    display: inline-block;
-    padding: 4px 12px;
-    border-radius: 12px;
-    font-size: 12px;
-    font-weight: 500;
-  }
-  
-  .status-badge.pending {
-    background-color: #fff4e5;
-    color: #ff9800;
-  }
-  
-  .status-badge.resolved {
-    background-color: #e8f5e9;
-    color: #4caf50;
-  }
-  
-  /* Priority Badges */
-  .priority-badge {
-    display: inline-block;
-    padding: 4px 12px;
-    border-radius: 12px;
-    font-size: 12px;
-    font-weight: 500;
-    background-color: #f5f5f5;
-  }
-  
-  .priority-badge.high {
-    background-color: #fde7e7;
-    color: #d32f2f;
-  }
-  
-  .priority-badge.medium {
-    background-color: #fff4e5;
-    color: #ff9800;
-  }
-  
-  .priority-badge.low {
-    background-color: #e8f5e9;
-    color: #4caf50;
-  }
-  
-  /* View Details Link */
-  .view-details {
-    color: #0066FF;
-    text-decoration: none;
-    font-size: 14px;
-    transition: color 0.2s ease;
-  }
-  
-  .view-details:hover {
-    color: #0052cc;
-    text-decoration: underline;
-  }
-  
-  /* Responsive Styles */
-  @media screen and (max-width: 768px) {
-    .page-content {
-      flex-direction: column;
-    }
-  
-    .sidebar {
-      width: 100%;
-      border-right: none;
-      border-bottom: 1px solid #eee;
-      padding: 16px 0;
-    }
-  
-    .main-content {
-      padding: 24px 16px;
-    }
-  
-    .nav-item {
-      padding: 12px 16px;
-    }
-  
-    .issues-table {
-      overflow-x: auto;
-    }
-  
-    table {
-      min-width: 800px;
-    }
-  } 
+import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import '../statics/UserProfile.css';
+
+const UserProfile = ({ user }) => {
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const navigate = useNavigate();
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const getInitials = (name) => {
+    if (!name) return 'U';
+    return name
+      .split(' ')
+      .map(word => word[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
+    navigate('/login');
+  };
+
+  return (
+    <div className="user-profile" ref={dropdownRef}>
+      <div 
+        className="profile-trigger" 
+        onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+      >
+        <div className="profile-button">
+          <span className="initials">{getInitials(user?.fullName)}</span>
+        </div>
+      </div>
+      
+      {isDropdownOpen && (
+        <div className="profile-dropdown">
+          <div className="user-info">
+            <p className="full-name">{user?.fullName || 'User'}</p>
+            <p className="email">{user?.studentNumber || 'No student number'}</p>
+          </div>
+          <div className="dropdown-divider"></div>
+          <div className="dropdown-item" onClick={handleLogout}>
+            <span>🚪</span>
+            Logout
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default UserProfile; 
