@@ -3,7 +3,7 @@ from django.dispatch import receiver
 from .models import Issue,Notifications
 
 @receiver(post_save,sender=Issue)
-def issue_nitification(sender,instance,created,**kwargs):
+def issue_notification(sender,instance,created,**kwargs):
     if created:
         message=f"A new issue'{instance.title}'has been created"
         notification_type="New Issue Created"
