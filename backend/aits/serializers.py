@@ -2,7 +2,17 @@ from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from .models import Issue, Department,Notifications,Student,AcademicRegistrar,Lecturer
 from rest_framework_simplejwt.tokens import RefreshToken
+from django.contrib.auth.hashers import make_password
 User=get_user_model()
+class SignupSerializer(serializers.ModelSerializer):
+    password=serializers.CharField(write_only=True,required=True,min_length=8)
+    class Meta:
+        model=User
+        fields=['username','password','user_type','student_number','email','full_name']
+        def create(self,validated_data):
+            validated_data['password']=make_password(validated_data['password'])
+            return super().create(validated_data)
+        
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model=User
