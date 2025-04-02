@@ -47,7 +47,7 @@ class LoginSerializer(serializers.Serializer):
         if hasattr(User,'student'):
             role="Student"
         elif hasattr(User,'registrar'):
-            role="AAcaddemic Registrar"
+            role="Acaddemic Registrar"
         elif hasattr(User,'lecturer'):
             role="Lecturer"
 
