@@ -1,125 +1,214 @@
-import React from 'react';
-import { Link, useParams, useNavigate } from 'react-router-dom';
-import { FaHome, FaQuestionCircle, FaUsers, FaCog, FaGraduationCap } from 'react-icons/fa';
-import '../static/css/IssueDetails.css';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { getIssueById } from '../services/api';
+import UserProfile from './UserProfile';
+import NotificationBadge from './NotificationBadge';
+import '../statics/Dashboard.css';
+import '../statics/IssueDetail.css';
 
-const IssueDetails = ({ userRole = 'lecturer' }) => {
+const IssueDetail = () => {
   const { issueId } = useParams();
   const navigate = useNavigate();
+  const [issue, setIssue] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [user, setUser] = useState(null);
 
-  // This would normally come from your API/backend
-  const issueDetails = {
-    issue: 'Missing marks',
-    issueTitle: 'Missing marks',
-    detailedDescription: 'My marks for coursework and mid-semester exams are missing but i did them',
-    priority: 'High',
-    submissionDate: 'Jun 21',
-    status: 'Open'
+  useEffect(() => {
+    const userData = JSON.parse(localStorage.getItem('user'));
+    if (!userData) {
+      navigate('/login');
+      return;
+    }
+    setUser(userData);
+  }, [navigate]);
+
+  useEffect(() => {
+    const fetchIssueDetails = async () => {
+      try {
+        const data = await getIssueById(issueId);
+        setIssue(data);
+        setError('');
+      } catch (err) {
+        setError(err.message || 'Failed to load issue details. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (issueId) {
+      fetchIssueDetails();
+    } else {
+      setError('No issue ID provided');
+      setLoading(false);
+    }
+  }, [issueId]);
+
+  const handleEditIssue = () => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+    // Check if the user is authorized to edit this issue
+    if (issue.student_id === user.id) {
+      navigate(`/add-issue/${issueId}`);
+    } else {
+      setError('You are not authorized to edit this issue.');
+    }
   };
 
-  const handleResolveIssue = () => {
-    // Handle issue resolution logic here
-    console.log('Resolving issue:', issueId);
+  const handleMyIssues = () => {
+    navigate('/my-issues');
   };
 
-  const handleBackToIssues = () => {
-    const route = userRole === 'lecturer' ? '/lecturer-dashboard' : 
-                 userRole === 'registrar' ? '/registrar-dashboard' : '/dashboard';
-    navigate(route);
-  };
+  if (loading) {
+    return (
+      <div className="dashboard-container">
+        <header className="dashboard-header">
+          <div className="logo">
+            <span className="graduation-icon">👨‍🎓</span>
+            <h1>AITs</h1>
+          </div>
+          <div className="user-menu">
+            <UserProfile user={user} />
+          </div>
+        </header>
+        <div className="loading">Loading issue details...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="dashboard-container">
+        <header className="dashboard-header">
+          <div className="logo">
+            <span className="graduation-icon">👨‍🎓</span>
+            <h1>AITs</h1>
+          </div>
+          <div className="user-menu">
+            <UserProfile user={user} />
+          </div>
+        </header>
+        <div className="error">
+          <h2>Error</h2>
+          <p>{error}</p>
+          <button onClick={() => navigate(-1)} className="back-button">
+            Back to Issues
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!issue) {
+    return (
+      <div className="dashboard-container">
+        <header className="dashboard-header">
+          <div className="logo">
+            <span className="graduation-icon">👨‍🎓</span>
+            <h1>AITs</h1>
+          </div>
+          <div className="user-menu">
+            <UserProfile user={user} />
+          </div>
+        </header>
+        <div className="not-found">
+          <h2>Issue Not Found</h2>
+          <p>The requested issue could not be found.</p>
+          <button onClick={() => navigate(-1)} className="back-button">
+            Back to Issues
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="issue-details-page">
-      <nav className="top-nav">
-        <div className="nav-logo">
-          <Link to="/">
-            <FaGraduationCap className="logo-icon" />
-            <span>AITs</span>
-          </Link>
+    <div className="dashboard-container">
+      {/* Header */}
+      <header className="dashboard-header">
+        <div className="logo">
+          <span className="graduation-icon">👨‍🎓</span>
+          <h1>AITs</h1>
         </div>
-        <div className="nav-profile">
-          <Link to="/profile">
-            <img src="/profile-placeholder.png" alt="Profile" />
-          </Link>
+        <div className="user-menu">
+          <UserProfile user={user} />
         </div>
-      </nav>
+      </header>
 
-      <div className="page-content">
-        <aside className="sidebar">
-          <nav className="side-nav">
-            <Link to="/dashboard" className="nav-item">
-              <FaHome />
-              <span>Home</span>
-            </Link>
-            <Link to="/issues" className="nav-item active">
-              <FaQuestionCircle />
-              <span>Issues</span>
-            </Link>
-            <Link to="/students" className="nav-item">
-              <FaUsers />
-              <span>Students</span>
-            </Link>
-            <Link to="/settings" className="nav-item">
-              <FaCog />
-              <span>Settings</span>
-            </Link>
-          </nav>
-        </aside>
+      <div className="dashboard-layout">
+        {/* Sidebar Navigation */}
+        <nav className="dashboard-nav">
+          <ul>
+            <li onClick={() => navigate('/dashboard')}>
+              <span>🏠</span>
+              Home
+            </li>
+            <li onClick={handleMyIssues}>
+              <span>📝</span>
+              My Issues
+            </li>
+            <li onClick={() => navigate('/notifications')} className="notification-item">
+              <span>🔔</span>
+              Notifications
+              <NotificationBadge />
+            </li>
+            <li>
+              <span>⚙️</span>
+              Settings
+            </li>
+          </ul>
+        </nav>
 
-        <main className="main-content">
-          <div className="content-header">
+        {/* Main Content */}
+        <main className="dashboard-main">
+          <div className="issue-container">
             <h1>Issue Details</h1>
             <p className="subtitle">Detailed view of the selected issue.</p>
-          </div>
 
-          <div className="issue-details">
-            <div className="detail-group">
-              <h2>Issue</h2>
-              <p>{issueDetails.issue}</p>
+            {error && <div className="error-message">{error}</div>}
+
+            <div className="issue-section">
+              <h2>Issue Category</h2>
+              <p>{issue.category}</p>
             </div>
 
-            <div className="detail-group">
+            <div className="issue-section">
               <h2>Issue Title</h2>
-              <p>{issueDetails.issueTitle}</p>
+              <p>{issue.title}</p>
             </div>
 
-            <div className="detail-group">
+            <div className="issue-section">
               <h2>Detailed Description</h2>
-              <p>{issueDetails.detailedDescription}</p>
+              <p>{issue.description}</p>
             </div>
 
-            <div className="detail-group">
+            <div className="issue-section">
               <h2>Priority</h2>
-              <span className={`priority-badge ${issueDetails.priority.toLowerCase()}`}>
-                {issueDetails.priority}
-              </span>
+              <p>{issue.priority}</p>
             </div>
 
-            <div className="detail-group">
+            <div className="issue-section">
               <h2>Submission Date</h2>
-              <p>{issueDetails.submissionDate}</p>
+              <p>{new Date(issue.created_at).toLocaleDateString()}</p>
             </div>
 
-            <div className="detail-group">
+            <div className="issue-section">
               <h2>Status</h2>
-              <span className={`status-badge ${issueDetails.status.toLowerCase()}`}>
-                {issueDetails.status}
-              </span>
+              <p>{issue.status}</p>
             </div>
 
-            <div className="action-buttons">
-              {(userRole === 'lecturer' || userRole === 'registrar') && (
+            <div className="issue-actions">
+              {issue.student_id === user?.id && (
                 <button 
-                  className="resolve-button"
-                  onClick={handleResolveIssue}
+                  onClick={handleEditIssue} 
+                  className="edit-button"
                 >
-                  Resolve Issue
+                  Edit Issue
                 </button>
               )}
-              <button 
-                className="back-button"
-                onClick={handleBackToIssues}
-              >
+              <button onClick={() => navigate(-1)} className="back-button">
                 Back to Issues
               </button>
             </div>
@@ -130,4 +219,4 @@ const IssueDetails = ({ userRole = 'lecturer' }) => {
   );
 };
 
-export default IssueDetails; 
+export default IssueDetail; 

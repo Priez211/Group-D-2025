@@ -1,152 +1,117 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Home from './components/Home';
-import studentDashboard from './components/StudentDashboard';
-import LecturerDashboard from './components/LecturerDashboard';
-import RegistrarDashboard from './components/RegistrarDashboard';
-import IssueDetails from './components/IssueDetails';
-import AddIssue from './components/AddIssue';
-import Login from './components/Login';
-import SignUp from './components/SignUp';
-import NotificationsDashboard from './components/NotificationsDashboard';
-
+import LoginPage from './components/LoginPage';
+import SignupPage from './components/SignupPage';
+import StudentDashboard from './components/StudentDashboard';
+import AddNewIssue from './components/AddNewIssue';
+import MyIssues from './components/MyIssues';
+import IssueDetail from './components/IssueDetail';
+import Notifications from './components/Notifications';
+// Import registrar components
+import RegistrarDashboard from './components/registrar/RegistrarDashboard';
+import StudentManagement from './components/registrar/StudentManagement';
+import DepartmentManagement from './components/registrar/DepartmentManagement';
 import './App.css';
 
-const App = () => {
-  // This would normally come from your authentication system
-  const isAuthenticated = false; // Set to true to test authenticated routes
-  const userRole = 'registrar'; // This would come from your auth system
-
-  // Protected Route wrapper
-  const ProtectedRoute = ({ children, allowedRoles = [] }) => {
-    if (!isAuthenticated) {
-      return <Navigate to="/login" />;
-    }
-    if (allowedRoles.length > 0 && !allowedRoles.includes(userRole)) {
-      return <Navigate to="/studentDashboard" />;
-    }
-    return children;
-  };
-
-  return (
-    <Router>
-      <Routes>
-        {/* Public Routes */}
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<SignUp />} />
-
-        {/* Student Routes */}
-        <Route
-          path="/studentDashboard"
-          element={
-            <ProtectedRoute allowedRoles={['student']}>
-              <StudentDashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/add-issue"
-          element={
-            <ProtectedRoute allowedRoles={['student']}>
-              <AddIssue />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/issue/:issueId"
-          element={
-            <ProtectedRoute allowedRoles={['student']}>
-              <IssueDetails userRole="student" />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* Lecturer Routes */}
-        <Route
-          path="/lecturer-dashboard"
-          element={
-            <ProtectedRoute allowedRoles={['lecturer']}>
-              <LecturerDashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/lecturer-issues"
-          element={
-            <ProtectedRoute allowedRoles={['lecturer']}>
-              <LecturerDashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/lecturer-students"
-          element={
-            <ProtectedRoute allowedRoles={['lecturer']}>
-              <LecturerDashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/lecturer/issue/:issueId"
-          element={
-            <ProtectedRoute allowedRoles={['lecturer']}>
-              <IssueDetails userRole="lecturer" />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* Registrar Routes */}
-        <Route
-          path="/registrar-dashboard"
-          element={
-            <ProtectedRoute allowedRoles={['registrar']}>
-              <RegistrarDashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/registrar-issues"
-          element={
-            <ProtectedRoute allowedRoles={['registrar']}>
-              <RegistrarDashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/registrar-students"
-          element={
-            <ProtectedRoute allowedRoles={['registrar']}>
-              <RegistrarDashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/registrar/issue/:issueId"
-          element={
-            <ProtectedRoute allowedRoles={['registrar']}>
-              <IssueDetails userRole="registrar" />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* Common Protected Routes */}
-        <Route
-          path="/notifications"
-          element={
-            <ProtectedRoute>
-              <NotificationsDashboard />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* Fallback route for unmatched paths */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </Router>
-  );
+const PrivateRoute = ({ children }) => {
+  const isAuthenticated = localStorage.getItem('token');
+  return isAuthenticated ? children : <Navigate to="/login" />;
 };
 
+function App() {
+  return (
+    <Router>
+      <div className="App">
+        <Routes>
+          {/* Redirect root to login */}
+          <Route path="/" element={<Navigate to="/login" />} />
+          
+          {/* Auth routes */}
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignupPage />} />
+          
+          {/* Protected routes */}
+          <Route
+            path="/dashboard"
+            element={
+              <PrivateRoute>
+                <StudentDashboard />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/add-issue"
+            element={
+              <PrivateRoute>
+                <AddNewIssue />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/my-issues"
+            element={
+              <PrivateRoute>
+                <MyIssues />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/issue/:issueId"
+            element={
+              <PrivateRoute>
+                <IssueDetail />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/add-issue/:issueId"
+            element={
+              <PrivateRoute>
+                <AddNewIssue />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/notifications"
+            element={
+              <PrivateRoute>
+                <Notifications />
+              </PrivateRoute>
+            }
+          />
+          
+          {/* Registrar routes */}
+          <Route
+            path="/registrar"
+            element={
+              <PrivateRoute>
+                <RegistrarDashboard />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/registrar/students"
+            element={
+              <PrivateRoute>
+                <StudentManagement />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/registrar/departments"
+            element={
+              <PrivateRoute>
+                <DepartmentManagement />
+              </PrivateRoute>
+            }
+          />
+          
+          {/* Catch all route */}
+          <Route path="*" element={<Navigate to="/login" />} />
+        </Routes>
+      </div>
+    </Router>
+  );
+}
+
 export default App;
-
-

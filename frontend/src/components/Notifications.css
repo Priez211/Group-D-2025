@@ -1,4 +1,4 @@
-.lecturer-dashboard {
+.notifications-page {
     min-height: 100vh;
     background-color: #f8f9fa;
   }
@@ -24,6 +24,7 @@
   .logo-icon {
     width: 24px;
     height: 24px;
+    color: #000;
   }
   
   .nav-logo span {
@@ -89,134 +90,91 @@
     padding: 40px;
   }
   
-  .dashboard-header {
+  .content-header {
     margin-bottom: 32px;
   }
   
-  .dashboard-header h1 {
+  .content-header h1 {
     font-size: 24px;
     font-weight: 600;
     color: #000;
+    margin: 0;
   }
   
-  /* Issues Section */
-  .issues-section h2 {
-    font-size: 18px;
+  /* Notifications Grid */
+  .notifications-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 24px;
+    margin-bottom: 40px;
+  }
+  
+  .notification-card {
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 24px;
+  }
+  
+  .notification-card h2 {
+    font-size: 16px;
+    font-weight: 500;
+    color: #666;
+    margin: 0 0 16px 0;
+  }
+  
+  .notification-count {
+    font-size: 32px;
     font-weight: 600;
     color: #000;
-    margin-bottom: 16px;
   }
   
-  .filter-tabs {
-    margin-bottom: 24px;
-    border-bottom: 1px solid #eee;
-  }
-  
-  .filter-tab {
-    padding: 8px 16px;
-    font-size: 14px;
-    color: #666;
-    background: none;
-    border: none;
-    border-bottom: 2px solid transparent;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-  
-  .filter-tab.active {
-    color: #0066FF;
-    border-bottom-color: #0066FF;
-  }
-  
-  /* Table Styles */
-  .issues-table {
+  /* Notifications List */
+  .notifications-list {
     background: #fff;
-    border-radius: 8px;
     border: 1px solid #eee;
-    overflow: hidden;
+    border-radius: 8px;
+    padding: 24px;
   }
   
-  table {
-    width: 100%;
-    border-collapse: collapse;
+  /* Placeholder Loading Animation */
+  .notifications-placeholder {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
   }
   
-  th {
-    text-align: left;
+  .placeholder-line {
+    height: 16px;
+    background: #eee;
+    border-radius: 4px;
+    animation: loading 1.5s infinite;
+  }
+  
+  .placeholder-line.short {
+    width: 60%;
+  }
+  
+  @keyframes loading {
+    0% {
+      opacity: 0.6;
+    }
+    50% {
+      opacity: 0.8;
+    }
+    100% {
+      opacity: 0.6;
+    }
+  }
+  
+  /* Notification Item */
+  .notification-item {
     padding: 16px;
-    font-size: 14px;
-    font-weight: 500;
-    color: #666;
-    background-color: #f8f9fa;
     border-bottom: 1px solid #eee;
   }
   
-  td {
-    padding: 16px;
-    font-size: 14px;
-    color: #333;
-    border-bottom: 1px solid #eee;
-  }
-  
-  tr:last-child td {
+  .notification-item:last-child {
     border-bottom: none;
-  }
-  
-  /* Status Badges */
-  .status-badge {
-    display: inline-block;
-    padding: 4px 12px;
-    border-radius: 12px;
-    font-size: 12px;
-    font-weight: 500;
-  }
-  
-  .status-badge.pending {
-    background-color: #fff4e5;
-    color: #ff9800;
-  }
-  
-  .status-badge.resolved {
-    background-color: #e8f5e9;
-    color: #4caf50;
-  }
-  
-  /* Priority Badges */
-  .priority-badge {
-    display: inline-block;
-    padding: 4px 12px;
-    border-radius: 12px;
-    font-size: 12px;
-    font-weight: 500;
-    background-color: #f5f5f5;
-  }
-  
-  .priority-badge.high {
-    background-color: #fde7e7;
-    color: #d32f2f;
-  }
-  
-  .priority-badge.medium {
-    background-color: #fff4e5;
-    color: #ff9800;
-  }
-  
-  .priority-badge.low {
-    background-color: #e8f5e9;
-    color: #4caf50;
-  }
-  
-  /* View Details Link */
-  .view-details {
-    color: #0066FF;
-    text-decoration: none;
-    font-size: 14px;
-    transition: color 0.2s ease;
-  }
-  
-  .view-details:hover {
-    color: #0052cc;
-    text-decoration: underline;
   }
   
   /* Responsive Styles */
@@ -240,11 +198,16 @@
       padding: 12px 16px;
     }
   
-    .issues-table {
-      overflow-x: auto;
+    .notifications-grid {
+      grid-template-columns: 1fr;
+      gap: 16px;
     }
   
-    table {
-      min-width: 800px;
+    .notification-card {
+      padding: 16px;
+    }
+  
+    .notifications-list {
+      padding: 16px;
     }
   } 
