@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { getStudentIssues } from './api';
 import UserProfile from './UserProfile';
 import './Dashboard.css';
+import './notifications'
 
 const StudentDashboard = () => {
   const navigate = useNavigate();

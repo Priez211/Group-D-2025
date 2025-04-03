@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getIssueById } from './services/api';
+import { getIssueById } from './api';
 import UserProfile from './UserProfile';
-import NotificationBadge from './NotificationBadge';
+import NotificationBadge from './NotificationBadge.css';
 import './Dashboard.css';
-import './IssueDetail.css';
+import './IssueDetails.css';
 
 const IssueDetail = () => {
   const { issueId } = useParams();
