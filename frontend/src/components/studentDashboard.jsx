@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getStudentIssues } from '../services/api';
+import { getStudentIssues } from './api';
 import UserProfile from './UserProfile';
-import '../statics/Dashboard.css';
+import './Dashboard.css';
+import './notifications'
 
 const StudentDashboard = () => {
   const navigate = useNavigate();

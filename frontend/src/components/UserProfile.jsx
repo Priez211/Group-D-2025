@@ -1,6 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState,} from 'react';
+import {useEffect} from 'react';
+import { useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import '../statics/UserProfile.css';
+import './UserProfile.css';
 
 const UserProfile = ({ user }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);

@@ -1,16 +1,14 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import LoginPage from './components/LoginPage';
-import SignupPage from './components/SignupPage';
-import StudentDashboard from './components/StudentDashboard';
-import AddNewIssue from './components/AddNewIssue';
+import LoginPage from './components/login';
+import SignupPage from './components/signup';
+import StudentDashboard from './components/studentDashboard';
+import AddNewIssue from './components/CreateIssue';
 import MyIssues from './components/MyIssues';
-import IssueDetail from './components/IssueDetail';
-import Notifications from './components/Notifications';
+import IssueDetail from './components/IssueDetails';
+import Notifications from './components/notifications';
 // Import registrar components
-import RegistrarDashboard from './components/registrar/RegistrarDashboard';
-import StudentManagement from './components/registrar/StudentManagement';
-import DepartmentManagement from './components/registrar/DepartmentManagement';
+import RegistrarDashboard from './components/RegistrarDashboard';
 import './App.css';
 
 const PrivateRoute = ({ children }) => {
@@ -89,7 +87,7 @@ function App() {
               </PrivateRoute>
             }
           />
-          <Route
+         {/* <Route
             path="/registrar/students"
             element={
               <PrivateRoute>
@@ -105,13 +103,15 @@ function App() {
               </PrivateRoute>
             }
           />
-          
+          */}
           {/* Catch all route */}
           <Route path="*" element={<Navigate to="/login" />} />
         </Routes>
       </div>
     </Router>
   );
+
+  
 }
 
 export default App;

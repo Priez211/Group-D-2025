@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import UserProfile from './UserProfile';
-import '../statics/Dashboard.css';
-import '../statics/Notifications.css';
+import './Dashboard.css';
+import './Notifications.css';
 
 const Notifications = () => {
   const navigate = useNavigate();
