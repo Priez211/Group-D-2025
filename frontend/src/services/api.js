@@ -70,17 +70,46 @@ const fetchWithAuth = async (url, options = {}) => {
 
 // User authentication
 export const loginUser = async (credentials) => {
-  return fetchWithAuth(`${API_URL}/login/`, {
-    method: 'POST',
-    body: JSON.stringify(credentials)
-  });
+  try {
+    console.log('Attempting login with credentials:', credentials);
+    const response = await fetch(`${API_URL}/login/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify(credentials)
+    });
+
+    console.log('Login response status:', response.status);
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('Login error response:', errorData);
+      throw new Error(errorData.error || 'Login failed');
+    }
+
+    const data = await response.json();
+    console.log('Login successful, received data:', data);
+    
+    // Store the token in localStorage
+    if (data.token) {
+      localStorage.setItem('token', data.token);
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Login error:', error);
+    throw error;
+  }
 };
 
 export const registerUser = async (userData) => {
   console.log('Registering user with data:', JSON.stringify(userData, null, 2));
   
   try {
-    const response = await fetch('http://localhost:8000/api/register/', {
+    const response = await fetch(`${API_URL}/register/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
