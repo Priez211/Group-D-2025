@@ -20,7 +20,6 @@ class Islecturer(permissions.BasePermission):
             return obj.student.user.department == lecturer.department
         return False
 
-
 class Isstudent(permissions.BasePermission):
     def has_permission(self,request,view):
         return bool(request.user.is_authenticated and request.user.user_role=='student')

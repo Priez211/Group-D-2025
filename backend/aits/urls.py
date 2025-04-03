@@ -1,20 +1,18 @@
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-from .views import UserViewSet,IssueViewSet,DepartmentViewSet,NotificationsViewSet,LoginView,StudentViewSet,AcademicRegistrarViewSet,LecturerViewSet,LogoutView,SignupView
+from django.urls import path
 
-
-router=DefaultRouter()
-router.register(r'departments',DepartmentViewSet)
-router.register(r'users',UserViewSet)
-router.register(r'issues',IssueViewSet)
-router.register(r'Notifications',NotificationsViewSet,basename='notifications')
-router.register(r'students',StudentViewSet)
-router.register(r'lecturers',LecturerViewSet)
-router.register(r'registrars',AcademicRegistrarViewSet)
+from .views import (
+    LoginView, 
+    RegisterView, 
+    StudentIssueCreateView,
+    StudentIssueDetailView
+)
+from . import views
 
 urlpatterns=[
-    path('',include(router.urls)),
-    path('api/Login/',LoginView.as_view(),name='Login'),
-    path('api/Logout/',LogoutView.as_view(),name='Logout'),
-    path('api/Signup/',SignupView.as_view(),name='Signup'),
+    path('login/', LoginView.as_view(), name='login'),
+    path('register/', RegisterView.as_view(), name='register'),
+    path('student/issues/', StudentIssueCreateView.as_view(), name='student-issues'),
+    path('student/issues/<int:pk>/', StudentIssueDetailView.as_view(), name='student-issue-detail'),
+    path('notifications/', views.get_notifications, name='notifications-slash'),
+    path('notifications/<int:notification_id>/mark-read/', views.mark_notification_read, name='mark-notification-read'),
 ]
