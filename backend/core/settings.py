@@ -15,7 +15,7 @@ SECRET_KEY = 'django-insecure-_!%4j90+(0)zfk7ss=i%9r8lq72izm5tjfng4qvduzj$ndflg4
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['localhost','http://127.0.0.1:8000/']
+ALLOWED_HOSTS = ['localhost','http://127.0.0.1']
 
 
 # Application definition
@@ -74,7 +74,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME':'aits_db',
-        'USER':'AITS',
+        'USER':'aits',
         'PASSWORD':'5432',
         'HOST':'localhost',
         'PORT':'5432',
@@ -128,7 +128,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
-    'http://127.0.0.1:8000/',
+    'http://127.0.0.1:8000',
 ]
 
 AUTH_USER_MODEL='aits.User'
