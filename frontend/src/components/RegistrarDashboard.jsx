@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FaHome, FaQuestionCircle, FaUsers, FaCog } from 'react-icons/fa';
-import '../static/css/RegistrarDashboard.css';
+//import { FaHome, FaQuestionCircle, FaUsers, FaCog } from 'react-icons/fa';
+import './RegistrarDashboard.css';
 
 const RegistrarDashboard = () => {
   const [activeFilter, setActiveFilter] = useState('All');
@@ -48,6 +48,20 @@ const RegistrarDashboard = () => {
       status: 'Open',
       priority: 'Low',
       submissionDate: 'Nov 1'
+    },
+    {
+      id: 7,
+      issue: 'CL-750',
+      status: 'Open',
+      priority: 'Low',
+      submissionDate: 'Nov 5'
+    },
+    {
+      id: 8,
+      issue: 'ML-775',
+      status: 'Open',
+      priority: 'Medium',
+      submissionDate: 'Nov 13'
     }
   ];
 
