@@ -1,12 +1,13 @@
-# React + Vite
+#Description
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+The Academic Issue Tracking System is an application designed to track, manage and resolve academic issues in Makerere university, such as assignments, exam and coursework issues, grading.
+The system allows students, lecturers, and registrars to report, track, and resolve academic issues efficiently.
+The features contained in the application include;
+issue reporting, categorization of issues, status tracking, user roles, notifications as well as search and filter.
 
-Currently, two official plugins are available:
+#Usage
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript and enable type-aware lint rules. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Upon opening the application, users will be prompted to log in based on their role(student, lecturer, or registrar).
+Students can submit issues and track their progress.
+Lecturers can manage and update the status of the reported issues.
+Registrars can view all issues and assign them to the appropriate lecturers.
