@@ -40,6 +40,13 @@ const RegistrarDashboard = () => {
       issue: 'UX-578',
       status: 'Open',
       priority: 'Low',
+      submissionDate: 'Oct 24'
+    },
+    {
+      id: 6,
+      issue: 'DB-630',
+      status: 'Open',
+      priority: 'Low',
       submissionDate: 'Nov 1'
     }
   ];
