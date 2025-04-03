@@ -80,7 +80,7 @@ export const registerUser = async (userData) => {
   console.log('Registering user with data:', JSON.stringify(userData, null, 2));
   
   try {
-    const response = await fetch(`${API_URL}/register/`, {
+    const response = await fetch('http://localhost:8000/api/register/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
