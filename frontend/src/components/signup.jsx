@@ -102,7 +102,7 @@ const SignupPage = () => {
     if (activeTab === 'registrar') {
       const regIdPattern = /^REG\d{3}$/;
       if (!regIdPattern.test(formData.userId)) {
-        setError('Registrar ID must be in the format "REGXXX" where XXX is a 3-digit number');
+        setError('Registrar ID must be in the format "REG###" where ### is a 3-digit number');
         return;
       }
     }
