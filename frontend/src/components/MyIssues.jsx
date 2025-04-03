@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getStudentIssues } from '../services/api';
+import { getStudentIssues } from './api';
 import UserProfile from './UserProfile';
-import NotificationBadge from './NotificationBadge';
-import '../statics/Dashboard.css';
+import NotificationBadge from './NotificationBadge.css';
+import './Dashboard.css';
 
 const MyIssues = () => {
   const navigate = useNavigate();

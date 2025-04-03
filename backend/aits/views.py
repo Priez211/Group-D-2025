@@ -5,7 +5,7 @@ from .models import Issue,Department,Notifications,Student,AcademicRegistrar,Lec
 from rest_framework.permissions import AllowAny,IsAuthenticated
 from .serializers import IssueSerializer,UserSerializer,DepartmentSerializer,NotificationsSerializer,LoginSerializer,StudentSerializer,StudentRegistrationSerializer,LecturerRegistrationSerializer,AcademicRegistrarSerializer,LecturerSerializer,LogoutSerializer,SignupSerializer
 from django.contrib.auth import get_user_model
-from .permissions import IsRegistrar,Isstudent, Islecturer
+from .permissions import IsRegistrar,Isstudent,IsOwnerOrReadOnly
 from rest_framework.authentication import TokenAuthentication
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.views import APIView
