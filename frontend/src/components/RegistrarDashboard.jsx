@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FaHome, FaQuestionCircle, FaUsers, FaCog } from 'react-icons/fa';
-import '../RegistrarDashboard.css';
+import './RegistrarDashboard.css';
 
 const RegistrarDashboard = () => {
   const [activeFilter, setActiveFilter] = useState('All');
