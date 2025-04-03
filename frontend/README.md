@@ -5,7 +5,7 @@ The features contained in the application include;
 issue reporting, categorization of issues, status tracking, user roles, notifications as well as search and filter.
 
 Usage:
-Upon opening the application, users will be prompted to log in based on their role(student, lecturer, or registrar).
+Upon opening the application, users will be prompted to log in based on their roles(student, lecturer, or registrar).
 Students can submit issues and track their progress.
 Lecturers can manage and update the status of the reported issues.
 Registrars can view all issues and assign them to the appropriate lecturers.
