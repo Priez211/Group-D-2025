@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import UserViewSet,IssueViewSet,DepartmentViewSet,NotificationsViewSet,LoginView,StudentViewSet,AcademicRegistrarViewSet,LecturerViewSet,LogoutView
+from .views import UserViewSet,IssueViewSet,DepartmentViewSet,NotificationsViewSet,LoginView,StudentViewSet,AcademicRegistrarViewSet,LecturerViewSet,LogoutView,SignupView
 
 
 router=DefaultRouter()
@@ -16,4 +16,5 @@ urlpatterns=[
     path('',include(router.urls)),
     path('api/Login/',LoginView.as_view(),name='Login'),
     path('api/Logout/',LogoutView.as_view(),name='Logout'),
+    path('api/Signup/',SignupView.as_view(),name='Signup'),
 ]

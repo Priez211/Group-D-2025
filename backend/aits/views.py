@@ -1,9 +1,9 @@
 
 from django.shortcuts import render
-from rest_framework import viewsets,permissions,status
+from rest_framework import serializers, viewsets,permissions,status
 from .models import Issue,Department,Notifications,Student,AcademicRegistrar,Lecturer
 from rest_framework.permissions import IsAuthenticated
-from .serializers import IssueSerializer,UserSerializer,DepartmentSerializer,NotificationsSerializer,LoginSerializer,StudentSerializer,AcademicRegistrarSerializer,LecturerSerializer,LogoutSerializer
+from .serializers import IssueSerializer,UserSerializer,DepartmentSerializer,NotificationsSerializer,LoginSerializer,StudentSerializer,AcademicRegistrarSerializer,LecturerSerializer,LogoutSerializer,SignupSerializer
 from django.contrib.auth import get_user_model
 from .permissions import IsRegistrar,Isstudent,IsOwnerOrReadOnly
 from rest_framework.authentication import TokenAuthentication
@@ -17,6 +17,15 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 # Create your views here.
 User=get_user_model()
+class SignupView(APIView):
+    def post(self,request):
+        serializer=SignupSerializer(data=request.data)
+        if serializer.is_valid():
+            User=serializer.save()
+            return Response({
+                "message":"User registered successfully","user":serializer.data},status=status.HTTP_201_CREATED)
+        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+        
 class LoginView(APIView):
     def post(self,request):
         serializer=LoginSerializer(data=request.data)
