@@ -1,14 +1,14 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import LoginPage from './components/login';
-import SignupPage from './components/signup';
-import StudentDashboard from './components/studentDashboard';
-import AddNewIssue from './components/CreateIssue';
-import MyIssues from './components/MyIssues';
-import IssueDetail from './components/IssueDetails';
-import Notifications from './components/notifications';
+import LoginPage from './components/login.jsx';
+import SignupPage from './components/signup.jsx';
+import StudentDashboard from './components/studentDashboard.jsx';
+import AddNewIssue from './components/CreateIssue.jsx';
+import MyIssues from './components/MyIssues.jsx';
+import IssueDetail from './components/IssueDetails.jsx';
+import Notifications from './components/notifications.jsx';
 // Import registrar components
-import RegistrarDashboard from './components/RegistrarDashboard';
+import RegistrarDashboard from './components/RegistrarDashboard.jsx';
 import './App.css';
 
 const PrivateRoute = ({ children }) => {
