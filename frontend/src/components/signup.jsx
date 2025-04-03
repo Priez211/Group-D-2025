@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { registerUser } from '../services/api';
-import '../statics/Login.css';
+import { registerUser } from './api';
+import './Login.css';
 
 const SignupPage = () => {
   const [activeTab, setActiveTab] = useState('student');
@@ -102,7 +102,7 @@ const SignupPage = () => {
     if (activeTab === 'registrar') {
       const regIdPattern = /^REG\d{3}$/;
       if (!regIdPattern.test(formData.userId)) {
-        setError('Registrar ID must be in the format "REGXXX" where XXX is a 3-digit number');
+        setError('Registrar ID must be in the format "REG###" where ### is a 3-digit number');
         return;
       }
     }

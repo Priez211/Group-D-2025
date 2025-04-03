@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import  { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { loginUser } from '../services/api';
-import '../statics/Login.css';
+import { loginUser } from './api';
+import './Login.css';
 
 const LoginPage = () => {
   const [activeTab, setActiveTab] = useState('student');
