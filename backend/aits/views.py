@@ -5,7 +5,7 @@ from .models import Issue,Department,Notifications,Student,AcademicRegistrar,Lec
 from rest_framework.permissions import AllowAny,IsAuthenticated
 from .serializers import IssueSerializer,UserSerializer,DepartmentSerializer,NotificationsSerializer,LoginSerializer,StudentSerializer,StudentRegistrationSerializer,LecturerRegistrationSerializer,AcademicRegistrarSerializer,LecturerSerializer,LogoutSerializer,SignupSerializer
 from django.contrib.auth import get_user_model
-from .permissions import IsRegistrar,Isstudent,IsOwnerOrReadOnly
+from .permissions import IsRegistrar,Isstudent, Islecturer
 from rest_framework.authentication import TokenAuthentication
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.views import APIView
@@ -53,6 +53,8 @@ class LoginView(APIView):
                },status=status.HTTP_200_OK)
            return Response({"error":"Invalid credentials"},status=status.HTTP_401_UNAUTHORIZED)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+
+class ProtectedViev(APIView):
     @authentication_classes([JWTAuthentication])
     @permission_classes([IsAuthenticated])
     def protected_view(request):
@@ -190,6 +192,26 @@ class StudentIssueDetailView(generics.RetrieveUpdateAPIView):
                 message=f'Issue updated: {issue.title}'
             )
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_issue(request):
+    try:
+        # ... existing issue creation code ...
+
+        # Create notification for assigned lecturer
+        if Issue.assigned_to:
+            create_notification(
+                recipient=Issue.assigned_to.user,
+                notification_type='issue_assigned',
+                issue=Issue,
+                message=f'You have been assigned a new issue: {issue.title}'
+            )
+
+        return Response(serializers.data, status=status.HTTP_201_CREATED)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
 def update_issue(request, issue_id):
@@ -229,6 +251,75 @@ class LecturerIssueListView(generics.ListAPIView):
     def get_queryset(self):
         lecturer = self.request.user.lecturer_profile
         return Issue.objects.filter(lecturer=lecturer)
+
+class AcademicRegistrarIssueListView(generics.ListAPIView):
+    queryset = Issue.objects.all()
+    serializer_class = IssueSerializer
+    permission_class = IsRegistrar
+
+
+class IssueDeleteView(generics.DestroyAPIView):
+    queryset = Issue.objects.all()
+    serializer_class = IssueSerializer
+    permission_class = [IsRegistrar, Isstudent]
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_notifications(request):
+    try:
+        print(f"Fetching notifications for user: {request.user.username}")
+        notifications = Notifications.objects.filter(recipient=request.user).order_by('-created_at')
+        print(f"Found {notifications.count()} notifications")
+        serializer = NotificationsSerializer(notifications, many=True)
+        return Response(serializer.data)
+    except Exception as e:
+        print(f"Error in get_notifications: {str(e)}")
+        return Response(
+            {'error': 'Failed to fetch notifications', 'detail': str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def mark_notification_read(request, notification_id):
+    try:
+        notification = Notifications.objects.get(id=notification_id, recipient=request.user)
+        notification.is_read = True
+        notification.save()
+        return Response({'status': 'success'})
+    except Notifications.DoesNotExist:
+        return Response(
+            {'error': 'Notification not found'},
+            status=status.HTTP_404_NOT_FOUND
+        )
+    except Exception as e:
+        print(f"Error in mark_notification_read: {str(e)}")
+        return Response(
+            {'error': 'Failed to mark notification as read', 'detail': str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+def create_notification(recipient, notification_type, issue, message):
+    """
+    Helper function to create notifications
+    """
+    try:
+        notification = Notifications.objects.create(
+            recipient=recipient,
+            notification_type=notification_type,
+            issue=issue,
+            message=message
+        )
+        print(f"Created notification: {notification.id} for user: {recipient.username}")
+        return notification
+    except Exception as e:
+        print(f"Error creating notification: {str(e)}")
+        return None
+
+
+
+
+
 
 class DepartmentViewSet(viewsets.ModelViewSet):
     queryset=Department.objects.all()

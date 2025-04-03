@@ -200,7 +200,7 @@ class RegistrarRegistrationSerializers(serializers.Serializer):
                 user.delete()
             raise serializers.ValidationError(str(e))
 class LecturerRegistrationSerializer(serializers.Serializer):
-    passS
+    pass
 
 class LoginSerializer(serializers.Serializer):
     username=serializers.CharField()
