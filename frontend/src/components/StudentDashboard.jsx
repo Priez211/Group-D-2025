@@ -2,10 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getStudentIssues } from '../services/api';
 import UserProfile from './UserProfile';
-import NotificationBadge from './NotificationBadge';
 import '../styles/Dashboard.css';
 
-const MyIssues = () => {
+const StudentDashboard = () => {
   const navigate = useNavigate();
   const [issues, setIssues] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -46,6 +45,10 @@ const MyIssues = () => {
 
   const handleAddNewIssue = () => {
     navigate('/add-issue');
+  };
+
+  const handleMyIssues = () => {
+    navigate('/my-issues');
   };
 
   const handleIssueClick = (issueId) => {
@@ -104,18 +107,17 @@ const MyIssues = () => {
         {/* Sidebar Navigation */}
         <nav className="dashboard-nav">
           <ul>
-            <li onClick={() => navigate('/dashboard')}>
+            <li className="active">
               <span>🏠</span>
               Home
             </li>
-            <li className="active">
+            <li onClick={() => navigate('/my-issues')}>
               <span>📝</span>
               My Issues
             </li>
-            <li onClick={() => navigate('/notifications')} className="notification-item">
+            <li onClick={() => navigate('/notifications')}>
               <span>🔔</span>
               Notifications
-              <NotificationBadge />
             </li>
             <li>
               <span>⚙️</span>
@@ -126,14 +128,16 @@ const MyIssues = () => {
 
         {/* Main Content */}
         <main className="dashboard-main">
-          <div className="page-header">
-            <h1>My Issues</h1>
-            <button className="add-issue-button" onClick={handleAddNewIssue}>
-              <span>➕</span> Add New Issue
-            </button>
-          </div>
+          <h1 className="welcome-message">Welcome back, {user?.fullName?.split(' ')[0] || 'Student'}!</h1>
           
-          <section className="all-issues">
+          <section className="recent-issues">
+            <div className="section-header">
+              <h2>Recent Issues</h2>
+              <button className="view-all-button" onClick={handleMyIssues}>
+                View All
+              </button>
+            </div>
+            
             {loading ? (
               <div className="loading-spinner">Loading...</div>
             ) : error ? (
@@ -145,6 +149,7 @@ const MyIssues = () => {
                 ) : (
                   [...issues]
                     .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+                    .slice(0, 3)
                     .map((issue) => {
                       console.log('Rendering issue:', JSON.stringify(issue, null, 2));
                       const issueId = issue._id || issue.id || issue.issue_id;
@@ -166,7 +171,7 @@ const MyIssues = () => {
                             <p className="issue-description">{issue.description}</p>
                             <div className="issue-status">
                               <span className={`status-badge ${issue.status}`}>
-                                {formatCategory(issue.status || '')}
+                                {(issue.status || '').replace('_', ' ')}
                               </span>
                             </div>
                           </div>
@@ -176,6 +181,10 @@ const MyIssues = () => {
                 )}
               </div>
             )}
+            
+            <button className="add-issue-button" onClick={handleAddNewIssue}>
+              <span>➕</span> Add New Issue
+            </button>
           </section>
         </main>
       </div>
@@ -183,4 +192,4 @@ const MyIssues = () => {
   );
 };
 
-export default MyIssues; 
+export default StudentDashboard; 
