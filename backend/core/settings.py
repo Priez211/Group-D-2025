@@ -133,3 +133,4 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 AUTH_USER_MODEL='aits.User'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
