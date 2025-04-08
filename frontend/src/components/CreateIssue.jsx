@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createIssue } from './api';
-import './addIssue.css';
+import { createIssue } from '../services/api';
+import '../styles/CreateIssue.css';
 
 const CreateIssue = () => {
   const navigate = useNavigate();
