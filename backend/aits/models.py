@@ -1,8 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.utils import timezone
 
-# Custom User model to handle different roles (Student, Lecturer, Academic Registrar)
-from django.contrib.auth.models import AbstractUser
 
 class User(AbstractUser):
     ROLES = (
@@ -93,7 +92,7 @@ class AcademicRegistrar(models.Model):
     )
     
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='registrar_profile')
-    college = models.CharField(max_length=100, choices=COLLEGE_CHOICES, null=True, blank=True)
+    college = models.CharField(max_length=100, choices=COLLEGE_CHOICES)
     department = models.ForeignKey(Department, on_delete=models.CASCADE, related_name='registrars')
 
     def __str__(self):
@@ -128,50 +127,53 @@ class Issue(models.Model):
         ('CSC2200', 'CSC2200 - Web Development'),
         ('CSC3100', 'CSC3100 - Software Engineering'),
     )
-    YEARS_OF_STUDY = (
+    YEARS_CHOICES = (
         ('1', 'First Year'),
         ('2', 'Second Year'),
         ('3', 'Third Year'),
-        ('4', 'Fourth Year'),
     )
-    SEMESTERS = (
+    SEMESTER_CHOICES= (
         ('1', 'Semester 1'),
         ('2', 'Semester 2'),
     )
 
-    CATEGORY_PRIORITY_MAP = {
-        'academic': 'high',
-        'examination': 'high',
-        'technical': 'medium',
-        'administrative': 'medium',
-        'registration': 'medium',
-        'other': 'low',
-    }
 
-    issue_id= models.AutoField(primary_key=True)
-    title = models.CharField(max_length=200, null=True, blank=True)
+    issue_id= models.AutoField(primary_key=True, serialize=False)
+    title = models.CharField(max_length=200)
     category = models.CharField(max_length=20, choices=CATEGORIES)
     description = models.TextField()
     status = models.CharField(max_length=20, choices=STATUSES, default='open')
-    priority = models.CharField(max_length=10, choices=PRIORITIES, null=True, blank=True)
+    priority = models.CharField(max_length=10, choices=PRIORITIES, default='medium')
     courseUnit = models.CharField(max_length=10, choices=COURSE_UNITS, null=True, blank=True)
-    yearOfStudy = models.CharField(max_length=1, choices=YEARS_OF_STUDY, null=True, blank=True)
-    semester = models.CharField(max_length=1, choices=SEMESTERS, null=True, blank=True)
+    yearOfStudy = models.CharField(max_length=1, choices=YEARS_CHOICES, null=True, blank=True)
+    semester = models.CharField(max_length=1, choices=SEMESTER_CHOICES, null=True, blank=True)
+    attachment = models.FileField(
+        upload_to='issue_attachments/%Y/%m/%d/',
+        null=True,
+        blank=True
+    )
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='issues')
     assigned_to = models.ForeignKey(Lecturer, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_issues')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
-    def get_priority_for_category(self):
-        return self.CATEGORY_PRIORITY_MAP.get(self.category, 'low')
-
     def save(self, *args, **kwargs):
-        if not self.priority or self.priority == '':
+        if not self.priority:
             self.priority = self.get_priority_for_category()
         super().save(*args, **kwargs)
 
+    def get_priority_for_category(self):
+        priority_map = {
+            'academic': 'high',
+            'examination': 'high',
+            'technical': 'medium',
+            'administrative': 'medium',
+            'registration': 'medium',
+            'other': 'low',
+        }
+        return priority_map.get(self.category, 'low')
+
     def __str__(self):
-        return f"Issue {self.issue_id} - {self.category}"
+        return f"Issue {self.title} ({self.get_status_display()})"
 
 # Notification model
 class Notification(models.Model):
@@ -188,10 +190,8 @@ class Notification(models.Model):
     issue = models.ForeignKey(Issue, on_delete=models.CASCADE, related_name='notifications')
     message = models.TextField()
     is_read = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(default=timezone.now)
 
-    class Meta:
-        ordering = ['-created_at']
 
     def __str__(self):
-        return f"Notification for {self.recipient.username} - {self.notification_type}"
+        return f"{self.notification_type} for {self.recipient.username}"
