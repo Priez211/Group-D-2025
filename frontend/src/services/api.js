@@ -1,3 +1,4 @@
+
 import axios from 'axios';
 
 const API_URL = 'http://localhost:8000/api';
@@ -104,7 +105,7 @@ export const loginUser = async (credentials) => {
     throw error;
   }
 };
-
+// register user
 export const registerUser = async (userData) => {
   console.log('Registering user with data:', JSON.stringify(userData, null, 2));
   
