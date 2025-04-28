@@ -1,3 +1,4 @@
+// this is the notifications page
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import UserProfile from './UserProfile';
