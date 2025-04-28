@@ -154,7 +154,7 @@ class Issue(models.Model):
         'other': 'low',
     }
 
-    issue_id = models.AutoField(primary_key=True)
+    issue_id= models.AutoField(primary_key=True)
     title = models.CharField(max_length=200, null=True, blank=True)
     category = models.CharField(max_length=20, choices=CATEGORIES)
     description = models.TextField()
