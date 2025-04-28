@@ -1,3 +1,4 @@
+// create an page where students can see their issues
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getStudentIssues } from '../services/api';
