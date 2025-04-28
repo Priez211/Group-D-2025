@@ -10,7 +10,7 @@ class User(AbstractUser):
         ('lecturer', 'Lecturer'),
         ('registrar', 'Academic Registrar'),
     )
-    role = models.CharField(max_length=10, choices=ROLES)
+    role = models.CharField(max_length=10, choices=ROLES,default='student')
     email = models.EmailField(unique=True)
 
     # Add unique related_name to avoid clashes
@@ -35,13 +35,7 @@ class User(AbstractUser):
 
 # Department model
 class Department(models.Model):
-    DEPARTMENT_CHOICES = (
-        ('Department of Computer Science', 'Department of Computer Science'),
-        ('Department Of Software Engineering', 'Department Of Software Engineering'),
-        ('Department of Library And Information System', 'Department of Library And Information System'),
-        ('Department Of Information Technology', 'Department Of Information Technology'),
-    )
-    name = models.CharField(max_length=100, choices=DEPARTMENT_CHOICES)
+    name = models.CharField(max_length=100, unique=True)
     faculty = models.CharField(max_length=100)
 
     def __str__(self):
@@ -82,8 +76,8 @@ class Student(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='student_profile')
     college = models.CharField(max_length=100, choices=COLLEGE_CHOICES, blank=True, null=True)
     department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, related_name='students')
-    year_of_study = models.CharField(max_length=20, choices=YEAR_CHOICES, blank=True, null=True)
-    course = models.CharField(max_length=100, choices=COURSE_CHOICES, blank=True, null=True)
+    year_of_study = models.CharField(max_length=20, choices=YEAR_CHOICES)
+    course = models.CharField(max_length=100, choices=COURSE_CHOICES)
 
     def __str__(self):
         return self.user.get_full_name()
