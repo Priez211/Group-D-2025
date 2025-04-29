@@ -42,7 +42,7 @@ const IssueDetail = () => {
       } finally {
         setLoading(false);
       }
-    };
+    }; 
 
     if (issueId) {
       fetchIssueDetails();
