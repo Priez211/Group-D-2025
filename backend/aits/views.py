@@ -14,11 +14,13 @@ from .serializers import (
 )
 from .permissions import IsStudent, IsLecturer, IsAcademicRegistrar
 import jwt
+import traceback
+import datetime
 from django.conf import settings
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework import serializers
 from rest_framework.decorators import api_view, permission_classes
-import traceback
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 
 
 class LoginView(APIView):
@@ -27,30 +29,22 @@ class LoginView(APIView):
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
         if serializer.is_valid():
-            user_id = serializer.validated_data['userId']
-            password = serializer.validated_data['password']
+            user = serializer.validated_data['user']
             role = serializer.validated_data['role']
-
-            try:
-                # Find user by username (userId) and role
-                user = User.objects.get(username=user_id, role=role)
-                
-                if check_password(password, user.password):
-                    # Get the profile based on role
-                    profile = None
-                    if role == 'student':
-                        profile = user.student_profile
-                    elif role == 'lecturer':
-                        profile = user.lecturer_profile
+            # Get current timestamp and set expiration
+            now = datetime.datetime.utcnow()
+            exp = now + datetime.timedelta(hours=24)
+            
+                     
 
                     # Generate JWT token
-                    token = jwt.encode(
-                        {'user_id': user.username, 'role': role},
+            token = jwt.encode(
+                        {'user_id': user.username, 'role': role,'exp':int(exp.timestamp())},
                         settings.SECRET_KEY,
                         algorithm='HS256'
                     )
                     
-                    return Response({
+            return Response({
                         'token': token,
                         'user': {
                             'userId': user.username,
@@ -58,16 +52,12 @@ class LoginView(APIView):
                             'email': user.email,
                             'role': role
                         }
-                    })
-                
-            except User.DoesNotExist:
-                pass
+                    },status=status.HTTP_200_OK)
             
-            return Response(
-                {'error': 'Invalid credentials'},
-                status=status.HTTP_401_UNAUTHORIZED
-            )
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {'error': serializer.errors.get('non_field_errors', ['Invalid credentials'])[0]},
+            status=status.HTTP_401_UNAUTHORIZED)
+        
 
 class RegisterView(APIView):
     permission_classes = [AllowAny]
