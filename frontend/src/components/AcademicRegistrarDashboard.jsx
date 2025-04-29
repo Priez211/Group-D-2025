@@ -20,7 +20,6 @@ const AcademicRegistrarDashboard = () => {
     if (!user || user.role !== 'academic_registrar') {
       navigate('/login');
     }
-    // TODO: Fetch statistics
   }, [navigate, user]);
 
   return (
