@@ -56,6 +56,23 @@ const AddNewIssue = () => {
     }
   };
 
+  useEffect(() => {
+    const fetchLecturerData = async () => {
+      try {
+        setLoadingLecturers(true);
+        const data = await getLecturers();
+        setLecturers(data);
+      } catch (err) {
+        console.error('Error loading lecturers:', err);
+        setError('Failed to load lecturers. Please try again.');
+      } finally {
+        setLoadingLecturers(false);
+      }
+    };
+
+    fetchLecturerData();
+  }, []);
+
   const handleInputChange = (e) => {
     const { name, value, files } = e.target;
     if (name === 'attachment') {
