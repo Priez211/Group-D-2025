@@ -39,7 +39,7 @@ const AddNewIssue = () => {
       console.log('Fetched issue data:', data);
       setFormData({
         title: data.title || '',
-        category: data.category || '',
+        // category: data.category || ''
         courseUnit: data.courseUnit || '',
         yearOfStudy: data.yearOfStudy || '',
         semester: data.semester || '',
