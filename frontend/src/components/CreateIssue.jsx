@@ -12,7 +12,8 @@ const CreateIssue = () => {
     priority: '',
     courseUnit: '',
     yearOfStudy: '',
-    semester: ''
+    semester: '',
+    assignedTo:''
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
