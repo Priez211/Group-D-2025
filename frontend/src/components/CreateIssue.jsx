@@ -51,8 +51,7 @@ const CreateIssue = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await createIssue(formData);
-      setSuccess('Issue submitted successfully! You will be notified of any updates.');
+      console.log('Submitting issue with data:', formData);
       
       // Clear form
       setFormData({
