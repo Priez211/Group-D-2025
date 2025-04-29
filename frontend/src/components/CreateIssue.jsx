@@ -17,7 +17,22 @@ const CreateIssue = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [lecturers, setLecturers] = useState([]);
+  const [loadingLecturers, setLoadingLecturers] = useState(true);
 
+  useEffect(() => {
+    const fetchLecturers = async () => {
+      try {
+        const data = await getLecturers();
+        setLecturers(data);
+      } catch (err) {
+        console.error('Failed to fetch lecturers:', err);
+        setError('Failed to load lecturers. Please try again later.');
+      } finally {
+        setLoadingLecturers(false);
+      }
+    };
+    
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
