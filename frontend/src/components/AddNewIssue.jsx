@@ -94,6 +94,12 @@ const AddNewIssue = () => {
     setError('');
 
     try {
+      const issueData = {
+        ...formData,
+        assigned_to: formData.lecturer // Map lecturer field to assigned_to for the API
+      };
+      delete issueData.lecturer; // Remove the original lecturer field
+
       if (isEditing) {
         await updateIssue(issueId, formData);
         navigate(`/issue/${issueId}`);
