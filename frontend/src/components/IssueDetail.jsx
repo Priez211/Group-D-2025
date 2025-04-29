@@ -13,6 +13,8 @@ const IssueDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [user, setUser] = useState(null);
+  const [showAssignModal, setShowAssignModal] = useState(false);
+  const [selectedLecturer, setSelectedLecturer] = useState('');
 
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem('user'));
