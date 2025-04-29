@@ -52,24 +52,26 @@ const CreateIssue = () => {
 
     try {
       console.log('Submitting issue with data:', formData);
-      
-      // Clear form
-      setFormData({
-        title: '',
-        category: '',
-        description: '',
-        priority: '',
-        courseUnit: '',
-        yearOfStudy: '',
-        semester: ''
-      });
 
-      // Redirect after 2 seconds
+      // Prepare the data with the correct assigned_to field
+      const issueData = {
+        ...formData,
+        assigned_to_id: formData.assignedTo // Map assignedTo to assigned_to_id for the API
+      };
+      delete issueData.assignedTo; // Remove the original assignedTo field
+      
+      console.log('Prepared issue data:', issueData);
+
+      const response = await createIssue(issueData);
+      console.log('Issue creation response:', response);
+
+      setSuccess('Issue created successfully!');
       setTimeout(() => {
         navigate('/student/dashboard');
       }, 2000);
     } catch (err) {
-      setError(err.message || 'Failed to submit issue. Please try again.');
+      console.error('Error creating issue:', err);
+      setError(err.message || 'Failed to create issue. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
