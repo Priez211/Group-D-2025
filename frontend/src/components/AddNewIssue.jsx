@@ -1,4 +1,3 @@
-// this page  implements code to allow a student to add a new issue
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { createIssue, getIssueById, updateIssue } from '../services/api';
