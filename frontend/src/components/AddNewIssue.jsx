@@ -45,7 +45,7 @@ const AddNewIssue = () => {
         semester: data.semester || '',
         lecturer: data.assigned_to?.user?.username || '',
         description: data.description || '',
-        attachment: null 
+        attachment: null //we don't load the existing attachment for security reasons
       });
     } catch (err) {
       console.error('Error loading issue:', err);
