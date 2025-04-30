@@ -35,6 +35,6 @@ class JWTAuthentication(authentication.BaseAuthentication):
         except jwt.InvalidTokenError:
             raise AuthenticationFailed('Invalid token')
         except User.DoesNotExist:
-            raise AuthenticationFailed('No user found for token')
+            raise AuthenticationFailed('No user found for this token')
         except (IndexError, KeyError):
             raise AuthenticationFailed('Invalid token format') 
