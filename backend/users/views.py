@@ -174,7 +174,7 @@ def register_user(request):
                 college=registrar_data['college'],
                 department=department
             )
-            print("Registrar profile created successfully")
+            print("Registrar profile has been created successfully")
         
         print("\n=== Registration Successful ===")
         return Response(
