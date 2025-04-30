@@ -101,7 +101,7 @@ class RegisterView(APIView):
                 print("Registration error:", str(e))
                 print("Traceback:", traceback.format_exc())
                 return Response(
-                    {'errors': {'general': 'Registration failed. Please try again.'}},
+                    {'errors': {'general': 'Registration failed. Please try again later.'}},
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR
                 )
         
