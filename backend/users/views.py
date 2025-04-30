@@ -68,7 +68,7 @@ def register_user(request):
             role=data['role'],
             password=make_password(data['password'])
         )
-        print("Base user has been created successfully:", user.username)
+        print("Base user created successfully:", user.username)
         
         # Handle role-specific data
         if data['role'] == 'student' and 'student_data' in data:
@@ -112,7 +112,7 @@ def register_user(request):
                 year_of_study=student_data['year_of_study'],
                 course=student_data['course']
             )
-            print("Student profile has been created successfully")
+            print("Student profile created successfully")
             
         elif data['role'] == 'lecturer' and 'lecturer_data' in data:
             lecturer_data = data['lecturer_data']
@@ -139,7 +139,7 @@ def register_user(request):
                 user=user,
                 department=department
             )
-            print("Lecturer profile has been created successfully")
+            print("Lecturer profile created successfully")
             
         elif data['role'] == 'registrar' and 'registrar_data' in data:
             registrar_data = data['registrar_data']
