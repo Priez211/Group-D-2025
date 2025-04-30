@@ -86,7 +86,7 @@ class RegisterView(APIView):
                 user = instance.user
                 print("User created successfully:", user.username)
                 return Response({
-                    'message': 'Registration is successful',
+                    'message': 'Registration successful',
                     'user': {
                         'userId': user.username,
                         'fullName': f"{user.first_name} {user.last_name}".strip(),
