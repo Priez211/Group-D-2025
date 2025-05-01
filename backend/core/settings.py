@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'corsheaders',
     'aits',
+    'users'
     'notifications',
 ]
 
@@ -126,6 +127,8 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'aits.User'
+
+AUTH_USER_MODEL = 'users.User'
 
 # CORS settings
 CORS_ORIGIN_ALLOW_ALL = False
