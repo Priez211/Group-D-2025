@@ -1,3 +1,4 @@
+// this is for designing the page where issues are created
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { createIssue, getIssueById, updateIssue } from '../services/api';
