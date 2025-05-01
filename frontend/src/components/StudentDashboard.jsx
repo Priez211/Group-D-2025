@@ -1,4 +1,3 @@
-// the student dashboard or page
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getStudentIssues } from '../services/api';
@@ -21,7 +20,7 @@ const StudentDashboard = () => {
     setUser(userData);
     fetchIssues();
   }, [navigate]);
-// includes conditions for handling the process of fetching what is in the  issue forms to the students dashboard
+
   const fetchIssues = async () => {
     try {
       const data = await getStudentIssues();
@@ -53,11 +52,11 @@ const StudentDashboard = () => {
   };
 
   const handleIssueClick = (issueId) => {
-    console.log('Clicking issue with full details:', issueId);
     if (!issueId) {
       console.error('No issue ID provided');
       return;
     }
+    // For students, always navigate to /issue/:issueId
     navigate(`/issue/${issueId}`);
   };
 
@@ -193,4 +192,4 @@ const StudentDashboard = () => {
   );
 };
 
-export default StudentDashboard; 
+export default StudentDashboard;
