@@ -92,7 +92,7 @@ const Notifications = () => {
       console.error('Error marking notification as read:', err);
     }
   };
-
+// this is for updating the icons for what happens in the issue creation process.
   const getNotificationIcon = (type) => {
     switch (type) {
       case 'issue_created':
@@ -109,7 +109,7 @@ const Notifications = () => {
         return '🔔';
     }
   };
-
+// this is used to format the date and time for notifications to be received
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
