@@ -1,3 +1,4 @@
+//this is for creating the UI for the student dashboard
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getStudentIssues } from '../services/api';
