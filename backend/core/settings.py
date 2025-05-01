@@ -1,5 +1,5 @@
 from pathlib import Path
-
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -13,8 +13,6 @@ SECRET_KEY = 'django-insecure-o-nutq5r+=2q=7c^p)kafwz9t-q_24ld3k1_ejopa+g#as5ysj
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
-ALLOWED_HOSTS = ['*']
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
@@ -32,6 +30,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'corsheaders',
     'aits',
+    'notifications',
 ]
 
 MIDDLEWARE = [
@@ -74,7 +73,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME':'aits_db',
         'USER':'postgres',
-        'PASSWORD':'5432',
+        'PASSWORD':'13.0.13Morna',
         'HOST':'localhost',
         'PORT':'5432', 
     }
@@ -117,6 +116,10 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+# Media files (uploads)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
@@ -125,16 +128,13 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'aits.User'
 
 # CORS settings
-CORS_ORIGIN_ALLOW_ALL = True
+CORS_ORIGIN_ALLOW_ALL = False
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOW_ALL_ORIGINS = True
 CORS_ORIGIN_WHITELIST = [
     'http://localhost:5173',
     'http://127.0.0.1:5173',
 ]
 
-AUTH_USER_MODEL='aits.User'
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 CORS_ALLOW_METHODS = [
     'DELETE',
     'GET',
@@ -154,13 +154,11 @@ CORS_ALLOW_HEADERS = [
     'user-agent',
     'x-csrftoken',
     'x-requested-with',
-    'access-control-allow-origin',
 ]
 
 CORS_EXPOSE_HEADERS = [
-    'Content-Type', 
-    'X-CSRFToken',
-    'Access-Control-Allow-Origin',
+    'content-type',
+    'authorization',
 ]
 
 CSRF_TRUSTED_ORIGINS = [
@@ -174,7 +172,6 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'aits.authentication.JWTAuthentication',
         'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.BasicAuthentication'
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated'
@@ -189,36 +186,7 @@ REST_FRAMEWORK = {
 # JWT settings
 JWT_SECRET_KEY = SECRET_KEY  # Using Django's secret key for JWT
 JWT_ALGORITHM = 'HS256'
+JWT_ACCESS_TOKEN_LIFETIME = 24 * 60 * 60  # 24 hours in seconds
 
 # Ensure APPEND_SLASH is False to prevent Django from redirecting URLs
 APPEND_SLASH = False
-
-# Add these CORS settings at the end of the file
-CORS_ALLOW_ALL_ORIGINS = True  # For development only
-CORS_ALLOW_CREDENTIALS = True
-
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # React development server
-    "http://127.0.0.1:3000",
-]
-
-CORS_ALLOW_METHODS = [
-    'DELETE',
-    'GET',
-    'OPTIONS',
-    'PATCH',
-    'POST',
-    'PUT',
-]
-
-CORS_ALLOW_HEADERS = [
-    'accept',
-    'accept-encoding',
-    'authorization',
-    'content-type',
-    'dnt',
-    'origin',
-    'user-agent',
-    'x-csrftoken',
-    'x-requested-with',
-]
