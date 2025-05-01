@@ -155,7 +155,7 @@ const AddNewIssue = () => {
         <main className="dashboard-main">
           <div className="add-issue-container">
             <h1>{isEditing ? 'Edit Issue' : 'Submit an Academic Issue'}</h1>
-            
+// this is for designing the form where issues will be submitted.            
             <form onSubmit={handleSubmit} className="add-issue-form">
               <div className="form-group">
                 <label>Issue Category</label>
