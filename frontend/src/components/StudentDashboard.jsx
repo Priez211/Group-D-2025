@@ -21,7 +21,7 @@ const StudentDashboard = () => {
     setUser(userData);
     fetchIssues();
   }, [navigate]);
-
+// includes conditions for handling the process of fetching what is in the  issue forms to the students dashboard
   const fetchIssues = async () => {
     try {
       const data = await getStudentIssues();
