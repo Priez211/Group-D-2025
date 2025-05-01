@@ -1,4 +1,4 @@
-// create an page where students can see their issues
+// this is a page where a student can view his or her issues.
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getStudentIssues } from '../services/api';
@@ -25,12 +25,11 @@ const MyIssues = () => {
 
   const fetchIssues = async () => {
     try {
+      setLoading(true);
       const data = await getStudentIssues();
-      console.log('Fetched issues data:', JSON.stringify(data, null, 2));
       if (Array.isArray(data)) {
         setIssues(data);
       } else if (data && typeof data === 'object') {
-        // If the data is wrapped in an object, try to find the issues array
         const issuesArray = data.issues || data.data || [];
         setIssues(issuesArray);
       } else {
@@ -50,28 +49,31 @@ const MyIssues = () => {
   };
 
   const handleIssueClick = (issueId) => {
-    console.log('Clicking issue with full details:', issueId);
     if (!issueId) {
       console.error('No issue ID provided');
       return;
     }
+    // For students, consistently use /issue/:issueId
     navigate(`/issue/${issueId}`);
   };
 
   const getStatusColor = (status) => {
-    switch (status) {
+    switch (status?.toLowerCase()) {
       case 'open':
         return 'gray';
       case 'in_progress':
         return 'blue';
       case 'resolved':
         return 'green';
+      case 'closed':
+        return 'red';
       default:
         return 'gray';
     }
   };
 
   const formatDate = (dateString) => {
+    if (!dateString) return '';
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
@@ -79,10 +81,9 @@ const MyIssues = () => {
     });
   };
 
-  const formatCategory = (category) => {
-    if (!category) return '';
-    // Split by underscore or space, capitalize each word, then join with space
-    return category
+  const formatCategory = (text) => {
+    if (!text) return '';
+    return text
       .split(/[_\s]/)
       .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
       .join(' ');
@@ -90,7 +91,6 @@ const MyIssues = () => {
 
   return (
     <div className="dashboard-container">
-      {/* Header */}
       <header className="dashboard-header">
         <div className="logo">
           <span className="graduation-icon">👨‍🎓</span>
@@ -102,7 +102,6 @@ const MyIssues = () => {
       </header>
 
       <div className="dashboard-layout">
-        {/* Sidebar Navigation */}
         <nav className="dashboard-nav">
           <ul>
             <li onClick={() => navigate('/dashboard')}>
@@ -125,7 +124,6 @@ const MyIssues = () => {
           </ul>
         </nav>
 
-        {/* Main Content */}
         <main className="dashboard-main">
           <div className="page-header">
             <h1>My Issues</h1>
@@ -142,23 +140,26 @@ const MyIssues = () => {
             ) : (
               <div className="issues-list">
                 {issues.length === 0 ? (
-                  <div className="no-issues">No issues found. Create your first issue!</div>
+                  <div className="no-issues">
+                    <p>No issues found.</p>
+                    <button className="add-issue-button" onClick={handleAddNewIssue}>
+                      Create your first issue
+                    </button>
+                  </div>
                 ) : (
-                  [...issues]
+                  issues
                     .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
                     .map((issue) => {
-                      console.log('Rendering issue:', JSON.stringify(issue, null, 2));
-                      const issueId = issue._id || issue.id || issue.issue_id;
+                      const issueId = issue.issue_id || issue._id || issue.id;
                       return (
                         <div 
                           key={issueId} 
                           className="issue-card"
                           onClick={() => handleIssueClick(issueId)}
-                          style={{ cursor: 'pointer' }}
                         >
                           <div className="issue-content">
                             <div className="issue-header">
-                              <h3>{formatCategory(issue.title || issue.category)}</h3>
+                              <h3>{issue.title || formatCategory(issue.category)}</h3>
                               <div className="issue-metadata">
                                 <div className={`issue-status-circle ${getStatusColor(issue.status)}`} />
                                 <span className="issue-date">{formatDate(issue.created_at)}</span>
@@ -166,8 +167,8 @@ const MyIssues = () => {
                             </div>
                             <p className="issue-description">{issue.description}</p>
                             <div className="issue-status">
-                              <span className={`status-badge ${issue.status}`}>
-                                {formatCategory(issue.status || '')}
+                              <span className={`status-badge ${issue.status?.toLowerCase()}`}>
+                                {formatCategory(issue.status) || 'Open'}
                               </span>
                             </div>
                           </div>
@@ -184,4 +185,4 @@ const MyIssues = () => {
   );
 };
 
-export default MyIssues; 
+export default MyIssues;
