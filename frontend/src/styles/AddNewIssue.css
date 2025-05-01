@@ -11,7 +11,7 @@
   margin-bottom: 2rem;
   font-weight: 600;
 }
-
+// this is the CSS code for styling the add issue form in terms of spacing.
 .add-issue-form {
   display: flex;
   flex-direction: column;
