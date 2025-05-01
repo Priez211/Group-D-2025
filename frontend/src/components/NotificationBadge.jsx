@@ -3,7 +3,7 @@ import '../styles/NotificationBadge.css';
 
 const NotificationBadge = () => {
   const [unreadCount, setUnreadCount] = useState(0);
-
+// the useEffect hook for handling the action of fetching information for notifying users.
   useEffect(() => {
     const fetchUnreadCount = async () => {
       try {
