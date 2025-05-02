@@ -29,7 +29,7 @@ const StudentDashboard = () => {
       if (Array.isArray(data)) {
         setIssues(data);
       } else if (data && typeof data === 'object') {
-
+        // If the data is wrapped in an object, try to find the issues array
         const issuesArray = data.issues || data.data || [];
         setIssues(issuesArray);
       } else {
