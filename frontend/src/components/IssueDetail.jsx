@@ -1,3 +1,4 @@
+// this is the issue for viewing details about a certain issue
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getIssueById, assignIssueToLecturer, updateIssueStatus, deleteIssue, getLecturers as fetchLecturers, getRegistrarIssueById } from '../services/api';
