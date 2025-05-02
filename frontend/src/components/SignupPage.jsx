@@ -46,7 +46,7 @@ const SignupPage = () => {
     'Library and Information',
     'Information Technology'
   ];
-
+// this is for the different users of the system to signup
   const getInputLabel = () => {
     switch(activeTab) {
       case 'student':
