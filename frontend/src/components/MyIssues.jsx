@@ -56,7 +56,7 @@ const MyIssues = () => {
     // For students, consistently use /issue/:issueId
     navigate(`/issue/${issueId}`);
   };
-
+setting colour changes for the different issue statuses
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
       case 'open':
