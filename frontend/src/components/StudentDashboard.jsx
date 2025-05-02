@@ -47,7 +47,7 @@ const StudentDashboard = () => {
   const handleAddNewIssue = () => {
     navigate('/add-issue');
   };
-
+// states that a user is taken to the my issues page in order to fulfil the component of handle my issues.
   const handleMyIssues = () => {
     navigate('/my-issues');
   };
