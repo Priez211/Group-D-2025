@@ -1,4 +1,3 @@
-
 import axios from 'axios';
 
 const API_URL = 'http://localhost:8000/api';
@@ -20,7 +19,6 @@ api.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
-    
   },
   (error) => {
     return Promise.reject(error);
@@ -31,6 +29,11 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    if (error.response?.status === 401 || error.response?.status === 403) {
+      // Instead of redirecting, we'll throw an error that components can handle
+      localStorage.removeItem('token');
+      throw new Error('Authentication required. Please log in again.');
+    }
     console.error('API Error:', {
       status: error.response?.status,
       data: error.response?.data,
@@ -40,119 +43,44 @@ api.interceptors.response.use(
   }
 );
 
-// Helper function for HTTP requests
-const fetchWithAuth = async (url, options = {}) => {
-  const token = localStorage.getItem('token');
-  
-  const headers = {
-    'Content-Type': 'application/json',
-    ...options.headers,
-  };
-  
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
-  
-  const response = await fetch(url, {
-    ...options,
-    headers,
-    credentials: 'include'
-  });
-  
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({
-      message: 'Something went wrong'
-    }));
-    throw new Error(errorData.message || `Error: ${response.status} ${response.statusText}`);
-  }
-  
-  return response.json();
-};
-
 // User authentication
 export const loginUser = async (credentials) => {
   try {
-    console.log('Attempting login with credentials:', credentials);
-    const response = await fetch(`${API_URL}/login/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-      credentials: 'include',
-      body: JSON.stringify(credentials)
-    });
-
-    console.log('Login response status:', response.status);
+    const response = await api.post('/login', credentials);
     
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error('Login error response:', errorData);
-      throw new Error(errorData.error || 'Login failed');
-    }
-
-    const data = await response.json();
-    console.log('Login successful, received data:', data);
-    
-    // Store the token in localStorage
-    if (data.token) {
-      localStorage.setItem('token', data.token);
+    if (response.data.token) {
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('user', JSON.stringify(response.data.user));
     }
     
-    return data;
+    return response.data;
   } catch (error) {
-    console.error('Login error:', error);
-    throw error;
+    console.error('Login error:', error.response?.data || error.message);
+    throw error.response?.data || error.message;
   }
 };
-// register user
+
 export const registerUser = async (userData) => {
   console.log('Registering user with data:', JSON.stringify(userData, null, 2));
   
   try {
-    const response = await fetch(`${API_URL}/register/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(userData)
-    });
-
-    console.log('Registration response status:', response.status);
-    
-    const responseData = await response.json();
-    console.log('Registration response data:', responseData);
-    
-    if (!response.ok) {
-      console.error('Registration error response:', responseData);
-      
-      // Handle different types of error responses
-      if (responseData.errors) {
-        // Handle field-specific errors
-        const errorMessages = Object.entries(responseData.errors)
-          .map(([field, messages]) => {
-            if (Array.isArray(messages)) {
-              return `${field}: ${messages.join(', ')}`;
-            }
-            return `${field}: ${messages}`;
-          })
-          .join('\n');
-        throw new Error(errorMessages);
-      } else if (responseData.message) {
-        // Handle general error message
-        throw new Error(responseData.message);
-      } else if (responseData.detail) {
-        // Handle DRF detail error
-        throw new Error(responseData.detail);
-      } else {
-        throw new Error('Registration failed. Please check your input and try again.');
-      }
-    }
-
-    return responseData;
+    const response = await api.post('/register/', userData);
+    console.log('Registration success:', response.data);
+    return response.data;
   } catch (error) {
     console.error('Registration error:', error);
-    throw error;
+    if (error.response?.data?.errors) {
+      const errorMessages = Object.entries(error.response.data.errors)
+        .map(([field, messages]) => {
+          if (Array.isArray(messages)) {
+            return `${field}: ${messages.join(', ')}`;
+          }
+          return `${field}: ${messages}`;
+        })
+        .join('\n');
+      throw new Error(errorMessages);
+    }
+    throw error.response?.data || error.message;
   }
 };
 
@@ -162,7 +90,6 @@ export const getStudentIssues = async () => {
     const response = await api.get('/student/issues', {
       headers: {
         'Accept': 'application/json',
-        'Content-Type': 'application/json'
       }
     });
     
@@ -174,16 +101,12 @@ export const getStudentIssues = async () => {
     return response.data;
   } catch (error) {
     if (error.response) {
-      // The request was made and the server responded with a status code
-      // that falls out of the range of 2xx
       console.error('Server responded with error:', error.response.data);
       throw error.response.data;
     } else if (error.request) {
-      // The request was made but no response was received
       console.error('No response received:', error.request);
       throw new Error('No response from server');
     } else {
-      // Something happened in setting up the request that triggered an Error
       console.error('Error setting up request:', error.message);
       throw error;
     }
@@ -192,28 +115,39 @@ export const getStudentIssues = async () => {
 
 export const getIssueById = async (issueId) => {
   try {
-    console.log('Making request to fetch issue:', issueId);
-    const response = await api.get(`/student/issues/${issueId}`, {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('Authentication required. Please log in again.');
+    }
+
+    const user = JSON.parse(localStorage.getItem('user'));
+    let endpoint = '/issues';
+    
+    // Use different endpoints based on user role
+    if (user.role === 'registrar') {
+      endpoint = '/registrar/issues';
+    } else if (user.role === 'lecturer') {
+      endpoint = '/lecturer/issues';
+    }
+
+    const response = await api.get(`${endpoint}/${issueId}`, {
       headers: {
+        'Authorization': `Bearer ${token}`,
         'Accept': 'application/json',
         'Content-Type': 'application/json'
       }
     });
     
     if (!response.data) {
-      console.error('No data received for issue:', issueId);
       throw new Error('No data received from server');
     }
     
-    console.log('Successfully fetched issue data:', response.data);
     return response.data;
   } catch (error) {
-    console.error('Error fetching issue:', {
-      issueId,
-      status: error.response?.status,
-      data: error.response?.data,
-      message: error.message
-    });
+    if (error.response?.status === 401 || error.response?.status === 403) {
+      localStorage.removeItem('token');
+      throw new Error('Authentication required. Please log in again.');
+    }
     
     if (error.response?.status === 404) {
       throw new Error('Issue not found');
@@ -231,6 +165,7 @@ export const createIssue = async (issueData) => {
     let data = issueData;
     if (issueData.attachment) {
       const formData = new FormData();
+      // Add all non-file fields to FormData
       Object.keys(issueData).forEach(key => {
         if (key === 'attachment') {
           formData.append('attachment', issueData.attachment);
@@ -250,11 +185,10 @@ export const createIssue = async (issueData) => {
         })
       }
     });
-    
-    console.log('Issue created successfully:', response.data);
+    console.log('Issue creation response:', response.data);
     return response.data;
   } catch (error) {
-    console.error('Error creating issue:', error.response?.data || error.message);
+    console.error('Error in createIssue:', error.response?.data || error.message);
     throw error.response?.data || error.message;
   }
 };
@@ -267,6 +201,7 @@ export const updateIssue = async (issueId, issueData) => {
     let data = issueData;
     if (issueData.attachment) {
       const formData = new FormData();
+      // Add all non-file fields to FormData
       Object.keys(issueData).forEach(key => {
         if (key === 'attachment') {
           formData.append('attachment', issueData.attachment);
@@ -352,6 +287,196 @@ export const markNotificationRead = async (notificationId) => {
       console.error('Error setting up request:', error.message);
       throw error;
     }
+  }
+};
+
+export const getStudents = async () => {
+  try {
+    console.log('Fetching all students');
+    const response = await api.get('/students', {
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (!response.data) {
+      throw new Error('No data received from server');
+    }
+    
+    console.log('Received students:', response.data);
+    return response.data;
+  } catch (error) {
+    if (error.response) {
+      console.error('Server responded with error:', error.response.data);
+      throw error.response.data;
+    } else if (error.request) {
+      console.error('No response received:', error.request);
+      throw new Error('No response from server');
+    } else {
+      console.error('Error setting up request:', error.message);
+      throw error;
+    }
+  }
+};
+export const getRegistrarIssues = async () => {
+  try {
+    const response = await api.get('/registrar/issues', {
+      headers: {
+        'Accept': 'application/json'
+      }
+    });
+    
+    if (!response.data) {
+      throw new Error('No data received from server');
+    }
+    
+    return response.data;
+  } catch (error) {
+    if (error.response) {
+      throw error.response.data;
+    } else if (error.request) {
+      throw new Error('No response from server');
+    } else {
+      throw error;
+    }
+  }
+};
+
+export const getRegistrarIssueById = async (issueId) => {
+  try {
+    const response = await api.get(`/registrar/issues/${issueId}`, {
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (!response.data) {
+      throw new Error('No data received from server');
+    }
+    
+    return response.data;
+  } catch (error) {
+    if (error.response?.status === 404) {
+      throw new Error('Issue not found');
+    }
+    throw error.response?.data || error.message;
+  }
+};
+
+export const getLecturerIssues = async () => {
+  try {
+    const response = await api.get('/lecturer/issues', {
+      headers: {
+        'Accept': 'application/json',
+      }
+    });
+    
+    if (!response.data) {
+      throw new Error('No data received from server');
+    }
+    
+    return response.data;
+  } catch (error) {
+    if (error.response) {
+      throw error.response.data;
+    } else if (error.request) {
+      throw new Error('No response from server');
+    } else {
+      throw error;
+    }
+  }
+};
+
+export const updateIssueStatus = async (issueId, status) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('Authentication required. Please log in again.');
+    }
+
+    const response = await api.patch(`/issues/${issueId}/update`, {
+      status
+    }, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    return response.data;
+  } catch (error) {
+    console.error('Error updating issue status:', error.response?.data || error.message);
+    if (error.response?.status === 401 || error.response?.status === 403) {
+      localStorage.removeItem('token');
+      throw new Error('Authentication required. Please log in again.');
+    }
+    throw error.response?.data || error.message;
+  }
+};
+
+export const assignIssueToLecturer = async (issueId, lecturerId) => {
+  try {
+    const response = await api.patch(`/issues/${issueId}/assign`, {
+      lecturer_id: lecturerId
+    });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error.message;
+  }
+};
+
+export const deleteIssue = async (issueId) => {
+  try {
+    const response = await api.delete(`/issues/${issueId}/delete`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error.message;
+  }
+};
+
+export const getLecturers = async (filters = {}) => {
+  try {
+    const params = new URLSearchParams();
+    if (filters.department) {
+      params.append('department', filters.department);
+    }
+
+    const response = await api.get(`/lecturers?${params.toString()}`, {
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (!response.data) {
+      throw new Error('No data received from server');
+    }
+    
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching lecturers:', error);
+    throw error.response?.data || error.message;
+  }
+};
+
+export const deleteLecturer = async (lecturerId) => {
+  try {
+    const response = await api.delete(`/lecturers/${lecturerId}`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error.message;
+  }
+};
+
+export const updateLecturer = async (lecturerId, data) => {
+  try {
+    const response = await api.patch(`/lecturers/${lecturerId}`, data);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error.message;
   }
 };
 
