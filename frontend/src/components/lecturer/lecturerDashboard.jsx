@@ -75,7 +75,30 @@ const lecturerDashboard = () => {
         </div>
       </header>
 
-      
+      <div className="dashboard-layout">
+        {/* Sidebar Navigation */}
+        <nav className="dashboard-nav">
+          <ul>
+            <li className="active">
+              <span>🏠</span>
+              Home
+            </li>
+            <li onClick={() => navigate('/lecturer/issues')}>
+              <span>📝</span>
+              Assigned Issues
+            </li>
+            <li onClick={() => navigate('/lecturer/notifications')} className="notification-item">
+              <span>🔔</span>
+              Notifications
+              <NotificationBadge />
+            </li>
+            <li>
+              <span>⚙️</span>
+              Settings
+            </li>
+          </ul>
+        </nav>
+    
   )
 }
 
