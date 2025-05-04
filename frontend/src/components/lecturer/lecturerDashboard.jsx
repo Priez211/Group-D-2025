@@ -24,8 +24,11 @@ const lecturerDashboard = () => {
     }
     setUser(userData);
   }, [navigate]);
+  useEffect(() => {
+    fetchIssues();
+  }, []);
 
-  
+
   return (
     <div>lecturerDashboard</div>
   )
