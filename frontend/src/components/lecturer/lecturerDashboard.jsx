@@ -35,6 +35,12 @@ const lecturerDashboard = () => {
       setIssues(Array.isArray(data) ? data : data.issues || []);
       setError('');
     } catch (err) {
+      console.error('Error fetching issues:', err);
+      setError('Failed to fetch issues. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <div>lecturerDashboard</div>
   )
