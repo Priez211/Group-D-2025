@@ -16,6 +16,13 @@ const lecturerDashboard = () => {
   const [error, setError] = useState('');
   const [filter, setFilter] = useState('all');
 
+  useEffect(() => {
+    const userData = JSON.parse(localStorage.getItem('user'));
+    if (!userData || userData.role !== 'lecturer') {
+      navigate('/login');
+      return;
+    }
+    
   return (
     <div>lecturerDashboard</div>
   )
