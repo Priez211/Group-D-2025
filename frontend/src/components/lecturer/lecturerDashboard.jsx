@@ -50,7 +50,12 @@ const lecturerDashboard = () => {
       day: 'numeric'
     });
   };
-  
+
+  const getStatusClass = (status) => {
+    if (!status) return 'unknown';
+    return status.toLowerCase().replace(/\s+/g, '_');
+  };
+
   return (
     <div>lecturerDashboard</div>
   )
