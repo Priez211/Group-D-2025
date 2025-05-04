@@ -74,8 +74,9 @@ const lecturerDashboard = () => {
           <UserProfile user={user} />
         </div>
       </header>
-    <div>lecturerDashboard</div>
-  )
 
+      
+  )
+}
 
 export default lecturerDashboard
