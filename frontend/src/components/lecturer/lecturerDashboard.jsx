@@ -9,6 +9,13 @@ import '../../styles/Dashboard.css';
 const API_URL = 'http://localhost:8000';
 
 const lecturerDashboard = () => {
+  const navigate = useNavigate();
+  const [user, setUser] = useState(null);
+  const [issues, setIssues] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [filter, setFilter] = useState('all');
+
   return (
     <div>lecturerDashboard</div>
   )
