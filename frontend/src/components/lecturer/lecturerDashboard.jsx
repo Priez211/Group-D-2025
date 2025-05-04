@@ -22,7 +22,10 @@ const lecturerDashboard = () => {
       navigate('/login');
       return;
     }
-    
+    setUser(userData);
+  }, [navigate]);
+
+  
   return (
     <div>lecturerDashboard</div>
   )
