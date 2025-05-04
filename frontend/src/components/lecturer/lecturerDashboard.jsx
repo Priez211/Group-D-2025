@@ -56,6 +56,12 @@ const lecturerDashboard = () => {
     return status.toLowerCase().replace(/\s+/g, '_');
   };
 
+  const filteredIssues = issues.filter(issue => {
+    if (filter === 'all') return true;
+    return issue.status?.toLowerCase() === filter;
+  }).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+
   return (
     <div>lecturerDashboard</div>
   )
