@@ -28,7 +28,13 @@ const lecturerDashboard = () => {
     fetchIssues();
   }, []);
 
-
+  const fetchIssues = async () => {
+    setLoading(true);
+    try {
+      const data = await getLecturerIssues();
+      setIssues(Array.isArray(data) ? data : data.issues || []);
+      setError('');
+    } catch (err) {
   return (
     <div>lecturerDashboard</div>
   )
