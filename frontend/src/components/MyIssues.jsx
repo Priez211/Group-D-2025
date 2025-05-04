@@ -37,7 +37,7 @@ const MyIssues = () => {
       }
       setError('');
     } catch (err) {
-      setError('Failed to fetch issues. Please try again later.');
+      setError('Failed to fetch issues. Please try again at a later time.');
       console.error('Error fetching issues:', err);
     } finally {
       setLoading(false);
@@ -56,7 +56,7 @@ const MyIssues = () => {
     // For students, consistently use /issue/:issueId
     navigate(`/issue/${issueId}`);
   };
-
+setting colour changes for the different issue statuses
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
       case 'open':

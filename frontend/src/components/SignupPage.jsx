@@ -1,9 +1,9 @@
-// the signup page
+// this is the signup page 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { registerUser } from '../services/api';
 import '../statics/Login.css';
-// the signup component
+
 const SignupPage = () => {
   const [activeTab, setActiveTab] = useState('student');
   const [formData, setFormData] = useState({
@@ -46,7 +46,7 @@ const SignupPage = () => {
     'Library and Information',
     'Information Technology'
   ];
-
+// this is a component for each user of the system when they get logged in.
   const getInputLabel = () => {
     switch(activeTab) {
       case 'student':
@@ -109,38 +109,51 @@ const SignupPage = () => {
     }
 
     try {
-      // Split full name into first and last name
-      const nameParts = formData.fullName.split(' ');
-      const firstName = nameParts[0];
-      const lastName = nameParts.slice(1).join(' ');
+      let userData;
 
-      // Prepare base user data
-      const userData = {
-        username: formData.userId,
-        email: formData.email,
-        password: formData.password,
-        role: activeTab,
-        first_name: firstName,
-        last_name: lastName
-      };
+      // Handle lecturer registration differently
+      if (activeTab === 'lecturer') {
+        userData = {
+          fullName: formData.fullName,  // Keep as single field
+          email: formData.email,
+          userId: formData.userId,      // Use userId instead of username
+          password: formData.password,
+          confirmPassword: formData.confirmPassword,
+          role: 'lecturer',            // Add role field
+          lecturer_data: {
+            department: formData.department
+          }
+        };
+      } else {
+        // Split full name into first and last name for other roles
+        const nameParts = formData.fullName.split(' ');
+        const firstName = nameParts[0];
+        const lastName = nameParts.slice(1).join(' ');
 
-      // Add role-specific data
-      if (activeTab === 'student') {
-        userData.student_data = {
-          college: formData.college,
-          department: formData.department,
-          year_of_study: formData.yearOfStudy,
-          course: formData.course
+        // For other roles, keep existing structure
+        userData = {
+          username: formData.userId,
+          email: formData.email,
+          password: formData.password,
+          role: activeTab,
+          first_name: firstName,
+          last_name: lastName
         };
-      } else if (activeTab === 'lecturer') {
-        userData.lecturer_data = {
-          department: formData.department
-        };
-      } else if (activeTab === 'registrar') {
-        userData.registrar_data = {
-          college: formData.college,
-          department: formData.department
-        };
+
+        // Add role-specific data
+        if (activeTab === 'student') {
+          userData.student_data = {
+            college: formData.college,
+            department: formData.department,
+            year_of_study: formData.yearOfStudy,
+            course: formData.course
+          };
+        } else if (activeTab === 'registrar') {
+          userData.registrar_data = {
+            college: formData.college,
+            department: formData.department
+          };
+        }
       }
 
       console.log('Sending registration data:', JSON.stringify(userData, null, 2));
@@ -187,6 +200,7 @@ const SignupPage = () => {
           </button>
         </div>
         {error && <div className="error-message">{error}</div>}
+// this is for designing the form for signing up for different users.        
         <form className="login-form" onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="fullName">Full Name</label>
@@ -334,4 +348,4 @@ const SignupPage = () => {
   );
 };
 
-export default SignupPage; 
+export default SignupPage;
