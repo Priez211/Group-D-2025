@@ -129,6 +129,8 @@ const lecturerDashboard = () => {
                 >Closed</button>
               </div>
             </div>
+ 
+    <div>lecturerDashboard</div>
   )
 }
 
