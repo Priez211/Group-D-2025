@@ -129,9 +129,76 @@ const lecturerDashboard = () => {
                 >Closed</button>
               </div>
             </div>
- 
-    <div>lecturerDashboard</div>
-  )
-}
 
-export default lecturerDashboard
+           {error && <div className="error-message">{error}</div>}
+
+            {loading ? (
+              <div className="loading-spinner">Loading issues...</div>
+            ) : (
+              <div className="data-table-container">
+                <table className="data-table">
+                  <thead>
+                    <tr> 
+                    <tr>
+                      <th>Title</th>
+                      <th>Category</th>
+                      <th>Status</th>
+                      <th>Priority</th>
+                      <th>Student</th>
+                      <th>Course Unit</th>
+                      <th>Submission Date</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredIssues.length === 0 ? (
+                      <tr>
+                        <td colSpan="8" className="no-data">No issues found</td>
+                      </tr>
+                    ) : (
+                      filteredIssues.map(issue => (
+                        <tr key={issue.issue_id}>
+                          <td>{issue.title}</td>
+                          <td>{issue.category}</td>
+                          <td>
+                            <span className={`status ${getStatusClass(issue.status)}`}>
+                              {issue.status}
+                            </span>
+                          </td>
+                          <td>
+                            <span className={`priority ${issue.priority?.toLowerCase()}`}>
+                              {issue.priority}
+                            </span>
+                          </td>
+                          <td>{issue.student_name}</td>
+                          <td>{issue.courseUnit}</td>
+                          <td>{formatDate(issue.created_at)}</td>
+                          <td className="actions-cell">
+                            <button 
+                              className="icon-button view-button" 
+                              title="View Details"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(`/lecturer/issues/${issue.issue_id}`);
+                              }}
+                            >
+                              👁️
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            )}
+            </section>
+        </main>
+      </div>
+    </div>
+  );
+};
+  );
+};
+
+export default lecturerDashboard;
