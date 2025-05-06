@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from 'axios'; // enables communication between frontend and backend
 
 const API_URL = 'http://localhost:8000/api';
 
