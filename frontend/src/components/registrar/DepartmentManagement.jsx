@@ -1,3 +1,4 @@
+// for enabling the registrar to handle different departments
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import UserProfile from '../UserProfile';
