@@ -132,7 +132,7 @@ const DepartmentManagement = () => {
     dept.headOfDepartment.toLowerCase().includes(filter.toLowerCase()) ||
     dept.faculty.toLowerCase().includes(filter.toLowerCase())
   );
-
+// this is a variable for formatting the date 
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
     const date = new Date(dateString);
