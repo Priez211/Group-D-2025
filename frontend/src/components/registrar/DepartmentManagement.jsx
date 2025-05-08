@@ -163,6 +163,10 @@ const DepartmentManagement = () => {
               <span>🏠</span>
               Home
             </li>
+            <li onClick={() => navigate('/registrar/issues')}>
+              <span>📝</span>
+              Issues
+            </li>
             <li onClick={() => navigate('/registrar/students')}>
               <span>👨‍🎓</span>
               Students
@@ -175,11 +179,8 @@ const DepartmentManagement = () => {
               <span>🏛️</span>
               Departments
             </li>
-            <li onClick={() => navigate('/registrar/issues')}>
-              <span>📝</span>
-              Issues
-            </li>
-            <li onClick={() => navigate('/notifications')} className="notification-item">
+
+            <li onClick={() => navigate('/registrar/notifications')} className="notification-item">
               <span>🔔</span>
               Notifications
               <NotificationBadge />
@@ -335,4 +336,4 @@ const DepartmentManagement = () => {
   );
 };
 
-export default DepartmentManagement; 
+export default DepartmentManagement;
