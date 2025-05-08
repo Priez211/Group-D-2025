@@ -1,3 +1,4 @@
+// import components to form the registar dashboard
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import UserProfile from '../UserProfile';
