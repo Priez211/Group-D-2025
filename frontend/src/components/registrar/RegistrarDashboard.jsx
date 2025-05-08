@@ -38,6 +38,10 @@ const RegistrarDashboard = () => {
               <span>🏠</span>
               Home
             </li>
+            <li onClick={() => navigate('/registrar/issues')}>
+              <span>📝</span>
+              Issues
+            </li>
             <li onClick={() => navigate('/registrar/students')}>
               <span>👨‍🎓</span>
               Students
@@ -50,11 +54,8 @@ const RegistrarDashboard = () => {
               <span>🏛️</span>
               Departments
             </li>
-            <li onClick={() => navigate('/registrar/issues')}>
-              <span>📝</span>
-              Issues
-            </li>
-            <li onClick={() => navigate('/notifications')} className="notification-item">
+
+            <li onClick={() => navigate('/registrar/notifications')} className="notification-item">
               <span>🔔</span>
               Notifications
               <NotificationBadge />
@@ -73,22 +74,17 @@ const RegistrarDashboard = () => {
           <section className="quick-actions">
             <h2>Quick Actions</h2>
             <div className="actions-grid">
-              <div className="action-card" onClick={() => navigate('/registrar/students')}>
-                <span className="action-icon">👨‍🎓</span>
-                <h3>Manage Students</h3>
-                <p>View and manage student records</p>
-              </div>
               <div className="action-card" onClick={() => navigate('/registrar/lecturers')}>
                 <span className="action-icon">👨‍🏫</span>
                 <h3>Manage Lecturers</h3>
                 <p>View and manage lecturer profiles</p>
               </div>
-              <div className="action-card" onClick={() => navigate('/registrar/departments')}>
-                <span className="action-icon">🏛️</span>
-                <h3>Departments</h3>
-                <p>Manage academic departments</p>
+              <div className="action-card" onClick={() => navigate('/registrar/issues')}>
+                <span className="action-icon">📝</span>
+                <h3>Issues</h3>
+                <p>View and manage academic issues</p>
               </div>
-              <div className="action-card notification-item" onClick={() => navigate('/notifications')}>
+              <div className="action-card notification-item" onClick={() => navigate('/registrar/notifications')}>
                 <span className="action-icon">🔔</span>
                 <h3>Notifications</h3>
                 <p>View updates and alerts</p>
@@ -97,31 +93,10 @@ const RegistrarDashboard = () => {
             </div>
           </section>
           
-          <section className="statistics-section">
-            <h2>System Overview</h2>
-            <div className="statistics-grid">
-              <div className="stat-card">
-                <h3>Total Students</h3>
-                <p className="stat-number">1,245</p>
-              </div>
-              <div className="stat-card">
-                <h3>Total Lecturers</h3>
-                <p className="stat-number">87</p>
-              </div>
-              <div className="stat-card">
-                <h3>Departments</h3>
-                <p className="stat-number">12</p>
-              </div>
-              <div className="stat-card">
-                <h3>Open Issues</h3>
-                <p className="stat-number">24</p>
-              </div>
-            </div>
-          </section>
         </main>
       </div>
     </div>
   );
 };
 
-export default RegistrarDashboard; 
+export default RegistrarDashboard;
