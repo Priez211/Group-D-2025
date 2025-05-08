@@ -1,3 +1,4 @@
+// this is the page for designing a lecture user interface
 import React from 'react'
 import { useNavigate } from 'react-router-dom';
 import { getLecturerIssues } from '../../services/api';
@@ -27,7 +28,7 @@ const lecturerDashboard = () => {
   useEffect(() => {
     fetchIssues();
   }, []);
-
+// this is for handling the fetching of issues and errors assoiated with that
   const fetchIssues = async () => {
     setLoading(true);
     try {
