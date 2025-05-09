@@ -25,7 +25,7 @@ const PrivateRoute = ({ children }) => {
   const isAuthenticated = localStorage.getItem('token');
   return isAuthenticated ? children : <Navigate to="/login" />;
 };
-
+// this includes the different routes within the app as you explore through it
 function App() {
   return (
     <Router>

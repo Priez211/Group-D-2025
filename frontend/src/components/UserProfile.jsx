@@ -47,7 +47,7 @@ const UserProfile = ({ user }) => {
           <span className="initials">{getInitials(user?.fullName)}</span>
         </div>
       </div>
-      
+// this is for manipulating the dorpdown lists.      
       {isDropdownOpen && (
         <div className="profile-dropdown">
           <div className="user-info">
