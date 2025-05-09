@@ -1,4 +1,3 @@
-// this is for the overall outlook of the app
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from './components/LoginPage';
