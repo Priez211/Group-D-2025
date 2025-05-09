@@ -16,15 +16,13 @@ const DEPARTMENT_FACULTY_MAP = {
   'Department Of Information Technology': 'College of Computing'
 };
 
-const StudentManagement = () => {
+const LecturerManagement = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
-  const [students, setStudents] = useState([]);
+  const [lecturers, setLecturers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('');
-  const [selectedCollege, setSelectedCollege] = useState('');
   const [selectedDepartment, setSelectedDepartment] = useState('');
-  const [selectedYear, setSelectedYear] = useState('');
 
   const departmentOptions = [
     'All Departments',
@@ -34,35 +32,17 @@ const StudentManagement = () => {
     'Department Of Information Technology'
   ];
 
-  const yearOptions = [
-    'All Years',
-    'First Year',
-    'Second Year',
-    'Third Year'
-  ];
-
-  // Filter department options based on selected college
-  const filteredDepartmentOptions = ['All Departments', ...departmentOptions.filter(dept => 
-    dept === 'All Departments' || DEPARTMENT_FACULTY_MAP[dept] === selectedCollege
-  )];
-
-  const fetchStudents = useCallback(async () => {
+  const fetchLecturers = useCallback(async () => {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
       const params = {};
       
-      if (selectedCollege && selectedCollege !== 'All Colleges') {
-        params.college = selectedCollege;
-      }
       if (selectedDepartment && selectedDepartment !== 'All Departments') {
         params.department = selectedDepartment;
       }
-      if (selectedYear && selectedYear !== 'All Years') {
-        params.year = selectedYear;
-      }
 
-      const response = await axios.get(`${API_URL}/students`, {
+      const response = await axios.get(`${API_URL}/lecturers`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Accept': 'application/json',
@@ -72,20 +52,19 @@ const StudentManagement = () => {
       });
 
       if (response.data) {
-        setStudents(Array.isArray(response.data) ? response.data : []);
+        setLecturers(Array.isArray(response.data) ? response.data : []);
       } else {
-        setStudents([]);
+        setLecturers([]);
       }
     } catch (error) {
-      console.error('Error fetching students:', error);
+      console.error('Error fetching lecturers:', error);
       if (error.response && error.response.status === 401) {
-        // Handle unauthorized access
         navigate('/login');
       }
     } finally {
       setLoading(false);
     }
-  }, [selectedCollege, selectedDepartment, selectedYear, navigate]);
+  }, [selectedDepartment, navigate]);
 
   useEffect(() => {
     // Check authentication and get user data
@@ -95,37 +74,27 @@ const StudentManagement = () => {
       return;
     }
     setUser(userData);
-    
-    // Set the college filter to the registrar's college and disable changing it
-    if (userData.college) {
-      setSelectedCollege(userData.college);
-    }
   }, [navigate]);
 
   useEffect(() => {
-    fetchStudents();
-  }, [fetchStudents]);
+    fetchLecturers();
+  }, [fetchLecturers]);
 
   const handleFilterChange = (e) => {
     setFilter(e.target.value);
   };
 
-  const filteredStudents = students.filter(student => {
+  const filteredLecturers = lecturers.filter(lecturer => {
+    const fullName = `${lecturer.user?.first_name} ${lecturer.user?.last_name}`;
     const matchesSearch = 
-      student.fullName?.toLowerCase().includes(filter.toLowerCase()) ||
-      student.studentNumber?.toLowerCase().includes(filter.toLowerCase()) ||
-      student.email?.toLowerCase().includes(filter.toLowerCase());
-    
-    const matchesCollege = selectedCollege === '' || selectedCollege === 'All Colleges' || 
-      student.college === selectedCollege;
+      fullName.toLowerCase().includes(filter.toLowerCase()) ||
+      lecturer.user?.email?.toLowerCase().includes(filter.toLowerCase()) ||
+      lecturer.department?.name?.toLowerCase().includes(filter.toLowerCase());
     
     const matchesDepartment = selectedDepartment === '' || selectedDepartment === 'All Departments' || 
-      student.department?.name === selectedDepartment;
+      lecturer.department?.name === selectedDepartment;
     
-    const matchesYear = selectedYear === '' || selectedYear === 'All Years' || 
-      student.yearOfStudy === selectedYear;
-    
-    return matchesSearch && matchesCollege && matchesDepartment && matchesYear;
+    return matchesSearch && matchesDepartment;
   });
 
   return (
@@ -153,11 +122,11 @@ const StudentManagement = () => {
               <span>📝</span>
               Issues
             </li>
-            <li className="active">
+            <li onClick={() => navigate('/registrar/students')}>
               <span>👨‍🎓</span>
               Students
             </li>
-            <li onClick={() => navigate('/registrar/lecturers')}>
+            <li className="active">
               <span>👨‍🏫</span>
               Lecturers
             </li>
@@ -181,37 +150,29 @@ const StudentManagement = () => {
         {/* Main Content */}
         <main className="dashboard-main">
           <div className="page-header">
-            <h1>Student Management</h1>
+            <h1>Lecturer Management</h1>
+            <button className="primary-button">
+              Add New Lecturer
+            </button>
           </div>
           
           <div className="filter-bar">
             <div className="search-bar">
               <input
                 type="text"
-                placeholder="Search by name, ID or email..."
+                placeholder="Search by name, email or department..."
                 value={filter}
                 onChange={handleFilterChange}
               />
             </div>
             
             <div className="filter-dropdowns">
-              
               <select 
                 value={selectedDepartment} 
                 onChange={(e) => setSelectedDepartment(e.target.value)}
                 className="filter-select"
               >
-                {filteredDepartmentOptions.map((option, index) => (
-                  <option key={index} value={option}>{option}</option>
-                ))}
-              </select>
-              
-              <select 
-                value={selectedYear} 
-                onChange={(e) => setSelectedYear(e.target.value)}
-                className="filter-select"
-              >
-                {yearOptions.map((option, index) => (
+                {departmentOptions.map((option, index) => (
                   <option key={index} value={option}>{option}</option>
                 ))}
               </select>
@@ -219,37 +180,39 @@ const StudentManagement = () => {
           </div>
           
           {loading ? (
-            <div className="loading-spinner">Loading student data...</div>
+            <div className="loading-spinner">Loading lecturer data...</div>
           ) : (
             <>
               <div className="data-table-container">
                 <table className="data-table">
                   <thead>
                     <tr>
-                      <th>Student Number</th>
                       <th>Name</th>
                       <th>Email</th>
-                      <th>College</th>
                       <th>Department</th>
-                      <th>Year</th>
-                      <th>Course</th>
+                      <th>Courses</th>
+                      <th>Active Issues</th>
+                      <th>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredStudents.length === 0 ? (
+                    {filteredLecturers.length === 0 ? (
                       <tr>
-                        <td colSpan="7" className="no-data">No students match your filters</td>
+                        <td colSpan="6" className="no-data">No lecturers match your filters</td>
                       </tr>
                     ) : (
-                      filteredStudents.map(student => (
-                        <tr key={student.id}>
-                          <td>{student.studentNumber}</td>
-                          <td>{student.fullName}</td>
-                          <td>{student.email}</td>
-                          <td>{student.college}</td>
-                          <td>{student.department.name}</td>
-                          <td>{student.yearOfStudy}</td>
-                          <td>{student.course}</td>
+                      filteredLecturers.map(lecturer => (
+                        <tr key={lecturer.id}>
+                          <td>{`${lecturer.user.first_name} ${lecturer.user.last_name}`}</td>
+                          <td>{lecturer.user.email}</td>
+                          <td>{lecturer.department.name}</td>
+                          <td>{lecturer.courses?.length || 0} courses</td>
+                          <td>{lecturer.active_issues_count || 0}</td>
+                          <td className="actions-cell">
+                            <button className="icon-button view-button" title="View Details">👁️</button>
+                            <button className="icon-button edit-button" title="Edit">✏️</button>
+                            <button className="icon-button delete-button" title="Delete">🗑️</button>
+                          </td>
                         </tr>
                       ))
                     )}
@@ -270,4 +233,4 @@ const StudentManagement = () => {
   );
 };
 
-export default StudentManagement;
+export default LecturerManagement;

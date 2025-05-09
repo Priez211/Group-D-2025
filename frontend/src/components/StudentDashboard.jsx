@@ -1,4 +1,3 @@
-//this is for creating the UI for the student dashboard
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getStudentIssues } from '../services/api';
@@ -47,7 +46,7 @@ const StudentDashboard = () => {
   const handleAddNewIssue = () => {
     navigate('/add-issue');
   };
-// states that a user is taken to the my issues page in order to fulfil the component of handle my issues.
+
   const handleMyIssues = () => {
     navigate('/my-issues');
   };

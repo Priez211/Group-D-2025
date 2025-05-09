@@ -1,4 +1,3 @@
-// the login page
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { loginUser } from '../services/api';
@@ -49,8 +48,19 @@ const LoginPage = () => {
       localStorage.setItem('token', response.token);
       localStorage.setItem('user', JSON.stringify(response.user));
       
-      // Redirect to dashboard
-      navigate('/dashboard');
+      // Redirect based on user role
+      switch (response.user.role) {
+        case 'registrar':
+          navigate('/registrar');
+          break;
+        case 'lecturer':
+          navigate('/lecturer-dashboard');
+          break;
+        case 'student':
+        default:
+          navigate('/dashboard');
+          break;
+      }
     } catch (err) {
       setError(err.message || 'Login failed. Please try again.');
     }
@@ -127,4 +137,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage; 
+export default LoginPage;

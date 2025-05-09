@@ -1,4 +1,3 @@
-// this is the signup page 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { registerUser } from '../services/api';
@@ -46,7 +45,7 @@ const SignupPage = () => {
     'Library and Information',
     'Information Technology'
   ];
-// this is a component for each user of the system when they get logged in.
+
   const getInputLabel = () => {
     switch(activeTab) {
       case 'student':
@@ -200,7 +199,6 @@ const SignupPage = () => {
           </button>
         </div>
         {error && <div className="error-message">{error}</div>}
-// this is for designing the form for signing up for different users.        
         <form className="login-form" onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="fullName">Full Name</label>

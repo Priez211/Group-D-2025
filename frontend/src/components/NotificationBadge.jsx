@@ -1,37 +1,33 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
+import { getNotifications } from '../services/api';
+import { useNotifications } from '../context/NotificationContext';
 import '../styles/NotificationBadge.css';
 
 const NotificationBadge = () => {
-  const [unreadCount, setUnreadCount] = useState(0);
-// the useEffect hook for handling the action of fetching information for notifying users.
+  const { hasUnreadNotifications, setUnreadStatus } = useNotifications();
+
   useEffect(() => {
-    const fetchUnreadCount = async () => {
-      try {
-        const response = await fetch('http://localhost:8000/api/notifications/unread-count/', {
-          credentials: 'include'
-        });
-        if (response.ok) {
-          const data = await response.json();
-          setUnreadCount(data.count);
-        }
-      } catch (error) {
-        console.error('Error fetching unread notifications:', error);
-      }
-    };
-
     fetchUnreadCount();
-    const interval = setInterval(fetchUnreadCount, 60000); // Poll every minute
-
+    // Poll for new notifications every minute
+    const interval = setInterval(fetchUnreadCount, 60000);
     return () => clearInterval(interval);
   }, []);
 
-  if (unreadCount === 0) return null;
+  const fetchUnreadCount = async () => {
+    try {
+      const data = await getNotifications();
+      const notifications = Array.isArray(data) ? data : (data?.notifications || data?.data || []);
+      setUnreadStatus(notifications.some(n => !n.is_read));
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+    }
+  };
+
+  if (!hasUnreadNotifications) return null;
 
   return (
-    <div className="notification-badge">
-      {unreadCount}
-    </div>
+    <span className="notification-badge"></span>
   );
 };
 
-export default NotificationBadge; 
+export default NotificationBadge;

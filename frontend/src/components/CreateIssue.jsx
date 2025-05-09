@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createIssue } from '../services/api';
+import { createIssue, getLecturers } from '../services/api';
 import '../styles/CreateIssue.css';
 
 const CreateIssue = () => {
@@ -13,7 +13,7 @@ const CreateIssue = () => {
     courseUnit: '',
     yearOfStudy: '',
     semester: '',
-    assignedTo:''
+    assignedTo: ''
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -53,7 +53,7 @@ const CreateIssue = () => {
 
     try {
       console.log('Submitting issue with data:', formData);
-
+      
       // Prepare the data with the correct assigned_to field
       const issueData = {
         ...formData,
@@ -194,6 +194,25 @@ const CreateIssue = () => {
           </select>
         </div>
 
+        <div className="form-group">
+          <label htmlFor="assignedTo">Lecturer to Assign Issue</label>
+          <select
+            id="assignedTo"
+            name="assignedTo"
+            value={formData.assignedTo}
+            onChange={handleChange}
+            required
+            disabled={loadingLecturers}
+          >
+            <option value="">Select Lecturer</option>
+            {lecturers.map(lecturer => (
+              <option key={lecturer.id} value={lecturer.id}>
+                {lecturer.user.first_name} {lecturer.user.last_name} - {lecturer.department.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
         <div className="form-actions">
           <button type="submit" disabled={isSubmitting}>
             {isSubmitting ? 'Submitting...' : 'Submit Issue'}
@@ -207,4 +226,4 @@ const CreateIssue = () => {
   );
 };
 
-export default CreateIssue; 
+export default CreateIssue;
