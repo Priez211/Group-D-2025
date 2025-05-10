@@ -49,7 +49,7 @@ const AddNewIssue = () => {
       });
     } catch (err) {
       console.error('Error loading issue:', err);
-      setError('Failed to load the issue data. Please try again.');
+      setError('Failed to load issue data. Please try again.');
     } finally {
       setLoading(false);
     }
