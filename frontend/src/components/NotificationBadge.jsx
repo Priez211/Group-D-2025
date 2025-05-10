@@ -15,7 +15,7 @@ const NotificationBadge = () => {
           setUnreadCount(data.count);
         }
       } catch (error) {
-        console.error('Error unread notifications:', error);
+        console.error('Error fetching unread notifications:', error);
       }
     };
 
