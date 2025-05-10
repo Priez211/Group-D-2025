@@ -8,7 +8,7 @@ const NotificationBadge = () => {
     const fetchUnreadCount = async () => {
       try {
         const response = await fetch('http://localhost:8000/api/notifications/unread-count/', {
-          credentials: 'exclude'
+          credentials: 'include'
         });
         if (response.ok) {
           const data = await response.json();
