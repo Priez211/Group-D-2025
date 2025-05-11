@@ -71,7 +71,7 @@ const CreateIssue = () => {
         navigate('/student/dashboard');
       }, 2000);
     } catch (err) {
-      console.error('Error creating issue:', err);
+      console.error('e:', err);
       setError(err.message || 'Failed to create issue. Please try again.');
     } finally {
       setIsSubmitting(false);
