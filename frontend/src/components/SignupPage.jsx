@@ -42,6 +42,7 @@ const SignupPage = () => {
 
   const courseOptions = [
     'Computer Science',
+    'Software Engineering',
     'Library and Information',
     'Information Technology'
   ];
