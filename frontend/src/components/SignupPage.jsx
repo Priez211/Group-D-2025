@@ -12,6 +12,7 @@ const SignupPage = () => {
     userId: '',
     password: '',
     confirmPassword: '',
+    college: '',
     department: '',
     yearOfStudy: '',
     course: ''
