@@ -37,7 +37,7 @@ const StudentDashboard = () => {
       }
       setError('');
     } catch (err) {
-      setError('Failed to fetch issues. Please try again later.');
+      setError('Failed issues. Please try again later.');
       console.error('Error fetching issues:', err);
     } finally {
       setLoading(false);
