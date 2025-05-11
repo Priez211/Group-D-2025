@@ -145,7 +145,7 @@ export const registerUser = async (userData) => {
         // Handle DRF detail error
         throw new Error(responseData.detail);
       } else {
-        throw new Error('Please check your input and try again.');
+        throw new Error('Registration failed. Please check your input and try again.');
       }
     }
 
