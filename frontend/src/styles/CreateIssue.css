@@ -54,7 +54,7 @@
   transition: background-color 0.2s;
 }
 
-.form-actions button[type="submit"] {
+.form-actions button[type=""] {
   background-color: #007bff;
   color: white;
 }
