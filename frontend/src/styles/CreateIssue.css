@@ -51,7 +51,7 @@
   border-radius: 4px;
   font-size: 1rem;
   cursor: pointer;
-  transition: background- 0.2s;
+  transition: background-color 0.2s;
 }
 
 .form-actions button[type="submit"] {
