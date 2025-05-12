@@ -122,52 +122,95 @@ class StudentIssueCreateView(APIView):
     parser_classes = (MultiPartParser, FormParser, JSONParser)
     
     def get(self, request):
-        student = request.user.student_profile
-        issues = Issue.objects.filter(student=student).order_by('-created_at')
-        return Response({'issues': IssueSerializer(issues, many=True).data})
+        try:
+            # Get the student instance
+            student = request.user.student_profile
+            
+            # Get all issues for this student
+            issues = Issue.objects.filter(student=student).order_by('-created_at')
+            
+            # Serialize the issues
+            serializer = IssueSerializer(issues, many=True)
+            
+            return Response({
+                'issues': serializer.data
+            })
+        except Exception as e:
+            return Response({
+                'error': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
     def post(self, request):
-        student = request.user.student_profile
-        assigned_to = None
-        
-        if 'assigned_to' in request.data:
-            try:
-                assigned_to = Lecturer.objects.get(id=request.data['assigned_to'])
-            except Lecturer.DoesNotExist:
-                return Response(
-                    {'error': 'Selected lecturer does not exist'},
-                    status=status.HTTP_400_BAD_REQUEST
+        try:
+            print("\n=== Creating New Issue ===")
+            print(f"Request data: {request.data}")
+            
+            # Get the student instance
+            student = request.user.student_profile
+            print(f"Student: {student}")
+            
+            # Get assigned lecturer if provided
+            assigned_to = None
+            if 'assigned_to' in request.data:
+                try:
+                    assigned_to = Lecturer.objects.get(id=request.data['assigned_to'])
+                    print(f"Assigning to lecturer: {assigned_to}")
+                except Lecturer.DoesNotExist:
+                    print(f"Lecturer with ID {request.data['assigned_to']} not found")
+                    return Response({
+                        'error': 'Selected lecturer does not exist'
+                    }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Create the issue
+            serializer = IssueSerializer(data=request.data, context={'request': request})
+            if serializer.is_valid():
+                print(f"Serializer is valid. Data: {serializer.validated_data}")
+                
+                # Add the student and assigned lecturer to the issue data
+                serializer.validated_data['student'] = student
+                if assigned_to:
+                    serializer.validated_data['assigned_to'] = assigned_to
+                
+                # Handle file upload
+                if 'attachment' in request.FILES:
+                    serializer.validated_data['attachment'] = request.FILES['attachment']
+                
+                # Save the issue
+                issue = serializer.save()
+                print(f"Issue created successfully: {issue}")
+                
+                # Create notification for the student
+                create_notification(
+                    recipient=request.user,
+                    notification_type='issue_created',
+                    issue=issue,
+                    message=f'Your issue "{issue.title}" has been submitted successfully.'
                 )
-        
-        serializer = IssueSerializer(data=request.data, context={'request': request})
-        serializer.is_valid(raise_exception=True)
-        
-        serializer.validated_data['student'] = student
-        if assigned_to:
-            serializer.validated_data['assigned_to'] = assigned_to
-        
-        if 'attachment' in request.FILES:
-            serializer.validated_data['attachment'] = request.FILES['attachment']
-        
-        issue = serializer.save()
-        
-        # Create notifications
-        create_notification(
-            recipient=request.user,
-            notification_type='issue_created',
-            issue=issue,
-            message=f'Your issue "{issue.title}" has been submitted successfully.'
-        )
-        
-        if assigned_to:
-            create_notification(
-                recipient=assigned_to.user,
-                notification_type='issue_assigned',
-                issue=issue,
-                message=f'You have been assigned a new issue: {issue.title}'
+                
+                # Create notification for assigned lecturer if one is assigned
+                if assigned_to:
+                    create_notification(
+                        recipient=assigned_to.user,
+                        notification_type='issue_assigned',
+                        issue=issue,
+                        message=f'You have been assigned a new issue: {issue.title}'
+                    )
+                    print(f"Notification sent to lecturer: {assigned_to}")
+                
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            
+            print(f"Serializer errors: {serializer.errors}")
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            
+        except Exception as e:
+            print(f"Error creating issue: {str(e)}")
+            return Response(
+                {'error': 'Failed to create issue', 'detail': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-        
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+
 
 
 class LecturerIssueListView(generics.ListAPIView):
