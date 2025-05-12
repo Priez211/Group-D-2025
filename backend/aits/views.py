@@ -334,25 +334,48 @@ class IssueDeleteView(generics.DestroyAPIView):
         return Issue.objects.none()
 
     def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        self.perform_destroy(instance)
-        return Response({'message': 'Issue deleted successfully'})
+        try:
+            instance = self.get_object()
+            self.perform_destroy(instance)
+            return Response({'message': 'Issue deleted successfully'}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_notifications(request):
-    notifications = Notification.objects.filter(recipient=request.user).order_by('-created_at')
-    return Response(NotificationSerializer(notifications, many=True).data)
-
-
+   try:
+        print(f"Fetching notifications for user: {request.user.username}")
+        notifications = Notification.objects.filter(recipient=request.user).order_by('-created_at')
+        print(f"Found {notifications.count()} notifications")
+        serializer = NotificationSerializer(notifications, many=True)
+        return Response(serializer.data)
+    except Exception as e:
+        print(f"Error in get_notifications: {str(e)}")
+        return Response(
+            {'error': 'Failed to fetch notifications', 'detail': str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def mark_notification_read(request, notification_id):
-    notification = Notification.objects.get(id=notification_id, recipient=request.user)
-    notification.is_read = True
-    notification.save()
-    return Response({'status': 'success'})
+    try:
+        notification = Notification.objects.get(id=notification_id, recipient=request.user)
+        notification.is_read = True
+        notification.save()
+        return Response({'status': 'success'})
+    except Notification.DoesNotExist:
+        return Response(
+            {'error': 'Notification not found'},
+            status=status.HTTP_404_NOT_FOUND
+        )
+    except Exception as e:
+        print(f"Error in mark_notification_read: {str(e)}")
+        return Response(
+            {'error': 'Failed to mark notification as read', 'detail': str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 
 
 @api_view(['GET'])
