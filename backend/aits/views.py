@@ -381,10 +381,18 @@ def mark_notification_read(request, notification_id):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_unread_count(request):
-    count = Notification.objects.filter(recipient=request.user, is_read=False).count()
-    return Response({'count': count})
-
-
+    try:
+        count = Notification.objects.filter(
+            recipient=request.user,
+            is_read=False
+        ).count()
+        return Response({'count': count})
+    except Exception as e:
+        print(f"Error in get_unread_count: {str(e)}")
+        return Response(
+            {'error': 'Failed to fetch unread count', 'detail': str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
 def delete_notification(request, notification_id):
