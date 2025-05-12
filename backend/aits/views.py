@@ -64,44 +64,59 @@ class LoginView(APIView):
             status=status.HTTP_401_UNAUTHORIZED
         )
 
-
-        
-        
-
-
 class RegisterView(APIView):
     permission_classes = [AllowAny]
-    role_serializers = {
-        'student': StudentRegistrationSerializer,
-        'lecturer': LecturerRegistrationSerializer,
-        'registrar': RegistrarRegistrationSerializer
-    }
-    
+   
     def post(self, request):
         role = request.data.get('role')
-        serializer_class = self.role_serializers.get(role)
-        
-        if not serializer_class:
+        print("\n=== Registration Request ===")
+        print("Received data:", request.data)
+        if role == 'student':
+            serializer = StudentRegistrationSerializer(data=request.data)
+        elif role == 'lecturer':
+            serializer = LecturerRegistrationSerializer(data=request.data)
+        elif role == 'registrar':
+            serializer = RegistrarRegistrationSerializer(data=request.data)
+        else:
+            print("Invalid role:", role)
             return Response(
-                {'error': 'Invalid role. Must be one of: student, lecturer, registrar'},
+                {'errors': {'role': f'Invalid role. Must be one of: student, lecturer, registrar'}},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        serializer = serializer_class(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        instance = serializer.save()
+        if serializer.is_valid():
+            try:
+                instance = serializer.save()
+                user = instance.user
+                print("User created successfully:", user.username)
+                return Response({
+                    'message': 'Registration successful',
+                    'user': {
+                        'userId': user.username,
+                        'fullName': f"{user.first_name} {user.last_name}".strip(),
+                        'email': user.email,
+                        'role': user.role
+                    }
+                }, status=status.HTTP_201_CREATED)
+            except serializers.ValidationError as e:
+                print("Validation error:", str(e))
+                return Response({'errors': {'general': str(e)}}, status=status.HTTP_400_BAD_REQUEST)
+            except Exception as e:
+                print("Registration error:", str(e))
+                print("Traceback:", traceback.format_exc())
+                return Response(
+                    {'errors': {'general': 'Registration failed. Please try again.'}},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
         
-        return Response({
-            'message': 'Registration successful',
-            'user': {
-                'userId': instance.user.username,
-                'fullName': f"{instance.user.first_name} {instance.user.last_name}".strip(),
-                'email': instance.user.email,
-                'role': instance.user.role
-            }
-        }, status=status.HTTP_201_CREATED)
-
-
+        # Format validation errors
+        errors = {}
+        for field, error_list in serializer.errors.items():
+            errors[field] = error_list[0] if isinstance(error_list, list) else error_list
+        
+        print("Validation errors:", errors)
+        return Response({'errors': errors}, status=status.HTTP_400_BAD_REQUEST)
+        
 class StudentIssueCreateView(APIView):
     permission_classes = [IsAuthenticated, IsStudent]
     parser_classes = (MultiPartParser, FormParser, JSONParser)
