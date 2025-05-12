@@ -11,7 +11,7 @@
   margin-bottom: 2rem;
   font-weight: 600;
 }
-
+// this is the CSS code for styling the add issue form in terms of spacing.
 .add-issue-form {
   display: flex;
   flex-direction: column;
@@ -104,7 +104,7 @@
   gap: 1rem;
   margin-top: 2rem;
 }
-
+// this is for styling the button used for submitting issues
 .submit-button {
   padding: 0.75rem 1.5rem;
   background-color: #2196f3;

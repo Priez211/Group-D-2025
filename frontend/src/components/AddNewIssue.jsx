@@ -1,4 +1,4 @@
-// this page  implements code to allow a student to add a new issue
+// this is for designing the page where issues are created
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { createIssue, getIssueById, updateIssue } from '../services/api';
@@ -40,13 +40,13 @@ const AddNewIssue = () => {
       console.log('Fetched issue data:', data);
       setFormData({
         title: data.title || '',
-        category: data.category || '',
+        // category: data.category || ''
         courseUnit: data.courseUnit || '',
         yearOfStudy: data.yearOfStudy || '',
         semester: data.semester || '',
         lecturer: data.assigned_to?.user?.username || '',
         description: data.description || '',
-        attachment: null // We don't load the existing attachment for security reasons
+        attachment: null //we don't load the existing attachment for security reasons
       });
     } catch (err) {
       console.error('Error loading issue:', err);
@@ -55,6 +55,23 @@ const AddNewIssue = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const fetchLecturerData = async () => {
+      try {
+        setLoadingLecturers(true);
+        const data = await getLecturers();
+        setLecturers(data);
+      } catch (err) {
+        console.error('Error loading lecturers:', err);
+        setError('Failed to load lecturers. Please try again.');
+      } finally {
+        setLoadingLecturers(false);
+      }
+    };
+
+    fetchLecturerData();
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value, files } = e.target;
@@ -77,6 +94,12 @@ const AddNewIssue = () => {
     setError('');
 
     try {
+      const issueData = {
+        ...formData,
+        assigned_to: formData.lecturer // Map lecturer field to assigned_to for the API
+      };
+      delete issueData.lecturer; // Remove the original lecturer field
+
       if (isEditing) {
         await updateIssue(issueId, formData);
         navigate(`/issue/${issueId}`);
@@ -132,7 +155,7 @@ const AddNewIssue = () => {
         <main className="dashboard-main">
           <div className="add-issue-container">
             <h1>{isEditing ? 'Edit Issue' : 'Submit an Academic Issue'}</h1>
-            
+// this is for designing the form where issues will be submitted.            
             <form onSubmit={handleSubmit} className="add-issue-form">
               <div className="form-group">
                 <label>Issue Category</label>

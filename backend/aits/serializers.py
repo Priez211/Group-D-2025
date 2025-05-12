@@ -1,4 +1,6 @@
+
 from  rest_framework import serializers
+from rest_framework import serializers
 from django.contrib.auth.hashers import make_password, check_password
 
 from .models import User, Department, Lecturer, Student, AcademicRegistrar, Issue, Notification
@@ -6,7 +8,7 @@ from .models import User, Department, Lecturer, Student, AcademicRegistrar, Issu
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'role', 'first_name', 'Last_name']
+        fields = ['id', 'username', 'email', 'role', 'first_name', 'last_name']
 
 class DepartmentSerializer(serializers.ModelSerializer):
     class Meta:
@@ -26,10 +28,28 @@ class LecturerSerializer(serializers.ModelSerializer):
         return f"{obj.user.first_name} {obj.user.last_name}".strip()
 
 
+
+    class Meta:
+        model = Lecturer
+        fields = ['id', 'lecturerId', 'fullName', 'email', 'department', 'user']
+
+    def get_fullName(self, obj):
+        return f"{obj.user.first_name} {obj.user.last_name}".strip()
+
 class StudentSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+    department = DepartmentSerializer(read_only=True)
+    studentNumber = serializers.CharField(source='user.username')
+    fullName = serializers.SerializerMethodField()
+    email = serializers.CharField(source='user.email')
+    yearOfStudy = serializers.CharField(source='year_of_study')
+
     class Meta:
         model = Student
-        fields = ['id', 'user']
+        fields = ['id', 'studentNumber', 'fullName', 'email', 'college', 'department', 'yearOfStudy', 'course', 'user']
+
+    def get_fullName(self, obj):
+        return f"{obj.user.first_name} {obj.user.last_name}".strip()
 
 class AcademicRegistrarSerializer(serializers.ModelSerializer):
     class Meta:
@@ -37,7 +57,7 @@ class AcademicRegistrarSerializer(serializers.ModelSerializer):
         fields = ['id', 'user']
 
 class IssueSerializer(serializers.ModelSerializer):
-    student = StudentSerializer(read_only=True)
+    student_name = serializers.SerializerMethodField()
     assigned_to = LecturerSerializer(read_only=True)
 
     class Meta:
@@ -52,11 +72,14 @@ class IssueSerializer(serializers.ModelSerializer):
             'courseUnit',
             'yearOfStudy',
             'semester',
-            'student', 
+            'student_name',  # Changed from full student object to just name
             'assigned_to', 
             'created_at', 
             'updated_at'
         ]
+
+    def get_student_name(self, obj):
+        return obj.student.user.get_full_name() if obj.student else None
 
 class NotificationSerializer(serializers.ModelSerializer):
     issue = IssueSerializer(read_only=True)
@@ -79,6 +102,24 @@ class LoginSerializer(serializers.Serializer):
     userId = serializers.CharField()
     password = serializers.CharField()
     role = serializers.CharField()
+
+    def validate(self, data):
+        userId = data.get('userId')
+        password = data.get('password')
+        role = data.get('role')
+
+        if not all([userId, password, role]):
+            raise serializers.ValidationError("All fields are required.")
+
+        try:
+            user = User.objects.get(username=userId, role=role)
+            if not check_password(password, user.password):
+                raise serializers.ValidationError("Invalid credentials")
+            data['user'] = user
+        except User.DoesNotExist:
+            raise serializers.ValidationError("Invalid credentials")
+
+        return data
 
 class StudentRegistrationSerializer(serializers.Serializer):
     username = serializers.CharField()
@@ -155,6 +196,7 @@ class LecturerRegistrationSerializer(serializers.Serializer):
     userId = serializers.CharField()
     password = serializers.CharField(write_only=True)
     confirmPassword = serializers.CharField(write_only=True)
+    lecturer_data = serializers.DictField()
     
     def validate(self, data):
         if data['password'] != data['confirmPassword']:
@@ -168,12 +210,20 @@ class LecturerRegistrationSerializer(serializers.Serializer):
         if User.objects.filter(username=data['userId']).exists():
             raise serializers.ValidationError({"userId": "This User ID is already taken"})
             
+        # Validate lecturer data
+        lecturer_data = data.get('lecturer_data', {})
+        if 'department' not in lecturer_data:
+            raise serializers.ValidationError({"lecturer_data": "department is required"})
+            
         return data
     
     def create(self, validated_data):
         try:
             # Remove confirmPassword from the data
             validated_data.pop('confirmPassword')
+            
+            # Extract lecturer data
+            lecturer_data = validated_data.pop('lecturer_data')
             
             # Split fullName into first_name and last_name
             full_name_parts = validated_data.pop('fullName').split(' ', 1)
@@ -190,8 +240,23 @@ class LecturerRegistrationSerializer(serializers.Serializer):
                 password=make_password(validated_data['password'])
             )
             
-            # Create Lecturer instance
-            lecturer = Lecturer.objects.create(user=user)
+            # Get or create Department instance
+            department_name = lecturer_data['department']
+            try:
+                department = Department.objects.get(name=department_name)
+            except Department.DoesNotExist:
+                # If department doesn't exist, create it with appropriate faculty
+                faculty = "Faculty of Computing"  # Default faculty for computing departments
+                department = Department.objects.create(
+                    name=department_name,
+                    faculty=faculty
+                )
+            
+            # Create Lecturer instance with department
+            lecturer = Lecturer.objects.create(
+                user=user,
+                department=department
+            )
             return lecturer
         except Exception as e:
             # If any error occurs during user creation, delete the user if it was created

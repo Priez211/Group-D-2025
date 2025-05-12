@@ -12,11 +12,30 @@ const CreateIssue = () => {
     priority: '',
     courseUnit: '',
     yearOfStudy: '',
-    semester: ''
+    semester: '',
+    assignedTo:''
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [lecturers, setLecturers] = useState([]);
+  const [loadingLecturers, setLoadingLecturers] = useState(true);
+
+  useEffect(() => {
+    const fetchLecturers = async () => {
+      try {
+        const data = await getLecturers();
+        setLecturers(data);
+      } catch (err) {
+        console.error('Failed to fetch lecturers:', err);
+        setError('Failed to load lecturers. Please try again later.');
+      } finally {
+        setLoadingLecturers(false);
+      }
+    };
+
+    fetchLecturers();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -33,26 +52,27 @@ const CreateIssue = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await createIssue(formData);
-      setSuccess('Issue submitted successfully! You will be notified of any updates.');
-      
-      // Clear form
-      setFormData({
-        title: '',
-        category: '',
-        description: '',
-        priority: '',
-        courseUnit: '',
-        yearOfStudy: '',
-        semester: ''
-      });
+      console.log('Submitting issue with data:', formData);
 
-      // Redirect after 2 seconds
+      // Prepare the data with the correct assigned_to field
+      const issueData = {
+        ...formData,
+        assigned_to_id: formData.assignedTo // Map assignedTo to assigned_to_id for the API
+      };
+      delete issueData.assignedTo; // Remove the original assignedTo field
+      
+      console.log('Prepared issue data:', issueData);
+
+      const response = await createIssue(issueData);
+      console.log('Issue creation response:', response);
+
+      setSuccess('Issue created successfully!');
       setTimeout(() => {
         navigate('/student/dashboard');
       }, 2000);
     } catch (err) {
-      setError(err.message || 'Failed to submit issue. Please try again.');
+      console.error('Error creating issue:', err);
+      setError(err.message || 'Failed to create issue. Please try again.');
     } finally {
       setIsSubmitting(false);
     }

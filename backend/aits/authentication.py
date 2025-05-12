@@ -11,30 +11,41 @@ class JWTAuthentication(authentication.BaseAuthentication):
             return None
 
         try:
-            # Get the token from the Authorization header
-            token = auth_header.split(' ')[1]
+            # Check for Bearer token
+            auth_parts = auth_header.split()
+            if len(auth_parts) != 2 or auth_parts[0].lower() != 'bearer':
+                raise AuthenticationFailed('Invalid authorization header format. Use: Bearer <token>')
+
+            token = auth_parts[1]
             
             # Decode the token
-            payload = jwt.decode(
-                token, 
-                settings.JWT_SECRET_KEY,
-                algorithms=[settings.JWT_ALGORITHM]
-            )
+            try:
+                payload = jwt.decode(
+                    token, 
+                    settings.JWT_SECRET_KEY,
+                    algorithms=[settings.JWT_ALGORITHM]
+                )
+            except jwt.ExpiredSignatureError:
+                raise AuthenticationFailed('Token has expired')
+            except jwt.InvalidTokenError:
+                raise AuthenticationFailed('Invalid token')
             
             # Get user from payload
-            user = User.objects.get(username=payload['user_id'])
+            try:
+                user = User.objects.get(username=payload['user_id'])
+            except User.DoesNotExist:
+                raise AuthenticationFailed('No user found for token')
             
             # Ensure user role matches the token
-            if user.role != payload['role']:
-                raise AuthenticationFailed('Invalid authentication token')
+            if user.role != payload.get('role'):
+                raise AuthenticationFailed('Invalid user role')
                 
             return (user, None)
             
-        except jwt.ExpiredSignatureError:
-            raise AuthenticationFailed('Token has expired')
-        except jwt.InvalidTokenError:
-            raise AuthenticationFailed('Invalid token')
-        except User.DoesNotExist:
-            raise AuthenticationFailed('No user found for token')
         except (IndexError, KeyError):
-            raise AuthenticationFailed('Invalid token format') 
+            raise AuthenticationFailed('Invalid token format')
+        except Exception as e:
+            raise AuthenticationFailed(str(e))
+
+    def authenticate_header(self, request):
+        return 'Bearer'

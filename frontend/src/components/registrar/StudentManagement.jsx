@@ -86,6 +86,16 @@ const StudentManagement = () => {
           department: 'Department Of Information Technology',
           yearOfStudy: 'Third Year',
           course: 'Information Technology'
+        },
+        {
+          id: 4,
+          name: 'Anna Delvey',
+          studentNumber: '2400721004',
+          email: 'anna.delvey@student.example.com',
+          college: 'College of Computing',
+          department: 'Department Of Information Technology',
+          yearOfStudy: 'Second Year',
+          course: 'Computer Science'
         }
       ];
       
