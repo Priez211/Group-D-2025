@@ -1,4 +1,3 @@
-// this is the page for designing a lecture user interface
 import React from 'react'
 import { useNavigate } from 'react-router-dom';
 import { getLecturerIssues } from '../../services/api';
@@ -28,7 +27,7 @@ const lecturerDashboard = () => {
   useEffect(() => {
     fetchIssues();
   }, []);
-// this is for handling the fetching of issues and errors assoiated with that
+
   const fetchIssues = async () => {
     setLoading(true);
     try {
@@ -76,7 +75,7 @@ const lecturerDashboard = () => {
         </div>
       </header>
 
-      <div className="dashboard-layout">
+ <div className="dashboard-layout">
         {/* Sidebar Navigation */}
         <nav className="dashboard-nav">
           <ul>
@@ -99,38 +98,6 @@ const lecturerDashboard = () => {
             </li>
           </ul>
         </nav>
-
-       {/* Main Content */}
-       <main className="dashboard-main">
-          <h1 className="welcome-message">Welcome back, {user?.first_name || 'Lecturer'}!</h1>
-          
-          <section className="issues-section">
-            <div className="section-header">
-              <h2>Assigned Issues</h2>
-              <div className="filter-tabs">
-                <button 
-                  className={filter === 'all' ? 'active' : ''} 
-                  onClick={() => setFilter('all')}
-                >All</button>
-                <button 
-                  className={filter === 'open' ? 'active' : ''} 
-                  onClick={() => setFilter('open')}
-                >Open</button>
-                <button 
-                  className={filter === 'in_progress' ? 'active' : ''} 
-                  onClick={() => setFilter('in_progress')}
-                >In Progress</button>
-                <button 
-                  className={filter === 'resolved' ? 'active' : ''} 
-                  onClick={() => setFilter('resolved')}
-                >Resolved</button>
-                <button 
-                  className={filter === 'closed' ? 'active' : ''} 
-                  onClick={() => setFilter('closed')}
-                >Closed</button>
-              </div>
-            </div>
- 
     <div>lecturerDashboard</div>
   )
 }
