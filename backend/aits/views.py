@@ -208,11 +208,6 @@ class StudentIssueCreateView(APIView):
                 {'error': 'Failed to create issue', 'detail': str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-
-
-
-
-
 class LecturerIssueListView(generics.ListAPIView):
     serializer_class = IssueSerializer
     permission_classes = [IsLecturer]
@@ -225,7 +220,17 @@ class LecturerIssueListView(generics.ListAPIView):
 class IssueUpdateView(generics.UpdateAPIView):
     queryset = Issue.objects.all()
     serializer_class = IssueSerializer
-    permission_classes = [IsAuthenticated, IsLecturer | IsAcademicRegistrar]
+    permission_classes = [IsAuthenticated]
+    
+    def get_permissions(self):
+        """
+        Custom permission check that properly implements OR logic
+        between IsLecturer and IsAcademicRegistrar
+        """
+        if self.request.user.is_authenticated:
+            if self.request.user.role in ['lecturer', 'registrar']:
+                return []
+        return [IsAuthenticated()]
 
     def perform_update(self, serializer):
         issue = serializer.save()
