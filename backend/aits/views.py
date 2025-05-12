@@ -425,12 +425,21 @@ def clear_all_notifications(request):
 
 
 def create_notification(recipient, notification_type, issue, message):
-    return Notification.objects.create(
-        recipient=recipient,
-        notification_type=notification_type,
-        issue=issue,
-        message=message
-    )
+    """
+    Helper function to create notifications
+    """
+    try:
+        notification = Notification.objects.create(
+            recipient=recipient,
+            notification_type=notification_type,
+            issue=issue,
+            message=message
+        )
+        print(f"Created notification: {notification.id} for user: {recipient.username}")
+        return notification
+    except Exception as e:
+        print(f"Error creating notification: {str(e)}")
+        return None
 
 
 class StudentListView(generics.ListAPIView):
