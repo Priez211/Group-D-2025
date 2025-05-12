@@ -326,6 +326,7 @@ class IssueDeleteView(generics.DestroyAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
+        # Filter issues based on user role and permissions
         if self.request.user.role == 'registrar':
             return Issue.objects.all()
         elif self.request.user.role == 'student':
