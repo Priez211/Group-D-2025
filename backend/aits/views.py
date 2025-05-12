@@ -594,4 +594,4 @@ class LecturerDeleteView(generics.DestroyAPIView):
     def perform_destroy(self, instance):
         user = instance.user
         instance.delete()
-        user.delete()
+        user.delete()  # Delete the associated user account as well
