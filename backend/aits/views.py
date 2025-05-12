@@ -396,10 +396,20 @@ def get_unread_count(request):
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
 def delete_notification(request, notification_id):
-    notification = Notification.objects.get(id=notification_id, recipient=request.user)
-    notification.delete()
-    return Response({'status': 'success'})
-
+    try:
+        notification = Notification.objects.get(id=notification_id, recipient=request.user)
+        notification.delete()
+        return Response({'status': 'success'})
+    except Notification.DoesNotExist:
+        return Response(
+            {'error': 'Notification not found'},
+            status=status.HTTP_404_NOT_FOUND
+        )
+    except Exception as e:
+        return Response(
+            {'error': 'Failed to delete notification', 'detail': str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
