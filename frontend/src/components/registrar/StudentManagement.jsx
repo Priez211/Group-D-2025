@@ -52,7 +52,7 @@ const StudentManagement = () => {
   }, [navigate]);
 
   const fetchStudents = async () => {
-    // This would be replaced with an actual API call
+    
     setLoading(true);
     try {
       // Simulated data - replace with actual API call
