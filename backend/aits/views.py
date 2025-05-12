@@ -4,10 +4,12 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
+from django.contrib.auth.hashers import check_password
 from django.conf import settings
 import jwt
 import datetime
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
+from  rest_framework import serializers
 
 from .models import Issue, Student, Lecturer, User, Notification
 from .serializers import (
