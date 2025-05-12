@@ -351,7 +351,7 @@ def get_notifications(request):
         print(f"Found {notifications.count()} notifications")
         serializer = NotificationSerializer(notifications, many=True)
         return Response(serializer.data)
-    except Exception as e:
+   except Exception as e:
         print(f"Error in get_notifications: {str(e)}")
         return Response(
             {'error': 'Failed to fetch notifications', 'detail': str(e)},
@@ -414,8 +414,14 @@ def delete_notification(request, notification_id):
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
 def clear_all_notifications(request):
-    Notification.objects.filter(recipient=request.user).delete()
-    return Response({'status': 'success'})
+    try:
+        Notification.objects.filter(recipient=request.user).delete()
+        return Response({'status': 'success'})
+    except Exception as e:
+        return Response(
+            {'error': 'Failed to clear notifications', 'detail': str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 
 
 def create_notification(recipient, notification_type, issue, message):
