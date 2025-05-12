@@ -122,12 +122,13 @@ class LoginSerializer(serializers.Serializer):
         return data
 
 class StudentRegistrationSerializer(serializers.Serializer):
-    user = UserSerializer(read_only=True)
-    department = DepartmentSerializer(read_only=True)
-    studentNumber = serializers.CharField(source='user.username')
-    fullName = serializers.SerializerMethodField()
-    email = serializers.CharField(source='user.email')
-    yearOfStudy = serializers.CharField(source='year_of_study')
+    username = serializers.CharField()
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True)
+    role = serializers.CharField()
+    first_name = serializers.CharField()
+    last_name = serializers.CharField()
+    student_data = serializers.DictField()
 
 
     
