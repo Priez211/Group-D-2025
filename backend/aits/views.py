@@ -458,6 +458,41 @@ def create_issue(request):
         return Response(Issue.data, status=status.HTTP_201_CREATED)
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def update_issue(request, issue_id):
+    try:
+        issue = Issue.objects.get(pk=issue_id)
+        old_status = issue.status
+        old_assigned_to = issue.assigned_to
+
+        # ... existing issue update code ...
+
+        # Create notifications for status changes
+        if old_status != issue.status:
+            if issue.status == 'resolved':
+                create_notification(
+                    recipient=issue.student.user,
+                    notification_type='issue_resolved',
+                    issue=issue,
+                    message=f'Your issue "{issue.title}" has been resolved'
+                )
+
+        # Create notifications for assignment changes
+        if old_assigned_to != issue.assigned_to and issue.assigned_to:
+            create_notification(
+                recipient=issue.assigned_to.user,
+                notification_type='issue_assigned',
+                issue=issue,
+                message=f'You have been assigned to issue: {issue.title}'
+            )
+
+        return Response(serializers.data)
+    except Issue.DoesNotExist:
+        return Response({'error': 'Issue not found'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 class StudentListView(generics.ListAPIView):
