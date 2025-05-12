@@ -566,7 +566,7 @@ class LecturerListView(generics.ListAPIView):
 
     def get_queryset(self):
         queryset = Lecturer.objects.all().select_related('user', 'department')
-        department = self.request.query_params.get('department')
+        department = self.request.query_params.get('department',None)
         if department:
             queryset = queryset.filter(department__name=department)
         return queryset
@@ -579,13 +579,12 @@ class LecturerUpdateView(generics.UpdateAPIView):
 
     def perform_update(self, serializer):
         lecturer = serializer.save()
-        create_notification(
+        # Create notification for the lecturer
+        Notification.objects.create(
             recipient=lecturer.user,
             notification_type='profile_updated',
-            issue=None,
             message=f'Your profile has been updated by {self.request.user.get_full_name()}'
         )
-
 
 class LecturerDeleteView(generics.DestroyAPIView):
     serializer_class = LecturerSerializer
