@@ -500,25 +500,64 @@ class StudentListView(generics.ListAPIView):
     permission_classes = [IsAuthenticated, IsAcademicRegistrar | IsLecturer]
     
     def get_queryset(self):
-        queryset = Student.objects.all().select_related('user', 'department')
-        
-        if self.request.user.role == 'lecturer':
-            lecturer = self.request.user.lecturer_profile
-            queryset = queryset.filter(college=lecturer.department.faculty)
+        try:
+            print(f"\n=== StudentListView.get_queryset ===")
+            print(f"User: {self.request.user}")
+            print(f"Role: {self.request.user.role}")
             
-        college = self.request.query_params.get('college')
-        if college and college != 'All Colleges':
-            queryset = queryset.filter(college=college)
+            # Start with all students
+            queryset = Student.objects.all().select_related('user', 'department')
             
-        department = self.request.query_params.get('department')
-        if department and department != 'All Departments':
-            queryset = queryset.filter(department__name=department)
+            # If user is a lecturer, filter by their college
+            if self.request.user.role == 'lecturer':
+                lecturer = self.request.user.lecturer_profile
+                lecturer_college = lecturer.department.faculty
+                queryset = queryset.filter(college=lecturer_college)
+                print(f"Filtered by lecturer's college: {lecturer_college}")
             
-        year = self.request.query_params.get('year')
-        if year and year != 'All Years':
-            queryset = queryset.filter(year_of_study=year)
+            # Apply additional filters from query parameters
+            college = self.request.query_params.get('college', None)
+            if college and college != 'All Colleges':
+                queryset = queryset.filter(college=college)
+                print(f"After college filter ({college}): {queryset.count()}")
+                
+            # Filter by department if provided
+            department = self.request.query_params.get('department', None)
+            if department and department != 'All Departments':
+                queryset = queryset.filter(department__name=department)
+                print(f"After department filter ({department}): {queryset.count()}")
+                
+            # Filter by year if provided
+            year = self.request.query_params.get('year', None)
+            if year and year != 'All Years':
+                queryset = queryset.filter(year_of_study=year)
+                print(f"After year filter ({year}): {queryset.count()}")
             
-        return queryset
+            return queryset
+            
+        except Exception as e:
+            print(f"Error in StudentListView.get_queryset: {str(e)}")
+            print(f"Request user: {self.request.user}, Role: {self.request.user.role}")
+            raise
+
+    def list(self, request, *args, **kwargs):
+        try:
+            print(f"\n=== StudentListView.list ===")
+            print(f"User: {request.user}")
+            print(f"Query params: {request.query_params}")
+            
+            queryset = self.get_queryset()
+            serializer = self.get_serializer(queryset, many=True)
+            return Response(serializer.data)
+            
+        except Exception as e:
+            print(f"Error in StudentListView.list: {str(e)}")
+            print(f"Request user: {request.user}")
+            print(f"Query params: {request.query_params}")
+            return Response(
+                {'error': str(e)}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
 class LecturerListView(generics.ListAPIView):
