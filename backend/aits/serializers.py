@@ -1,5 +1,5 @@
 from  rest_framework import serializers
-from django.contrib.auth.hashers import make_password
+from django.contrib.auth.hashers import make_password, check_password
 
 from .models import User, Department, Lecturer, Student, AcademicRegistrar, Issue, Notification
 
@@ -14,9 +14,17 @@ class DepartmentSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'faculty']
 
 class LecturerSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+    department = DepartmentSerializer(read_only=True)
+    lecturerId = serializers.CharField(source='user.username')
+    fullName = serializers.SerializerMethodField()
+    email = serializers.CharField(source='user.email')
     class Meta:
         model = Lecturer
-        fields = ['id', 'user', 'department']
+        fields = ['id','lecturerId','fullName','email','user', 'department']
+    def get_fullName(self, obj):
+        return f"{obj.user.first_name} {obj.user.last_name}".strip()
+
 
 class StudentSerializer(serializers.ModelSerializer):
     class Meta:
