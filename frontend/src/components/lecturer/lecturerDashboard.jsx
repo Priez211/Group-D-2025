@@ -75,7 +75,6 @@ const lecturerDashboard = () => {
         </div>
       </header>
 
-
     <div>lecturerDashboard</div>
   )
 }
