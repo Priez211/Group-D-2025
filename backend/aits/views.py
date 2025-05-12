@@ -279,7 +279,7 @@ class LecturerIssueDetailView(generics.RetrieveUpdateAPIView):
 
     def perform_update(self, serializer):
         issue = serializer.save()
-        
+         # Create notification for the student when status changes
         if 'status' in self.request.data:
             create_notification(
                 recipient=issue.student.user,
