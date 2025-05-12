@@ -440,6 +440,24 @@ def create_notification(recipient, notification_type, issue, message):
     except Exception as e:
         print(f"Error creating notification: {str(e)}")
         return None
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_issue(request):
+    try:
+        # ... existing issue creation code ...
+
+        # Create notification for assigned lecturer
+        if Issue.assigned_to:
+            create_notification(
+                recipient=Issue.assigned_to.user,
+                notification_type='issue_assigned',
+                issue=Issue,
+                message=f'You have been assigned a new issue: {Issue.title}'
+            )
+
+        return Response(Issue.data, status=status.HTTP_201_CREATED)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class StudentListView(generics.ListAPIView):
