@@ -302,7 +302,7 @@ class AcademicRegistrarIssueDetailView(generics.RetrieveUpdateAPIView):
 
     def perform_update(self, serializer):
         issue = serializer.save()
-        
+        # Create notification for status changes
         if 'status' in self.request.data:
             create_notification(
                 recipient=issue.student.user,
@@ -310,7 +310,7 @@ class AcademicRegistrarIssueDetailView(generics.RetrieveUpdateAPIView):
                 issue=issue,
                 message=f'Your issue "{issue.title}" status has been updated to {issue.status}'
             )
-        
+        # Create notification for assignment changes
         if 'assigned_to' in self.request.data and issue.assigned_to:
             create_notification(
                 recipient=issue.assigned_to.user,
