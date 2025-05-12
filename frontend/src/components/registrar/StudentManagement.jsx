@@ -47,7 +47,7 @@ const StudentManagement = () => {
     }
     setUser(userData);
     
-    
+    // Fetch student data
     fetchStudents();
   }, [navigate]);
 
