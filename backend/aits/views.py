@@ -30,31 +30,43 @@ class LoginView(APIView):
 
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        
-        user = serializer.validated_data['user']
-        now = datetime.datetime.utcnow()
-        exp = now + datetime.timedelta(hours=24)
-        
-        token = jwt.encode(
-            {
-                'user_id': user.username,
-                'role': user.role,
-                'exp': int(exp.timestamp())
-            },
-            settings.SECRET_KEY,
-            algorithm='HS256'
+        if serializer.is_valid():
+            user = serializer.validated_data['user']
+            role = serializer.validated_data['role']
+            
+            # Get current timestamp and set expiration
+            now = datetime.datetime.utcnow()
+            exp = now + datetime.timedelta(hours=24)
+            
+            # Generate JWT token with expiration
+            token = jwt.encode(
+                {
+                    'user_id': user.username,
+                    'role': role,
+                    'exp': int(exp.timestamp())
+                },
+                settings.SECRET_KEY,
+                algorithm='HS256'
+            )
+            
+            return Response({
+                'token': token,
+                'user': {
+                    'userId': user.username,
+                    'fullName': f"{user.first_name} {user.last_name}".strip(),
+                    'email': user.email,
+                    'role': role
+                }
+            }, status=status.HTTP_200_OK)
+            
+        return Response(
+            {'error': serializer.errors.get('non_field_errors', ['Invalid credentials'])[0]},
+            status=status.HTTP_401_UNAUTHORIZED
         )
+
+
         
-        return Response({
-            'token': token,
-            'user': {
-                'userId': user.username,
-                'fullName': f"{user.first_name} {user.last_name}".strip(),
-                'email': user.email,
-                'role': user.role
-            }
-        })
+        
 
 
 class RegisterView(APIView):
