@@ -27,15 +27,6 @@ class LecturerSerializer(serializers.ModelSerializer):
     def get_fullName(self, obj):
         return f"{obj.user.first_name} {obj.user.last_name}".strip()
 
-
-
-    class Meta:
-        model = Lecturer
-        fields = ['id', 'lecturerId', 'fullName', 'email', 'department', 'user']
-
-    def get_fullName(self, obj):
-        return f"{obj.user.first_name} {obj.user.last_name}".strip()
-
 class StudentSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
     department = DepartmentSerializer(read_only=True)
