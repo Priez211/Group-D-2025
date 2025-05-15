@@ -1,15 +1,14 @@
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from .models import Notification
+from aits.models import Notification
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def get_unread_count(request):
-    if not request.user.is_authenticated:
-        return Response({'count': 0})
-    
     count = Notification.objects.filter(
         recipient=request.user,
-        read=False
+        is_read=False
     ).count()
     
-    return Response({'count': count}) 
+    return Response({'count': count})
