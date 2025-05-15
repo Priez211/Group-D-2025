@@ -5,6 +5,22 @@ DEBUG = False
 
 ALLOWED_HOSTS = ['malual211.pythonanywhere.com']
 
+# Application definition
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'rest_framework',
+    'rest_framework.authtoken',
+    'corsheaders',
+    'aits.apps.AitsConfig',
+    'users.apps.UsersConfig',
+    'notifications.apps.NotificationsConfig',
+]
+
 # Database settings (using SQLite for free tier)
 DATABASES = {
     'default': {
