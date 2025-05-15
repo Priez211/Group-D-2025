@@ -2,10 +2,10 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import make_password
 from aits.models import User, Student, Lecturer, AcademicRegistrar, Department
 import traceback
+import json
 
 # Map departments to their faculties
 DEPARTMENT_FACULTY_MAP = {
@@ -18,15 +18,36 @@ DEPARTMENT_FACULTY_MAP = {
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def register_user(request):
-    data = request.data
     print("\n=== Registration Request ===")
-    print("Received data:", data)
+    print("Request Headers:", request.headers)
+    print("Request Method:", request.method)
+    print("Content Type:", request.content_type)
     
+    try:
+        data = request.data
+        print("Raw Request Data:", data)
+        if isinstance(data, str):
+            try:
+                data = json.loads(data)
+            except json.JSONDecodeError as e:
+                print("JSON Decode Error:", str(e))
+                return Response(
+                    {'errors': {'json': 'Invalid JSON format'}},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+    except Exception as e:
+        print("Error accessing request.data:", str(e))
+        return Response(
+            {'errors': {'request': 'Could not parse request data'}},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
     # Check for required fields
     required_fields = ['username', 'email', 'password', 'role', 'first_name', 'last_name']
     missing_fields = [field for field in required_fields if field not in data]
     if missing_fields:
         print("Missing required fields:", missing_fields)
+        print("Received fields:", list(data.keys()))
         return Response(
             {'errors': {field: 'This field is required.' for field in missing_fields}},
             status=status.HTTP_400_BAD_REQUEST
