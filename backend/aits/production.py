@@ -5,6 +5,9 @@ DEBUG = False
 
 ALLOWED_HOSTS = ['malual211.pythonanywhere.com']
 
+# Root URL Configuration
+ROOT_URLCONF = 'aits.urls'
+
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -56,14 +59,16 @@ CORS_ALLOW_HEADERS = [
     'x-requested-with',
 ]
 
-# Security settings
-SECURE_SSL_REDIRECT = True
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
+# Security settings - temporarily disabled for initial setup
+SECURE_SSL_REDIRECT = False  # Changed from True
+SESSION_COOKIE_SECURE = False  # Changed from True
+CSRF_COOKIE_SECURE = False  # Changed from True
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 CSRF_TRUSTED_ORIGINS = [
     'https://group-d-2025-qvr1.vercel.app',
+    'http://malual211.pythonanywhere.com',  # Added HTTP version
+    'https://malual211.pythonanywhere.com',  # Added HTTPS version
 ]
 
 # Static files
