@@ -9,7 +9,7 @@ def get_unread_count(request):
     
     count = Notification.objects.filter(
         recipient=request.user,
-        read=False
+        is_read=False
     ).count()
     
     return Response({'count': count}) 
