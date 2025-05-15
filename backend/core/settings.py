@@ -131,6 +131,8 @@ CORS_ALLOW_CREDENTIALS = True
 CORS_ORIGIN_WHITELIST = [
     'http://localhost:5173',
     'http://127.0.0.1:5173',
+    'https://group-d-2025.vercel.app',
+    'https://malual211.pythonanywhere.com',
 ]
 
 CORS_ALLOW_METHODS = [
@@ -158,10 +160,19 @@ CORS_EXPOSE_HEADERS = [
     'content-type',
     'authorization',
 ]
+ALLOWED_HOSTS = [
+    'https://malual211.pythonanywhere.com',
+]
+
+CORS_ALLOWED_ORIGINS = [
+        'https://group-d-2025-qvi1.vercel.app/',
+    ]
 
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
+    'https://malual211.pythonanywhere.com',
+    'https://group-d-2025-qvi1.vercel.app/',
 ]
 
 CORS_PREFLIGHT_MAX_AGE = 86400
