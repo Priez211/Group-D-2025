@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
 
-class User(AbstractUser):
+class User(AbstractUser):#User model for the application
     ROLES = (
         ('student', 'Student'),
         ('lecturer', 'Lecturer'),
