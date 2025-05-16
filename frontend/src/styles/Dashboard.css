@@ -340,7 +340,7 @@
   color: #93979f;
   font-size: 0.875rem;
 }
-@supports (-webkit-line-clamp: 2){
+
 .issue-description {
   color: #6b7280;
   margin: 0.5rem 0;
@@ -350,10 +350,8 @@
   text-overflow: ellipsis;
   display: -webkit-box;
   -webkit-line-clamp: 2;
-  line-clamp:2;
   -webkit-box-orient: vertical;
   max-height: 3em;
-}
 }
 
 .issue-status {

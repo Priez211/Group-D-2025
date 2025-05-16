@@ -1,6 +1,4 @@
-
-from  rest_framework import serializers
-
+from rest_framework import serializers
 from django.contrib.auth.hashers import make_password, check_password
 
 from .models import User, Department, Lecturer, Student, AcademicRegistrar, Issue, Notification
@@ -21,9 +19,11 @@ class LecturerSerializer(serializers.ModelSerializer):
     lecturerId = serializers.CharField(source='user.username')
     fullName = serializers.SerializerMethodField()
     email = serializers.CharField(source='user.email')
+
     class Meta:
         model = Lecturer
-        fields = ['id','lecturerId','fullName','email','user', 'department']
+        fields = ['id', 'lecturerId', 'fullName', 'email', 'department', 'user']
+
     def get_fullName(self, obj):
         return f"{obj.user.first_name} {obj.user.last_name}".strip()
 
@@ -120,8 +120,6 @@ class StudentRegistrationSerializer(serializers.Serializer):
     first_name = serializers.CharField()
     last_name = serializers.CharField()
     student_data = serializers.DictField()
-
-
     
     def validate(self, data):
         # Check if email already exists

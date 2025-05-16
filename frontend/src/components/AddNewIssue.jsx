@@ -1,7 +1,6 @@
-// this is for designing the page where issues are created
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { createIssue, getIssueById, updateIssue } from '../services/api';
+import { createIssue, getIssueById, updateIssue, getLecturers } from '../services/api';
 import UserProfile from './UserProfile';
 import NotificationBadge from './NotificationBadge';
 import '../styles/Dashboard.css';
@@ -24,37 +23,40 @@ const AddNewIssue = () => {
   const [error, setError] = useState('');
   const [user] = useState(JSON.parse(localStorage.getItem('user')));
   const [isEditing, setIsEditing] = useState(false);
+  const [lecturers, setLecturers] = useState([]);
+  const [loadingLecturers, setLoadingLecturers] = useState(true);
 
   useEffect(() => {
     // If we have an issueId, fetch the issue data
     if (issueId) {
       setIsEditing(true);
+      
+      const fetchIssueData = async () => {
+        try {
+          setLoading(true);
+          const data = await getIssueById(issueId);
+          console.log('Fetched issue data:', data);
+          setFormData({
+            title: data.title || '',
+            category: data.category || '',
+            courseUnit: data.courseUnit || '',
+            yearOfStudy: data.yearOfStudy || '',
+            semester: data.semester || '',
+            lecturer: data.assigned_to?.id || '',
+            description: data.description || '',
+            attachment: null // We don't load the existing attachment for security reasons
+          });
+        } catch (err) {
+          console.error('Error loading issue:', err);
+          setError('Failed to load issue data. Please try again.');
+        } finally {
+          setLoading(false);
+        }
+      };
+
       fetchIssueData();
     }
   }, [issueId]);
-
-  const fetchIssueData = async () => {
-    try {
-      setLoading(true);
-      const data = await getIssueById(issueId);
-      console.log('Fetched issue data:', data);
-      setFormData({
-        title: data.title || '',
-        // category: data.category || ''
-        courseUnit: data.courseUnit || '',
-        yearOfStudy: data.yearOfStudy || '',
-        semester: data.semester || '',
-        lecturer: data.assigned_to?.user?.username || '',
-        description: data.description || '',
-        attachment: null //we don't load the existing attachment for security reasons
-      });
-    } catch (err) {
-      console.error('Error loading issue:', err);
-      setError('Failed to load issue data. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   useEffect(() => {
     const fetchLecturerData = async () => {
@@ -101,13 +103,15 @@ const AddNewIssue = () => {
       delete issueData.lecturer; // Remove the original lecturer field
 
       if (isEditing) {
-        await updateIssue(issueId, formData);
+        await updateIssue(issueId, issueData);
         navigate(`/issue/${issueId}`);
       } else {
-        await createIssue(formData);
+        const response = await createIssue(issueData);
+        console.log('Issue created successfully:', response);
         navigate('/dashboard');
       }
     } catch (err) {
+      console.error('Error submitting issue:', err);
       setError(err.message || `Failed to ${isEditing ? 'update' : 'create'} issue. Please try again.`);
     } finally {
       setLoading(false);
@@ -155,7 +159,7 @@ const AddNewIssue = () => {
         <main className="dashboard-main">
           <div className="add-issue-container">
             <h1>{isEditing ? 'Edit Issue' : 'Submit an Academic Issue'}</h1>
-// this is for designing the form where issues will be submitted.            
+            
             <form onSubmit={handleSubmit} className="add-issue-form">
               <div className="form-group">
                 <label>Issue Category</label>
@@ -241,12 +245,14 @@ const AddNewIssue = () => {
                   value={formData.lecturer}
                   onChange={handleInputChange}
                   required
+                  disabled={loadingLecturers}
                 >
                   <option value="">Select Lecturer</option>
-                  <option value="dr_smith">Dr. Smith</option>
-                  <option value="prof_jones">Prof. Jones</option>
-                  <option value="dr_williams">Dr. Williams</option>
-                  <option value="prof_brown">Prof. Brown</option>
+                  {lecturers.map(lecturer => (
+                    <option key={lecturer.id} value={lecturer.id}>
+                      {lecturer.user.first_name} {lecturer.user.last_name} - {lecturer.department.name}
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -318,4 +324,4 @@ const AddNewIssue = () => {
   );
 };
 
-export default AddNewIssue; 
+export default AddNewIssue;

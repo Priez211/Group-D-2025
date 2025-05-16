@@ -1,4 +1,3 @@
-// for enabling the registrar to handle different departments
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import UserProfile from '../UserProfile';
@@ -132,7 +131,7 @@ const DepartmentManagement = () => {
     dept.headOfDepartment.toLowerCase().includes(filter.toLowerCase()) ||
     dept.faculty.toLowerCase().includes(filter.toLowerCase())
   );
-// this is a variable for formatting the date 
+
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
     const date = new Date(dateString);

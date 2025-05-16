@@ -1,30 +1,10 @@
 .notification-badge {
   position: absolute;
-  top: -8px;
-  right: -8px;
-  background-color: #ff4444;
-  color: white;
+  top: 4px;
+  right: 4px;
+  width: 8px;
+  height: 8px;
+  background-color: #666;
   border-radius: 50%;
-  padding: 4px 8px;
-  font-size: 12px;
-  font-weight: bold;
-  min-width: 20px;
-  height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  animation: pulse 2s infinite;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
-
-@keyframes pulse {
-  0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.1);
-  }
-  100% {
-    transform: scale(1);
-  }
-} 

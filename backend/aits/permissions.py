@@ -18,7 +18,7 @@ class IsLecturer(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         if isinstance(obj, Issue):
             lecturer = Lecturer.objects.get(user=request.user)
-            return obj.student.user.department == lecturer.department
+            return obj.assigned_to == lecturer
         return False
 
 class IsAcademicRegistrar(permissions.BasePermission):

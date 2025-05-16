@@ -8,12 +8,6 @@ import '../styles/AcademicRegistrar.css';
 const AcademicRegistrarDashboard = () => {
   const navigate = useNavigate();
   const [user] = useState(JSON.parse(localStorage.getItem('user')));
-  const [stats, setStats] = useState({
-    totalIssues: 0,
-    openIssues: 0,
-    resolvedIssues: 0,
-    inProgressIssues: 0
-  });
 
   useEffect(() => {
     // Verify user is academic registrar
@@ -71,31 +65,6 @@ const AcademicRegistrarDashboard = () => {
         <main className="dashboard-main">
           <div className="welcome-section">
             <h1>Welcome, {user?.fullName || 'Academic Registrar'}!</h1>
-            <p>System overview and statistics</p>
-          </div>
-
-          {/* Statistics Cards */}
-          <div className="stats-grid">
-            <div className="stat-card total">
-              <h3>Total Issues</h3>
-              <div className="stat-value">{stats.totalIssues}</div>
-              <div className="stat-icon">📊</div>
-            </div>
-            <div className="stat-card open">
-              <h3>Open Issues</h3>
-              <div className="stat-value">{stats.openIssues}</div>
-              <div className="stat-icon">📬</div>
-            </div>
-            <div className="stat-card in-progress">
-              <h3>In Progress</h3>
-              <div className="stat-value">{stats.inProgressIssues}</div>
-              <div className="stat-icon">⚙️</div>
-            </div>
-            <div className="stat-card resolved">
-              <h3>Resolved Issues</h3>
-              <div className="stat-value">{stats.resolvedIssues}</div>
-              <div className="stat-icon">✅</div>
-            </div>
           </div>
 
           {/* Quick Actions */}
@@ -131,4 +100,4 @@ const AcademicRegistrarDashboard = () => {
   );
 };
 
-export default AcademicRegistrarDashboard; 
+export default AcademicRegistrarDashboard;

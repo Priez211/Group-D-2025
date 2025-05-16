@@ -1,9 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import UserProfile from '../UserProfile';
 import NotificationBadge from '../NotificationBadge';
+import axios from 'axios';
 import '../../styles/Dashboard.css';
 import '../../styles/ManagementPage.css';
+
+const API_URL = 'http://localhost:8000/api';
+
+// Map departments to their colleges for filtering
+const DEPARTMENT_FACULTY_MAP = {
+  'Department of Computer Science': 'College of Computing',
+  'Department Of Software Engineering': 'College of Computing',
+  'Department of Library And Information System': 'College Of Humanity And Social Sciences',
+  'Department Of Information Technology': 'College of Computing'
+};
 
 const StudentManagement = () => {
   const navigate = useNavigate();
@@ -14,14 +25,6 @@ const StudentManagement = () => {
   const [selectedCollege, setSelectedCollege] = useState('');
   const [selectedDepartment, setSelectedDepartment] = useState('');
   const [selectedYear, setSelectedYear] = useState('');
-
-  const collegeOptions = [
-    'All Colleges',
-    'College of Computing',
-    'College Of Humanity And Social Sciences',
-    'College Of Engineering',
-    'College Of Education'
-  ];
 
   const departmentOptions = [
     'All Departments',
@@ -38,8 +41,54 @@ const StudentManagement = () => {
     'Third Year'
   ];
 
+  // Filter department options based on selected college
+  const filteredDepartmentOptions = ['All Departments', ...departmentOptions.filter(dept => 
+    dept === 'All Departments' || DEPARTMENT_FACULTY_MAP[dept] === selectedCollege
+  )];
+
+  const fetchStudents = useCallback(async () => {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      const params = {};
+      
+      if (selectedCollege && selectedCollege !== 'All Colleges') {
+        params.college = selectedCollege;
+      }
+      if (selectedDepartment && selectedDepartment !== 'All Departments') {
+        params.department = selectedDepartment;
+      }
+      if (selectedYear && selectedYear !== 'All Years') {
+        params.year = selectedYear;
+      }
+
+      const response = await axios.get(`${API_URL}/students`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        params
+      });
+
+      if (response.data) {
+        setStudents(Array.isArray(response.data) ? response.data : []);
+      } else {
+        setStudents([]);
+      }
+    } catch (error) {
+      console.error('Error fetching students:', error);
+      if (error.response && error.response.status === 401) {
+        // Handle unauthorized access
+        navigate('/login');
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedCollege, selectedDepartment, selectedYear, navigate]);
+
   useEffect(() => {
-    // Check authentication
+    // Check authentication and get user data
     const userData = JSON.parse(localStorage.getItem('user'));
     if (!userData || userData.role !== 'registrar') {
       navigate('/login');
@@ -47,67 +96,15 @@ const StudentManagement = () => {
     }
     setUser(userData);
     
-    // Fetch student data
-    fetchStudents();
+    // Set the college filter to the registrar's college and disable changing it
+    if (userData.college) {
+      setSelectedCollege(userData.college);
+    }
   }, [navigate]);
 
-  const fetchStudents = async () => {
-    // This would be replaced with an actual API call
-    setLoading(true);
-    try {
-      // Simulated data - replace with actual API call
-      const mockStudents = [
-        {
-          id: 1,
-          name: 'John Doe',
-          studentNumber: '2400721001',
-          email: 'john.doe@student.example.com',
-          college: 'College of Computing',
-          department: 'Department of Computer Science',
-          yearOfStudy: 'Second Year',
-          course: 'Computer Science'
-        },
-        {
-          id: 2,
-          name: 'Jane Smith',
-          studentNumber: '2400721002',
-          email: 'jane.smith@student.example.com',
-          college: 'College of Computing',
-          department: 'Department Of Software Engineering',
-          yearOfStudy: 'First Year',
-          course: 'Software Engineering'
-        },
-        {
-          id: 3,
-          name: 'Michael Johnson',
-          studentNumber: '2400721003',
-          email: 'michael.j@student.example.com',
-          college: 'College of Computing',
-          department: 'Department Of Information Technology',
-          yearOfStudy: 'Third Year',
-          course: 'Information Technology'
-        },
-        {
-          id: 4,
-          name: 'Anna Delvey',
-          studentNumber: '2400721004',
-          email: 'anna.delvey@student.example.com',
-          college: 'College of Computing',
-          department: 'Department Of Information Technology',
-          yearOfStudy: 'Second Year',
-          course: 'Computer Science'
-        }
-      ];
-      
-      setTimeout(() => {
-        setStudents(mockStudents);
-        setLoading(false);
-      }, 800); // Simulate network delay
-    } catch (error) {
-      console.error('Error fetching students:', error);
-      setLoading(false);
-    }
-  };
+  useEffect(() => {
+    fetchStudents();
+  }, [fetchStudents]);
 
   const handleFilterChange = (e) => {
     setFilter(e.target.value);
@@ -115,15 +112,15 @@ const StudentManagement = () => {
 
   const filteredStudents = students.filter(student => {
     const matchesSearch = 
-      student.name.toLowerCase().includes(filter.toLowerCase()) ||
-      student.studentNumber.toLowerCase().includes(filter.toLowerCase()) ||
-      student.email.toLowerCase().includes(filter.toLowerCase());
+      student.fullName?.toLowerCase().includes(filter.toLowerCase()) ||
+      student.studentNumber?.toLowerCase().includes(filter.toLowerCase()) ||
+      student.email?.toLowerCase().includes(filter.toLowerCase());
     
     const matchesCollege = selectedCollege === '' || selectedCollege === 'All Colleges' || 
       student.college === selectedCollege;
     
     const matchesDepartment = selectedDepartment === '' || selectedDepartment === 'All Departments' || 
-      student.department === selectedDepartment;
+      student.department?.name === selectedDepartment;
     
     const matchesYear = selectedYear === '' || selectedYear === 'All Years' || 
       student.yearOfStudy === selectedYear;
@@ -152,6 +149,10 @@ const StudentManagement = () => {
               <span>🏠</span>
               Home
             </li>
+            <li onClick={() => navigate('/registrar/issues')}>
+              <span>📝</span>
+              Issues
+            </li>
             <li className="active">
               <span>👨‍🎓</span>
               Students
@@ -164,11 +165,8 @@ const StudentManagement = () => {
               <span>🏛️</span>
               Departments
             </li>
-            <li onClick={() => navigate('/registrar/issues')}>
-              <span>📝</span>
-              Issues
-            </li>
-            <li onClick={() => navigate('/notifications')} className="notification-item">
+
+            <li onClick={() => navigate('/registrar/notifications')} className="notification-item">
               <span>🔔</span>
               Notifications
               <NotificationBadge />
@@ -184,9 +182,6 @@ const StudentManagement = () => {
         <main className="dashboard-main">
           <div className="page-header">
             <h1>Student Management</h1>
-            <button className="primary-button" onClick={() => navigate('/add-student')}>
-              Add New Student
-            </button>
           </div>
           
           <div className="filter-bar">
@@ -200,22 +195,13 @@ const StudentManagement = () => {
             </div>
             
             <div className="filter-dropdowns">
-              <select 
-                value={selectedCollege} 
-                onChange={(e) => setSelectedCollege(e.target.value)}
-                className="filter-select"
-              >
-                {collegeOptions.map((option, index) => (
-                  <option key={index} value={option}>{option}</option>
-                ))}
-              </select>
               
               <select 
                 value={selectedDepartment} 
                 onChange={(e) => setSelectedDepartment(e.target.value)}
                 className="filter-select"
               >
-                {departmentOptions.map((option, index) => (
+                {filteredDepartmentOptions.map((option, index) => (
                   <option key={index} value={option}>{option}</option>
                 ))}
               </select>
@@ -247,29 +233,23 @@ const StudentManagement = () => {
                       <th>Department</th>
                       <th>Year</th>
                       <th>Course</th>
-                      <th>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredStudents.length === 0 ? (
                       <tr>
-                        <td colSpan="8" className="no-data">No students match your filters</td>
+                        <td colSpan="7" className="no-data">No students match your filters</td>
                       </tr>
                     ) : (
                       filteredStudents.map(student => (
                         <tr key={student.id}>
                           <td>{student.studentNumber}</td>
-                          <td>{student.name}</td>
+                          <td>{student.fullName}</td>
                           <td>{student.email}</td>
                           <td>{student.college}</td>
-                          <td>{student.department}</td>
+                          <td>{student.department.name}</td>
                           <td>{student.yearOfStudy}</td>
                           <td>{student.course}</td>
-                          <td className="actions-cell">
-                            <button className="icon-button view-button" title="View Details">👁️</button>
-                            <button className="icon-button edit-button" title="Edit">✏️</button>
-                            <button className="icon-button delete-button" title="Delete">🗑️</button>
-                          </td>
                         </tr>
                       ))
                     )}
@@ -290,4 +270,4 @@ const StudentManagement = () => {
   );
 };
 
-export default StudentManagement; 
+export default StudentManagement;

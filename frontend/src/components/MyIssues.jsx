@@ -1,4 +1,3 @@
-// this is a page where a student can view his or her issues.
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getStudentIssues } from '../services/api';
@@ -37,7 +36,7 @@ const MyIssues = () => {
       }
       setError('');
     } catch (err) {
-      setError('Failed to fetch issues. Please try again at a later time.');
+      setError('Failed to fetch issues. Please try again later.');
       console.error('Error fetching issues:', err);
     } finally {
       setLoading(false);
@@ -56,7 +55,8 @@ const MyIssues = () => {
     // For students, consistently use /issue/:issueId
     navigate(`/issue/${issueId}`);
   };
-setting colour changes for the different issue statuses
+
+  // Setting colour changes for the different issue statuses
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
       case 'open':

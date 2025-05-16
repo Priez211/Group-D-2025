@@ -5,11 +5,12 @@ from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
 from django.contrib.auth.hashers import check_password
+from rest_framework import serializers
 from django.conf import settings
 import jwt
+import traceback
 import datetime
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
-from  rest_framework import serializers
 
 from .models import Issue, Student, Lecturer, User, Notification
 from .serializers import (
@@ -66,11 +67,12 @@ class LoginView(APIView):
 
 class RegisterView(APIView):
     permission_classes = [AllowAny]
-   
+    
     def post(self, request):
         role = request.data.get('role')
         print("\n=== Registration Request ===")
         print("Received data:", request.data)
+        
         if role == 'student':
             serializer = StudentRegistrationSerializer(data=request.data)
         elif role == 'lecturer':
@@ -116,7 +118,7 @@ class RegisterView(APIView):
         
         print("Validation errors:", errors)
         return Response({'errors': errors}, status=status.HTTP_400_BAD_REQUEST)
-        
+
 class StudentIssueCreateView(APIView):
     permission_classes = [IsAuthenticated, IsStudent]
     parser_classes = (MultiPartParser, FormParser, JSONParser)
@@ -208,6 +210,8 @@ class StudentIssueCreateView(APIView):
                 {'error': 'Failed to create issue', 'detail': str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+
 class LecturerIssueListView(generics.ListAPIView):
     serializer_class = IssueSerializer
     permission_classes = [IsLecturer]
@@ -220,8 +224,8 @@ class LecturerIssueListView(generics.ListAPIView):
 class IssueUpdateView(generics.UpdateAPIView):
     queryset = Issue.objects.all()
     serializer_class = IssueSerializer
-    permission_classes = [IsAuthenticated]
-    
+    permission_classes = [IsAuthenticated]  # Base authentication check
+
     def get_permissions(self):
         """
         Custom permission check that properly implements OR logic
@@ -235,6 +239,7 @@ class IssueUpdateView(generics.UpdateAPIView):
     def perform_update(self, serializer):
         issue = serializer.save()
         if self.request.user.role == 'lecturer':
+            # Create notification about the update
             create_notification(
                 recipient=issue.student.user,
                 notification_type='issue_updated',
@@ -255,11 +260,13 @@ class StudentIssueDetailView(generics.RetrieveUpdateAPIView):
     def perform_update(self, serializer):
         student = self.request.user.student_profile
         
+        # Handle file upload during update
         if 'attachment' in self.request.FILES:
             serializer.validated_data['attachment'] = self.request.FILES['attachment']
             
         issue = serializer.save(student=student)
         
+        # Create notification for assigned lecturer if one is assigned
         if issue.assigned_to:
             create_notification(
                 recipient=issue.assigned_to.user,
@@ -279,7 +286,8 @@ class LecturerIssueDetailView(generics.RetrieveUpdateAPIView):
 
     def perform_update(self, serializer):
         issue = serializer.save()
-         # Create notification for the student when status changes
+        
+        # Create notification for the student when status changes
         if 'status' in self.request.data:
             create_notification(
                 recipient=issue.student.user,
@@ -294,7 +302,6 @@ class AcademicRegistrarIssueListView(generics.ListAPIView):
     serializer_class = IssueSerializer
     permission_classes = [IsAcademicRegistrar]
 
-
 class AcademicRegistrarIssueDetailView(generics.RetrieveUpdateAPIView):
     serializer_class = IssueSerializer
     permission_classes = [IsAcademicRegistrar]
@@ -302,6 +309,7 @@ class AcademicRegistrarIssueDetailView(generics.RetrieveUpdateAPIView):
 
     def perform_update(self, serializer):
         issue = serializer.save()
+        
         # Create notification for status changes
         if 'status' in self.request.data:
             create_notification(
@@ -310,6 +318,7 @@ class AcademicRegistrarIssueDetailView(generics.RetrieveUpdateAPIView):
                 issue=issue,
                 message=f'Your issue "{issue.title}" status has been updated to {issue.status}'
             )
+        
         # Create notification for assignment changes
         if 'assigned_to' in self.request.data and issue.assigned_to:
             create_notification(
@@ -345,18 +354,19 @@ class IssueDeleteView(generics.DestroyAPIView):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_notifications(request):
-   try:
+    try:
         print(f"Fetching notifications for user: {request.user.username}")
         notifications = Notification.objects.filter(recipient=request.user).order_by('-created_at')
         print(f"Found {notifications.count()} notifications")
         serializer = NotificationSerializer(notifications, many=True)
         return Response(serializer.data)
-   except Exception as e:
+    except Exception as e:
         print(f"Error in get_notifications: {str(e)}")
         return Response(
             {'error': 'Failed to fetch notifications', 'detail': str(e)},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def mark_notification_read(request, notification_id):
@@ -377,7 +387,6 @@ def mark_notification_read(request, notification_id):
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
-
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_unread_count(request):
@@ -393,6 +402,7 @@ def get_unread_count(request):
             {'error': 'Failed to fetch unread count', 'detail': str(e)},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
+
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
 def delete_notification(request, notification_id):
@@ -423,7 +433,6 @@ def clear_all_notifications(request):
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
-
 def create_notification(recipient, notification_type, issue, message):
     """
     Helper function to create notifications
@@ -440,6 +449,7 @@ def create_notification(recipient, notification_type, issue, message):
     except Exception as e:
         print(f"Error creating notification: {str(e)}")
         return None
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def create_issue(request):
@@ -458,6 +468,7 @@ def create_issue(request):
         return Response(Issue.data, status=status.HTTP_201_CREATED)
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
 def update_issue(request, issue_id):
@@ -492,7 +503,6 @@ def update_issue(request, issue_id):
         return Response({'error': 'Issue not found'}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
 
 
 class StudentListView(generics.ListAPIView):
@@ -566,11 +576,13 @@ class LecturerListView(generics.ListAPIView):
 
     def get_queryset(self):
         queryset = Lecturer.objects.all().select_related('user', 'department')
-        department = self.request.query_params.get('department',None)
+        
+        # Filter by department if provided
+        department = self.request.query_params.get('department', None)
         if department:
             queryset = queryset.filter(department__name=department)
+            
         return queryset
-
 
 class LecturerUpdateView(generics.UpdateAPIView):
     serializer_class = LecturerSerializer

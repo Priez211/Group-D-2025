@@ -1,8 +1,9 @@
-// this is the notifications page
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import UserProfile from './UserProfile';
-import '../styles/Dashboard.css';
+import NotificationBadge from './NotificationBadge';
+import { getNotifications } from '../services/api';
+import { useNotifications } from '../context/NotificationContext';
 import '../styles/Notifications.css';
 
 const Notifications = () => {
@@ -10,7 +11,8 @@ const Notifications = () => {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [user] = useState(JSON.parse(localStorage.getItem('user')));
+  const [user, setUser] = useState(null);
+  const { clearUnreadStatus } = useNotifications();
 
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem('user'));
@@ -18,101 +20,36 @@ const Notifications = () => {
       navigate('/login');
       return;
     }
+    setUser(userData);
     fetchNotifications();
-  }, [navigate]);
+    // Clear unread status when notifications page is opened
+    clearUnreadStatus();
+  }, [navigate, clearUnreadStatus]);
 
   const fetchNotifications = async () => {
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error('No authentication token found');
+      setLoading(true);
+      const data = await getNotifications();
+      if (Array.isArray(data)) {
+        setNotifications(data);
+      } else if (data && typeof data === 'object') {
+        const notificationsArray = data.notifications || data.data || [];
+        setNotifications(notificationsArray);
+      } else {
+        setNotifications([]);
       }
-
-      const response = await fetch('http://localhost:8000/api/notifications/', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-      
-      if (!response.ok) {
-        if (response.status === 401) {
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
-          navigate('/login');
-          throw new Error('Session expired. Please login again.');
-        }
-        throw new Error('Failed to fetch notifications');
-      }
-
-      const data = await response.json();
-      console.log('Fetched notifications:', data);
-      setNotifications(data);
+      setError('');
     } catch (err) {
-      setError(err.message || 'Failed to load notifications');
-      console.error('Error:', err);
+      setError('Failed to fetch notifications. Please try again later.');
+      console.error('Error fetching notifications:', err);
     } finally {
       setLoading(false);
     }
   };
 
-  const markAsRead = async (notificationId) => {
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error('No authentication token found');
-      }
-
-      const response = await fetch(`http://localhost:8000/api/notifications/${notificationId}/mark-read/`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        if (response.status === 401) {
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
-          navigate('/login');
-          throw new Error('Session expired. Please login again.');
-        }
-        throw new Error('Failed to mark notification as read');
-      }
-
-      setNotifications(prevNotifications =>
-        prevNotifications.map(notification =>
-          notification.id === notificationId
-            ? { ...notification, is_read: true }
-            : notification
-        )
-      );
-    } catch (err) {
-      console.error('Error marking notification as read:', err);
-    }
-  };
-// this is for updating the icons for what happens in the issue creation process.
-  const getNotificationIcon = (type) => {
-    switch (type) {
-      case 'issue_created':
-        return '📝';
-      case 'issue_updated':
-        return '🔄';
-      case 'issue_resolved':
-        return '✅';
-      case 'issue_assigned':
-        return '👤';
-      case 'comment_added':
-        return '💬';
-      default:
-        return '🔔';
-    }
-  };
-// this is used to format the date and time for notifications to be received
   const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
+    if (!dateString) return '';
+    return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
@@ -121,9 +58,117 @@ const Notifications = () => {
     });
   };
 
+  const deleteNotification = async (notificationId) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      const response = await fetch(`http://localhost:8000/api/notifications/${notificationId}/delete/`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          navigate('/login');
+          throw new Error('Session expired. Please login again.');
+        }
+        throw new Error('Failed to delete notification');
+      }
+
+      setNotifications(prevNotifications =>
+        prevNotifications.filter(notification => notification.id !== notificationId)
+      );
+    } catch (err) {
+      console.error('Error deleting notification:', err);
+      setError(err.message);
+    }
+  };
+
+  const clearAllNotifications = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      const response = await fetch('http://localhost:8000/api/notifications/clear-all/', {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          navigate('/login');
+          throw new Error('Session expired. Please login again.');
+        }
+        throw new Error('Failed to clear notifications');
+      }
+
+      setNotifications([]);
+    } catch (err) {
+      console.error('Error clearing notifications:', err);
+      setError(err.message);
+    }
+  };
+
+  const getBackUrl = () => {
+    switch (user?.role) {
+      case 'lecturer':
+        return '/lecturer';
+      case 'registrar':
+        return '/registrar';
+      case 'academic_registrar':
+        return '/academic-registrar';
+      default:
+        return '/dashboard';
+    }
+  };
+
+  const getRoleSpecificIcon = (type) => {
+    const baseIcons = {
+      issue_created: '📝',
+      issue_updated: '🔄',
+      issue_resolved: '✅',
+      issue_assigned: '👤',
+      comment_added: '💬'
+    };
+
+    // Add role-specific icons
+    if (user?.role === 'lecturer') {
+      return {
+        ...baseIcons,
+        student_submission: '📚',
+        deadline_approaching: '⏰',
+      }[type] || '🔔';
+    }
+
+    if (user?.role === 'registrar' || user?.role === 'academic_registrar') {
+      return {
+        ...baseIcons,
+        new_registration: '📋',
+        department_update: '🏛️',
+        system_alert: '⚠️',
+      }[type] || '🔔';
+    }
+
+    return baseIcons[type] || '🔔';
+  };
+
   return (
     <div className="dashboard-container">
-      {/* Header */}
       <header className="dashboard-header">
         <div className="logo">
           <span className="graduation-icon">👨‍🎓</span>
@@ -135,10 +180,9 @@ const Notifications = () => {
       </header>
 
       <div className="dashboard-layout">
-        {/* Sidebar Navigation */}
         <nav className="dashboard-nav">
           <ul>
-            <li onClick={() => navigate('/dashboard')}>
+            <li onClick={() => navigate(getBackUrl())}>
               <span>🏠</span>
               Home
             </li>
@@ -146,9 +190,10 @@ const Notifications = () => {
               <span>📝</span>
               My Issues
             </li>
-            <li className="active">
+            <li className="active notification-item">
               <span>🔔</span>
               Notifications
+              <NotificationBadge />
             </li>
             <li>
               <span>⚙️</span>
@@ -157,11 +202,15 @@ const Notifications = () => {
           </ul>
         </nav>
 
-        {/* Main Content */}
         <main className="dashboard-main">
           <div className="notifications-container">
             <div className="page-header">
               <h1>Notifications</h1>
+              {notifications.length > 0 && (
+                <button onClick={clearAllNotifications} className="clear-all-btn">
+                  Clear All
+                </button>
+              )}
             </div>
             
             {loading ? (
@@ -179,17 +228,9 @@ const Notifications = () => {
                   <div
                     key={notification.id}
                     className={`notification-item ${notification.is_read ? 'read' : 'unread'}`}
-                    onClick={() => {
-                      if (!notification.is_read) {
-                        markAsRead(notification.id);
-                      }
-                      if (notification.issue && notification.issue.issue_id) {
-                        navigate(`/issue/${notification.issue.issue_id}`);
-                      }
-                    }}
                   >
                     <div className="notification-icon">
-                      {getNotificationIcon(notification.notification_type)}
+                      {getRoleSpecificIcon(notification.notification_type)}
                     </div>
                     <div className="notification-content">
                       <div className="notification-message">{notification.message}</div>
@@ -202,6 +243,15 @@ const Notifications = () => {
                         )}
                       </div>
                     </div>
+                    <button
+                      className="delete-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        deleteNotification(notification.id);
+                      }}
+                    >
+                      ✕
+                    </button>
                   </div>
                 ))}
               </div>
@@ -213,4 +263,4 @@ const Notifications = () => {
   );
 };
 
-export default Notifications; 
+export default Notifications;

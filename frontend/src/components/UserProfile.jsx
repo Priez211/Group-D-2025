@@ -1,13 +1,12 @@
-// this is the user profile page UI .
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/UserProfile.css';
-// this handles the user profile dropdown
+
 const UserProfile = ({ user }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const navigate = useNavigate();
   const dropdownRef = useRef(null);
-// this handles the side effect when one clicks out.
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -47,12 +46,11 @@ const UserProfile = ({ user }) => {
           <span className="initials">{getInitials(user?.fullName)}</span>
         </div>
       </div>
-// this is for manipulating the dorpdown lists.      
+      
       {isDropdownOpen && (
         <div className="profile-dropdown">
           <div className="user-info">
             <p className="full-name">{user?.fullName || 'User'}</p>
-            <p className="email">{user?.studentNumber || 'No student number'}</p>
           </div>
           <div className="dropdown-divider"></div>
           <div className="dropdown-item" onClick={handleLogout}>

@@ -1,4 +1,3 @@
-// this is for the overall outlook of the app
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from './components/LoginPage';
@@ -26,7 +25,7 @@ const PrivateRoute = ({ children }) => {
   const isAuthenticated = localStorage.getItem('token');
   return isAuthenticated ? children : <Navigate to="/login" />;
 };
-// this includes the different routes within the app as you explore through it
+
 function App() {
   return (
     <Router>

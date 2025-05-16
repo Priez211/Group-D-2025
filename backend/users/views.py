@@ -22,15 +22,41 @@ def register_user(request):
     print("\n=== Registration Request ===")
     print("Received data:", data)
     
-    # Check for required fields
-    required_fields = ['username', 'email', 'password', 'role', 'first_name', 'last_name']
-    missing_fields = [field for field in required_fields if field not in data]
-    if missing_fields:
-        print("Missing required fields:", missing_fields)
-        return Response(
-            {'errors': {field: 'This field is required.' for field in missing_fields}},
-            status=status.HTTP_400_BAD_REQUEST
-        )
+    role = data.get('role')
+    
+    # For lecturer registration, map the fields to match backend expectations
+    if role == 'lecturer':
+        required_fields = ['fullName', 'email', 'userId', 'password', 'confirmPassword']
+        missing_fields = [field for field in required_fields if field not in data]
+        if missing_fields:
+            print("Missing required fields:", missing_fields)
+            return Response(
+                {'errors': {field: 'This field is required.' for field in missing_fields}},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Transform the data to match the legacy format
+        name_parts = data['fullName'].split(' ', 1)
+        transformed_data = {
+            'username': data['userId'],
+            'email': data['email'],
+            'password': data['password'],
+            'role': 'lecturer',
+            'first_name': name_parts[0],
+            'last_name': name_parts[1] if len(name_parts) > 1 else '',
+            'lecturer_data': data.get('lecturer_data', {})
+        }
+        data = transformed_data
+    else:
+        # For other roles, check legacy required fields
+        required_fields = ['username', 'email', 'password', 'role', 'first_name', 'last_name']
+        missing_fields = [field for field in required_fields if field not in data]
+        if missing_fields:
+            print("Missing required fields:", missing_fields)
+            return Response(
+                {'errors': {field: 'This field is required.' for field in missing_fields}},
+                status=status.HTTP_400_BAD_REQUEST
+            )
     
     # Validate role
     if data['role'] not in dict(User.ROLES):
@@ -71,7 +97,45 @@ def register_user(request):
         print("Base user created successfully:", user.username)
         
         # Handle role-specific data
-        if data['role'] == 'student' and 'student_data' in data:
+        if data['role'] == 'lecturer' and 'lecturer_data' in data:
+            lecturer_data = data['lecturer_data']
+            print("\n=== Processing Lecturer Data ===")
+            print("Lecturer data:", lecturer_data)
+            
+            # Get or create department
+            department_name = lecturer_data['department']
+            print("\nProcessing department:", department_name)
+            print("Department faculty map:", DEPARTMENT_FACULTY_MAP)
+            
+            faculty = DEPARTMENT_FACULTY_MAP.get(department_name)
+            if not faculty:
+                raise ValueError(f"Invalid department: {department_name}")
+                
+            department, created = Department.objects.get_or_create(
+                name=department_name,
+                defaults={'faculty': faculty}
+            )
+            print(f"Department {'created' if created else 'retrieved'}:", department.name)
+            
+            print("\nCreating lecturer profile...")
+            lecturer = Lecturer.objects.create(
+                user=user,
+                department=department
+            )
+            print("Lecturer profile created successfully")
+            
+            # Return lecturer-specific response
+            return Response({
+                'message': 'Registration successful',
+                'user': {
+                    'userId': user.username,
+                    'fullName': f"{user.first_name} {user.last_name}".strip(),
+                    'email': user.email,
+                    'role': user.role
+                }
+            }, status=status.HTTP_201_CREATED)
+            
+        elif data['role'] == 'student' and 'student_data' in data:
             student_data = data['student_data']
             print("\n=== Processing Student Data ===")
             print("Student data:", student_data)
@@ -113,33 +177,6 @@ def register_user(request):
                 course=student_data['course']
             )
             print("Student profile created successfully")
-            
-        elif data['role'] == 'lecturer' and 'lecturer_data' in data:
-            lecturer_data = data['lecturer_data']
-            print("\n=== Processing Lecturer Data ===")
-            print("Lecturer data:", lecturer_data)
-            
-            # Get or create department
-            department_name = lecturer_data['department']
-            print("\nProcessing department:", department_name)
-            print("Department faculty map:", DEPARTMENT_FACULTY_MAP)
-            
-            faculty = DEPARTMENT_FACULTY_MAP.get(department_name)
-            if not faculty:
-                raise ValueError(f"Invalid department: {department_name}")
-                
-            department, created = Department.objects.get_or_create(
-                name=department_name,
-                defaults={'faculty': faculty}
-            )
-            print(f"Department {'created' if created else 'retrieved'}:", department.name)
-            
-            print("\nCreating lecturer profile...")
-            Lecturer.objects.create(
-                user=user,
-                department=department
-            )
-            print("Lecturer profile created successfully")
             
         elif data['role'] == 'registrar' and 'registrar_data' in data:
             registrar_data = data['registrar_data']
@@ -185,7 +222,13 @@ def register_user(request):
         print("\n=== Registration Error ===")
         print("Error:", str(e))
         print("Traceback:", traceback.format_exc())
+        try:
+            # If any error occurs during user creation, delete the user if it was created
+            if 'user' in locals():
+                user.delete()
+        except Exception:
+            pass
         return Response(
             {'errors': {'general': str(e)}}, 
             status=status.HTTP_400_BAD_REQUEST
-        ) 
+        )
