@@ -159,7 +159,7 @@ class Issue(models.Model):
         ('CSC2100', 'CSC2100 - Database Systems'),
         ('CSC2200', 'CSC2200 - Web Development'),
         ('CSC3100', 'CSC3100 - Software Engineering'),
-    )
+    ) # Year choices for students
     YEAR_CHOICES = (
         ('1', 'First Year'),
         ('2', 'Second Year'),
