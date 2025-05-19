@@ -55,7 +55,7 @@ class Lecturer(models.Model):
         return self.user.get_full_name()
 
 
-class Student(models.Model):
+class Student(models.Model):#student model for the application
     COLLEGE_CHOICES = (
         ('College of Computing', 'College of Computing'),
         ('College Of Humanity And Social Sciences', 'College Of Humanity And Social Sciences'),
