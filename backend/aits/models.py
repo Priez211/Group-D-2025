@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
 
-class User(AbstractUser):#User model for the application
+class User(AbstractUser):
     ROLES = (
         ('student', 'Student'),
         ('lecturer', 'Lecturer'),
@@ -52,10 +52,10 @@ class Lecturer(models.Model):
     )
 
     def __str__(self):
-        return self.user.get_full_name()#Returns the full name of the lecturer
+        return self.user.get_full_name()
 
 
-class Student(models.Model):#student model for the application
+class Student(models.Model):
     COLLEGE_CHOICES = (
         ('College of Computing', 'College of Computing'),
         ('College Of Humanity And Social Sciences', 'College Of Humanity And Social Sciences'),
@@ -159,7 +159,7 @@ class Issue(models.Model):
         ('CSC2100', 'CSC2100 - Database Systems'),
         ('CSC2200', 'CSC2200 - Web Development'),
         ('CSC3100', 'CSC3100 - Software Engineering'),
-    ) # Year choices for students
+    )
     YEAR_CHOICES = (
         ('1', 'First Year'),
         ('2', 'Second Year'),

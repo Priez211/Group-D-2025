@@ -28,7 +28,7 @@ class User(AbstractUser):
         ('Library and Information', 'Library and Information'),
         ('Information Technology', 'Information Technology'),
     )
-   
+    
     YEAR_CHOICES = (
         ('First Year', 'First Year'),
         ('Second Year', 'Second Year'),
