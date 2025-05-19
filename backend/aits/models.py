@@ -52,7 +52,7 @@ class Lecturer(models.Model):
     )
 
     def __str__(self):
-        return self.user.get_full_name()
+        return self.user.get_full_name()#Returns the full name of the lecturer
 
 
 class Student(models.Model):#student model for the application
