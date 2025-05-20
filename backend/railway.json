@@ -4,15 +4,10 @@
     "builder": "NIXPACKS"
   },
   "deploy": {
-    "startCommand": "python serve.py",
+    "startCommand": "python3 serve.py",
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 3,
     "healthcheckPath": "/",
     "healthcheckTimeout": 300
-  },
-  "phases": {
-    "prepare": {
-      "command": "bash prepare.sh"
-    }
   }
 } 
