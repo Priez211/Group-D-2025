@@ -12,10 +12,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-o-nutq5r+=2q=7c^p)kafwz9t-q_24ld3k1_ejopa+g#as5ysj'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG =  os.environ.get('DEBUG', 'False') == 'True'
 
-
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1',
+                 'aits.onrender.com',
+                 ]
 
 
 # Application definition
@@ -80,7 +81,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME':'aits_db',
         'USER':'postgres',
-        'PASSWORD':'13.0.13Morna',
+        'PASSWORD':'5432',
         'HOST':'localhost',
         'PORT':'5432', 
     }
