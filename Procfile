@@ -1,1 +1,1 @@
-web: cd backend && python3 serve.py 
+web: /app/backend/start.sh 
