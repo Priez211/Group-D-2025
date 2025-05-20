@@ -1,6 +1,11 @@
 from pathlib import Path
 import os
 import dj_database_url
+
+from dotenv import load_dotenv
+
+load_dotenv()
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -9,15 +14,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-o-nutq5r+=2q=7c^p)kafwz9t-q_24ld3k1_ejopa+g#as5ysj'
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-o-nutq5r+=2q=7c^p)kafwz9t-q_24ld3k1_ejopa+g#as5ysj')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG =  os.environ.get('DEBUG', 'False') == 'True'
+DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1',
-                 'aits.onrender.com',
-                  'group-d-2025-2.onrender.com'
-                 ]
+# Ensure Railway domains are allowed in production
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1,*.up.railway.app').split(',')
 
 
 # Application definition
@@ -34,8 +37,9 @@ INSTALLED_APPS = [
     'corsheaders',
     'aits',
     'notifications',
+    'whitenoise.runserver_nostatic',
 ]
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
@@ -71,23 +75,27 @@ WSGI_APPLICATION = 'core.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-DATABASE_URL = os.environ.get('DATABASE_URL')
 
 DATABASES = {
-    'default':  dj_database_url.parse(
-        DATABASE_URL,
-        conn_max_age=600,
-        ssl_require=True  # Ensures secure connection for production databases
-    ) if DATABASE_URL else{
+    'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME':'aits_db',
-        'USER':'postgres',
-        'PASSWORD':'5432',
-        'HOST':'localhost',
-        'PORT':'5432', 
+        'NAME': os.getenv("DB_NAME"),
+        'USER': os.getenv("DB_USER"),
+        'PASSWORD': os.getenv("DB_PASSWORD",),
+        'HOST': os.getenv("DB_HOST"),
+        'PORT': os.getenv("DB_PORT"),
     }
 }
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# If DATABASE_URL is set (on Railway), use that instead
+DATABASE_URL = os.environ.get('DATABASE_URL')
+if DATABASE_URL:
+    DATABASES['default'] = dj_database_url.config(
+        default=DATABASE_URL,
+        conn_max_age=600,
+        conn_health_checks=True,
+    )
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -124,6 +132,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Media files (uploads)
 MEDIA_URL = '/media/'
@@ -139,10 +149,13 @@ AUTH_USER_MODEL = 'aits.User'
 # CORS settings
 CORS_ORIGIN_ALLOW_ALL = False
 CORS_ALLOW_CREDENTIALS = True
-CORS_ORIGIN_WHITELIST = [
-    'http://localhost:5173',
-    'http://127.0.0.1:5173',
-]
+CORS_ORIGIN_WHITELIST = os.environ.get('CORS_ORIGIN_WHITELIST', 
+    'http://localhost:5173,http://127.0.0.1:5173,https://group-d-2025-j76wf1j7b-priez211s-projects.vercel.app').split(',')
+
+ALLOWED_HOSTS = ['*']
+
+if os.environ.get('FRONTEND_URL'):
+    CORS_ORIGIN_WHITELIST.append(os.environ.get('FRONTEND_URL'))
 
 CORS_ALLOW_METHODS = [
     'DELETE',
@@ -170,10 +183,11 @@ CORS_EXPOSE_HEADERS = [
     'authorization',
 ]
 
-CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-]
+CSRF_TRUSTED_ORIGINS = os.environ.get('CSRF_TRUSTED_ORIGINS',
+    "http://localhost:5173,http://127.0.0.1:5173,https://group-d-2025-j76wf1j7b-priez211s-projects.vercel.app").split(',')
+
+if os.environ.get('FRONTEND_URL'):
+    CSRF_TRUSTED_ORIGINS.append(os.environ.get('FRONTEND_URL'))
 
 CORS_PREFLIGHT_MAX_AGE = 86400
 

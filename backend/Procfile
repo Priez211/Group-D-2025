@@ -1,1 +1,1 @@
-web: gunicorn aits.wsgi
+web: python3 serve.py 
