@@ -24,11 +24,31 @@ COPY backend/ ./
 # Copy the rest of the application (if needed elsewhere)
 COPY . /app/
 
-# Make prepare script executable
+# Make scripts executable
 RUN chmod +x prepare.sh
+RUN chmod +x collect_static.sh
+RUN chmod +x migrate.sh
 
-# Run migrations and collect static when building the container
-RUN ./prepare.sh
+# Collect static files (doesn't require DB)
+RUN python3 manage.py collectstatic --noinput
 
-# Run the application
-CMD ["python3", "serve.py"] 
+# Create a more robust startup script with debugging and fallbacks
+RUN echo '#!/bin/bash' > /app/backend/start.sh && \
+    echo 'set -e' >> /app/backend/start.sh && \
+    echo 'echo "Starting Django application..."' >> /app/backend/start.sh && \
+    echo 'echo "Checking environment variables:"' >> /app/backend/start.sh && \
+    echo 'echo "DATABASE_URL: ${DATABASE_URL:-not set}"' >> /app/backend/start.sh && \
+    echo 'echo "Waiting for database to be ready..."' >> /app/backend/start.sh && \
+    echo 'sleep 5' >> /app/backend/start.sh && \
+    echo 'if [ -n "$DATABASE_URL" ]; then' >> /app/backend/start.sh && \
+    echo '  echo "Running migrations..."' >> /app/backend/start.sh && \
+    echo '  python3 manage.py migrate --noinput || echo "Migrations failed but continuing anyway"' >> /app/backend/start.sh && \
+    echo 'else' >> /app/backend/start.sh && \
+    echo '  echo "WARNING: DATABASE_URL is not set. Skipping migrations."' >> /app/backend/start.sh && \
+    echo 'fi' >> /app/backend/start.sh && \
+    echo 'echo "Starting server..."' >> /app/backend/start.sh && \
+    echo 'python3 serve.py' >> /app/backend/start.sh && \
+    chmod +x /app/backend/start.sh
+
+# Run the startup script
+CMD ["/app/backend/start.sh"] 

@@ -1,12 +1,67 @@
-# Railway Deployment Instructions
+# Railway Deployment Guide
 
-## Step 1: Push Your Code to GitHub
-Make sure your code is pushed to a GitHub repository. Railway will deploy directly from GitHub.
+## Required Services
 
-## Step 2: Login to Railway
-Go to [Railway.app](https://railway.app/) and login with your account.
+To deploy this application on Railway, you need:
 
-## Step 3: Deploy the Backend
+1. **Main app service** (this repository)
+2. **PostgreSQL database** (must be added as a separate service)
+
+## Step 1: Add a PostgreSQL Database
+
+Before deploying the main application:
+
+1. Log in to your Railway dashboard
+2. Click "New Project" or open your existing project
+3. Click "Add Service" → "Database" → "PostgreSQL"
+4. Wait for the database to provision
+
+## Step 2: Deploy the Application
+
+Once the database is provisioned:
+
+1. Click "Add Service" → "GitHub Repo"
+2. Select this repository
+3. Configure environment variables if needed (most are set in the .env file and Dockerfile)
+4. Deploy
+
+## Step 3: Link Services
+
+Ensure your app and database are connected:
+
+1. Go to your application service
+2. Click "Variables" in the top menu
+3. Click "Add from service"
+4. Select your PostgreSQL database
+5. This will automatically add the DATABASE_URL variable
+
+## Troubleshooting
+
+### Database Connection Issues
+
+If you see database connection errors:
+
+1. Verify the DATABASE_URL variable is set in your application service
+2. Check if the PostgreSQL service is running
+3. You may need to manually create a database user with appropriate permissions
+
+### Migration Errors
+
+If migrations are failing:
+
+1. You can manually run migrations via Railway CLI: `railway run python backend/manage.py migrate`
+2. Check database logs for specific errors
+
+## Environment Variables
+
+The following variables are required:
+
+- `DATABASE_URL` (automatically set when linking to PostgreSQL service)
+- `SECRET_KEY` (set in .env file)
+- `DEBUG` (defaults to False for production)
+- `ALLOWED_HOSTS` (defaults include *.up.railway.app)
+
+## Step 4: Deploy the Backend
 1. Click on "New Project"
 2. Select "Deploy from GitHub repo"
 3. Connect to your GitHub account if not already connected
@@ -16,12 +71,6 @@ Go to [Railway.app](https://railway.app/) and login with your account.
    - `SECRET_KEY` - A secure random string
    - `DEBUG` - Set to 'False'
    - `ALLOWED_HOSTS` - This should include `*.up.railway.app` (this is already set in settings.py)
-
-## Step 4: Add PostgreSQL Database
-1. In your project dashboard, click "New"
-2. Select "Database"
-3. Choose "PostgreSQL"
-4. Railway will automatically set the `DATABASE_URL` environment variable
 
 ## Step 5: Deploy and Run Migrations
 1. The backend service will automatically use the DATABASE_URL environment variable
