@@ -5,10 +5,10 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include('users.urls')),  # Include users app URLs under /api/
+    path('api/', include('aits.urls')),  # Include aits app URLs first since it has the registration view
+    path('api/', include('users.urls')),  # Include users app URLs
     path('api/', include('core.urls')),  # Include core app URLs
     path('api/', include('notifications.urls')),  # Include notifications app URLs
-    path('api/', include('aits.urls')),  # Include aits app URLs
 ]
 
 # Add static and media URLs in development
