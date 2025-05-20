@@ -1,7 +1,10 @@
 #!/bin/bash
+set -e
 
-# Run migrations
-python manage.py migrate
+echo "Running migrations..."
+python3 manage.py migrate
 
-# Collect static files
-python manage.py collectstatic --noinput 
+echo "Collecting static files..."
+python3 manage.py collectstatic --noinput 
+
+echo "Preparation completed successfully!" 
