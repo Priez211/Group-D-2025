@@ -149,8 +149,11 @@ AUTH_USER_MODEL = 'aits.User'
 # CORS settings
 CORS_ORIGIN_ALLOW_ALL = False
 CORS_ALLOW_CREDENTIALS = True
-CORS_ORIGIN_WHITELIST = os.environ.get('CORS_ORIGIN_WHITELIST', 
-    'http://localhost:5173,http://127.0.0.1:5173,https://group-d-2025-j76wf1j7b-priez211s-projects.vercel.app').split(',')
+
+CORS_ORIGIN_WHITELIST = os.environ.get(
+    'CORS_ORIGIN_WHITELIST',
+    'http://localhost:5173,https://academicissuetrackingsysgroupd.vercel.app/,http://127.0.0.1:5173,https://group-d-2025-production.up.railway.app/'
+).split(',')
 
 ALLOWED_HOSTS = ['*']
 
