@@ -6,7 +6,7 @@ from django.views.generic import RedirectView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include('aits.urls')),
-    path('api/notifications/', include('notifications.urls')),
-    path('', RedirectView.as_view(url='api/')),  # Redirect root to /api/
+    path('', include('aits.urls')),
+    path('notifications/', include('notifications.urls')),
+    path('', RedirectView.as_view(url='/')),  # Redirect root to home
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
