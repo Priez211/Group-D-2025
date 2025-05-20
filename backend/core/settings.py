@@ -154,6 +154,12 @@ CORS_ORIGIN_WHITELIST = os.environ.get('CORS_ORIGIN_WHITELIST',
 
 ALLOWED_HOSTS = ['*']
 
+CORS_ALLOWED_ORIGINS = [
+    "https://academicissuetrackingsysgroupd.vercel.app",
+    "http://localhost:5173",  # For local development
+]
+
+
 if os.environ.get('FRONTEND_URL'):
     CORS_ORIGIN_WHITELIST.append(os.environ.get('FRONTEND_URL'))
 
