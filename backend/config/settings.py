@@ -8,7 +8,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'corsheaders',
-    'users',  # Add users app
+    'users.apps.UsersConfig',  # Use the proper app configuration
+    'core',
+    'notifications',
+    'aits',
     # Other installed apps
 ]
 
