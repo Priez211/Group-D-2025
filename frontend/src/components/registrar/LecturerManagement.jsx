@@ -6,7 +6,7 @@ import axios from 'axios';
 import '../../styles/Dashboard.css';
 import '../../styles/ManagementPage.css';
 
-const API_URL = 'http://localhost:8000/api';
+const API_URL = 'https://group-d-2025-production.up.railway.app/api';
 
 // Map departments to their colleges for filtering
 const DEPARTMENT_FACULTY_MAP = {

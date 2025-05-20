@@ -65,7 +65,7 @@ const Notifications = () => {
         throw new Error('No authentication token found');
       }
 
-      const response = await fetch(`http://localhost:8000/api/notifications/${notificationId}/delete/`, {
+      const response = await fetch(`https://group-d-2025-production.up.railway.app/api/notifications/${notificationId}/delete/`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -99,7 +99,7 @@ const Notifications = () => {
         throw new Error('No authentication token found');
       }
 
-      const response = await fetch('http://localhost:8000/api/notifications/clear-all/', {
+      const response = await fetch('https://group-d-2025-production.up.railway.app/api/notifications/clear-all/', {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
