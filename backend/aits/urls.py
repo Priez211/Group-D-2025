@@ -20,7 +20,6 @@ from .views import (
     clear_all_notifications
 )
 from . import views
-
 urlpatterns = [
     # Auth routes
     path('login', LoginView.as_view(), name='login'),
