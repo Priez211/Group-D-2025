@@ -111,17 +111,17 @@ const LecturerNotifications = () => {
       </header>
 
       <div className="dashboard-layout">
-        <nav className="dashboard-nav">
+      <nav className="dashboard-nav">
           <ul>
             <li onClick={() => navigate('/lecturer-dashboard')}>
               <span>🏠</span>
               Home
             </li>
-            <li onClick={() => navigate('/lecturer/issues')}>
+            <li className="active">
               <span>📝</span>
               Assigned Issues
             </li>
-            <li className="active notification-item">
+            <li onClick={() => navigate('/lecturer/notifications')} className="notification-item">
               <span>🔔</span>
               Notifications
               <NotificationBadge />
