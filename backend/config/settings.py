@@ -56,6 +56,13 @@ CORS_ALLOW_HEADERS = [
     'x-requested-with',
 ]
 
+# Allowed hosts
+ALLOWED_HOSTS = [
+    'group-d-2025-production.up.railway.app',
+    'localhost',
+    '127.0.0.1',
+]
+
 # Custom user model
 AUTH_USER_MODEL = 'users.User'
 
