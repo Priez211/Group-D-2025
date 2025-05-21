@@ -57,7 +57,7 @@ const LecturerIssueManagement = () => {
     const matchesSearch = searchQuery === '' || 
       issue.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       issue.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      issue.student?.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      issue.student_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       issue.courseUnit.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesFilter && matchesSearch;
   });
@@ -163,7 +163,7 @@ const LecturerIssueManagement = () => {
                     filteredIssues.map(issue => (
                       <tr key={issue.issue_id} className="issue-row" onClick={() => navigate(`/lecturer/issues/${issue.issue_id}`)}>
                         <td>{issue.title}</td>
-                        <td>{issue.student?.fullName || 'N/A'}</td>
+                        <td>{issue.student_name || 'N/A'}</td>
                         <td>
                           <span className={`status ${issue.status.toLowerCase()}`}>
                             {issue.status}
