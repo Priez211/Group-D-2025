@@ -77,22 +77,22 @@ const LecturerIssueManagement = () => {
       <div className="dashboard-layout">
         <nav className="dashboard-nav">
           <ul>
-            <li onClick={() => navigate('/lecturer-dashboard')}>
+            <li onClick={() => navigate('/lecturer/dashboard')}>
               <span>🏠</span>
-              Home
+              Dashboard
             </li>
             <li className="active">
               <span>📝</span>
-              Assigned Issues
+              Manage Issues
             </li>
             <li onClick={() => navigate('/lecturer/notifications')} className="notification-item">
               <span>🔔</span>
               Notifications
               <NotificationBadge />
             </li>
-            <li>
-              <span>⚙️</span>
-              Settings
+            <li onClick={() => navigate('/lecturer/profile')}>
+              <span>👤</span>
+              Profile
             </li>
           </ul>
         </nav>
