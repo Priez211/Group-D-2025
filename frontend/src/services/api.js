@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'https://group-d-2025-production.up.railway.app/api';
+const API_URL = 'https://group-d-2025-production.up.railway.app/';
 
 const api = axios.create({
   baseURL: API_URL,
