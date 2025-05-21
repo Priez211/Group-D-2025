@@ -149,13 +149,19 @@ AUTH_USER_MODEL = 'aits.User'
 # CORS settings
 CORS_ORIGIN_ALLOW_ALL = False
 CORS_ALLOW_CREDENTIALS = True
-CORS_ORIGIN_WHITELIST = os.environ.get('CORS_ORIGIN_WHITELIST', 
-    'http://localhost:5173,http://127.0.0.1:5173,https://group-d-2025-j76wf1j7b-priez211s-projects.vercel.app').split(',')
 
-ALLOWED_HOSTS = ['*']
+CORS_ORIGIN_WHITELIST =['http://localhost:5173',
+                        'https://academicissuetrackingsysgroupd.vercel.app/',
+                        'http://127.0.0.1:5173',
+                        'https://group-d-2025-production.up.railway.app/']
 
-if os.environ.get('FRONTEND_URL'):
-    CORS_ORIGIN_WHITELIST.append(os.environ.get('FRONTEND_URL'))
+ALLOWED_HOSTS = ['https://academicissuetrackingsysgroupd.vercel.app/',
+                 'https://group-d-2025-production.up.railway.app/',]
+
+CORS_ALLOWED_ORIGINS = [
+    "https://academicissuetrackingsysgroupd.vercel.app",
+    "http://localhost:5173",  
+]
 
 CORS_ALLOW_METHODS = [
     'DELETE',
@@ -183,13 +189,9 @@ CORS_EXPOSE_HEADERS = [
     'authorization',
 ]
 
-CSRF_TRUSTED_ORIGINS = os.environ.get('CSRF_TRUSTED_ORIGINS',
-    "http://localhost:5173,http://127.0.0.1:5173,https://group-d-2025-j76wf1j7b-priez211s-projects.vercel.app").split(',')
-
-if os.environ.get('FRONTEND_URL'):
-    CSRF_TRUSTED_ORIGINS.append(os.environ.get('FRONTEND_URL'))
-
-CORS_PREFLIGHT_MAX_AGE = 86400
+CSRF_TRUSTED_ORIGINS = ['https://group-d-2025-j76wf1j7b-priez211s-projects.vercel.app',
+                        
+]
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
