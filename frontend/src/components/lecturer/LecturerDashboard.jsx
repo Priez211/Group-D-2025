@@ -75,24 +75,28 @@ const LecturerDashboard = () => {
       </header>
 
       <div className="dashboard-layout">
-        <nav className="dashboard-nav">
+      <nav className="dashboard-nav">
           <ul>
-            <li className="active">
+            <li onClick={() => navigate('/lecturer-dashboard')}>
               <span>🏠</span>
-              Dashboard
+              Home
             </li>
-            <li onClick={() => navigate('/lecturer/issues')}>
+            <li className="active">
               <span>📝</span>
-              Manage Issues
+              Assigned Issues
             </li>
             <li onClick={() => navigate('/lecturer/notifications')} className="notification-item">
               <span>🔔</span>
               Notifications
               <NotificationBadge />
             </li>
+            <li>
+              <span>⚙️</span>
+              Settings
+            </li>
           </ul>
         </nav>
-
+        
         <main className="dashboard-main">
           {loading ? (
             <div className="loading-spinner">Loading...</div>
