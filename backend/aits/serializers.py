@@ -49,6 +49,7 @@ class AcademicRegistrarSerializer(serializers.ModelSerializer):
 
 class IssueSerializer(serializers.ModelSerializer):
     student_name = serializers.SerializerMethodField()
+    student_department = serializers.SerializerMethodField()
     assigned_to = LecturerSerializer(read_only=True)
 
     class Meta:
@@ -63,7 +64,8 @@ class IssueSerializer(serializers.ModelSerializer):
             'courseUnit',
             'yearOfStudy',
             'semester',
-            'student_name',  # Changed from full student object to just name
+            'student_name',
+            'student_department',
             'assigned_to', 
             'created_at', 
             'updated_at'
@@ -71,6 +73,9 @@ class IssueSerializer(serializers.ModelSerializer):
 
     def get_student_name(self, obj):
         return obj.student.user.get_full_name() if obj.student else None
+
+    def get_student_department(self, obj):
+        return obj.student.department.name if obj.student and obj.student.department else None
 
 class NotificationSerializer(serializers.ModelSerializer):
     issue = IssueSerializer(read_only=True)

@@ -70,9 +70,10 @@ const RegistrarIssues = () => {
     const matchesSearch = searchQuery === '' || 
       issue.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       issue.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      issue.student?.fullName.toLowerCase().includes(searchQuery.toLowerCase());
+      (issue.student_name && issue.student_name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (issue.student_department && issue.student_department.toLowerCase().includes(searchQuery.toLowerCase()));
     const matchesDepartment = selectedDepartment === 'All Departments' || 
-      issue.student?.department?.name === selectedDepartment;
+      issue.student_department === selectedDepartment;
     
     return matchesFilter && matchesSearch && matchesDepartment;
   });
@@ -201,8 +202,8 @@ const RegistrarIssues = () => {
                     filteredIssues.map(issue => (
                       <tr key={issue.id}>
                         <td>{issue.title}</td>
-                        <td>{issue.student?.fullName}</td>
-                        <td>{issue.student?.department?.name}</td>
+                        <td>{issue.student_name || 'N/A'}</td>
+                        <td>{issue.student_department || 'N/A'}</td>
                         <td>
                           <span className={`status ${issue.status.toLowerCase()}`}>
                             {issue.status}
