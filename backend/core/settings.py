@@ -192,12 +192,9 @@ CORS_EXPOSE_HEADERS = [
     'authorization',
 ]
 
-CSRF_TRUSTED_ORIGINS = os.environ.get('CSRF_TRUSTED_ORIGINS',
-    "http://localhost:5173,http://127.0.0.1:5173,https://group-d-2025-j76wf1j7b-priez211s-projects.vercel.app").split(',')
-
-if os.environ.get('FRONTEND_URL'):
-    CSRF_TRUSTED_ORIGINS.append(os.environ.get('FRONTEND_URL'))
-
+CSRF_TRUSTED_ORIGINS = ['https://group-d-2025-j76wf1j7b-priez211s-projects.vercel.app',
+                        
+                        ]
 CORS_PREFLIGHT_MAX_AGE = 86400
 
 REST_FRAMEWORK = {
