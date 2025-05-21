@@ -60,6 +60,12 @@ const LecturerIssueDetail = () => {
     });
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    navigate('/login');
+  };
+
   return (
     <div className="dashboard-container">
       <header className="dashboard-header">
@@ -68,18 +74,18 @@ const LecturerIssueDetail = () => {
           <h1>AITs</h1>
         </div>
         <div className="user-menu">
-          <UserProfile user={user} />
+          <UserProfile user={user} onLogout={handleLogout} />
         </div>
       </header>
 
       <div className="dashboard-layout">
         <nav className="dashboard-nav">
           <ul>
-            <li onClick={() => navigate('/lecturer/dashboard')}>
+            <li onClick={() => navigate('/lecturer')}>
               <span>🏠</span>
               Dashboard
             </li>
-            <li className="active">
+            <li onClick={() => navigate('/lecturer/issues')} className="active">
               <span>📝</span>
               Manage Issues
             </li>
@@ -88,9 +94,9 @@ const LecturerIssueDetail = () => {
               Notifications
               <NotificationBadge />
             </li>
-            <li onClick={() => navigate('/lecturer/settings')}>
-              <span>⚙️</span>
-              Settings
+            <li onClick={() => navigate('/lecturer/profile')}>
+              <span>👤</span>
+              Profile
             </li>
           </ul>
         </nav>
