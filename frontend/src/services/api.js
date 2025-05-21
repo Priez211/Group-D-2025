@@ -121,13 +121,13 @@ export const getIssueById = async (issueId) => {
     }
 
     const user = JSON.parse(localStorage.getItem('user'));
-    let endpoint = '/issues';
+    let endpoint = '/student/issues';
     
     // Use different endpoints based on user role
-    if (user.role === 'registrar') {
-      endpoint = '/registrar/issues';
-    } else if (user.role === 'lecturer') {
+    if (user.role === 'lecturer') {
       endpoint = '/lecturer/issues';
+    } else if (user.role === 'registrar') {
+      endpoint = '/registrar/issues';
     }
 
     const response = await api.get(`${endpoint}/${issueId}`, {
@@ -396,7 +396,17 @@ export const updateIssueStatus = async (issueId, status) => {
       throw new Error('Authentication required. Please log in again.');
     }
 
-    const response = await api.patch(`/issues/${issueId}/update`, {
+    const user = JSON.parse(localStorage.getItem('user'));
+    let endpoint = '/student/issues';
+    
+    // Use different endpoints based on user role
+    if (user.role === 'lecturer') {
+      endpoint = '/lecturer/issues';
+    } else if (user.role === 'registrar') {
+      endpoint = '/registrar/issues';
+    }
+
+    const response = await api.patch(`${endpoint}/${issueId}/status`, {
       status
     }, {
       headers: {

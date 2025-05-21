@@ -150,21 +150,11 @@ AUTH_USER_MODEL = 'aits.User'
 CORS_ORIGIN_ALLOW_ALL = False
 CORS_ALLOW_CREDENTIALS = True
 
-CORS_ORIGIN_WHITELIST =['http://localhost:5173',
-                        'https://academicissuetrackingsysgroupd.vercel.app/',
-                        'http://127.0.0.1:5173',
-                        'https://group-d-2025-production.up.railway.app/']
-
-ALLOWED_HOSTS = [
-    'academicissuetrackingsysgroupd.vercel.app',
-    'group-d-2025-production.up.railway.app',
-    'localhost',
-    '127.0.0.1',
-]
-
+# Remove CORS_ORIGIN_WHITELIST and use only CORS_ALLOWED_ORIGINS
 CORS_ALLOWED_ORIGINS = [
     "https://academicissuetrackingsysgroupd.vercel.app",
-    "http://localhost:5173",  
+    "http://localhost:5173",
+    "http://127.0.0.1:5173"
 ]
 
 CORS_ALLOW_METHODS = [
@@ -193,8 +183,8 @@ CORS_EXPOSE_HEADERS = [
     'authorization',
 ]
 
-CSRF_TRUSTED_ORIGINS = ['https://group-d-2025-j76wf1j7b-priez211s-projects.vercel.app',
-                        
+CSRF_TRUSTED_ORIGINS = [
+    'https://academicissuetrackingsysgroupd.vercel.app'
 ]
 
 REST_FRAMEWORK = {
