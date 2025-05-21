@@ -607,3 +607,7 @@ class LecturerDeleteView(generics.DestroyAPIView):
         user = instance.user
         instance.delete()
         user.delete()  # Delete the associated user account as well
+from django.http import HttpResponse
+
+def home(request):
+    return HttpResponse("Welcome to the homepage!")
