@@ -6,7 +6,7 @@ import axios from 'axios';
 import '../../styles/Dashboard.css';
 import '../../styles/ManagementPage.css';
 
-const API_URL = 'http://localhost:8000/api';
+const API_URL = 'https://group-d-2025-production.up.railway.app/api';
 
 // Map departments to their colleges for filtering
 const DEPARTMENT_FACULTY_MAP = {
@@ -22,9 +22,8 @@ const StudentManagement = () => {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('');
-  const [selectedCollege, setSelectedCollege] = useState('');
-  const [selectedDepartment, setSelectedDepartment] = useState('');
-  const [selectedYear, setSelectedYear] = useState('');
+  const [selectedDepartment, setSelectedDepartment] = useState('All Departments');
+  const [selectedYear, setSelectedYear] = useState('All Years');
 
   const departmentOptions = [
     'All Departments',
@@ -41,20 +40,12 @@ const StudentManagement = () => {
     'Third Year'
   ];
 
-  // Filter department options based on selected college
-  const filteredDepartmentOptions = ['All Departments', ...departmentOptions.filter(dept => 
-    dept === 'All Departments' || DEPARTMENT_FACULTY_MAP[dept] === selectedCollege
-  )];
-
   const fetchStudents = useCallback(async () => {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
       const params = {};
       
-      if (selectedCollege && selectedCollege !== 'All Colleges') {
-        params.college = selectedCollege;
-      }
       if (selectedDepartment && selectedDepartment !== 'All Departments') {
         params.department = selectedDepartment;
       }
@@ -79,27 +70,20 @@ const StudentManagement = () => {
     } catch (error) {
       console.error('Error fetching students:', error);
       if (error.response && error.response.status === 401) {
-        // Handle unauthorized access
         navigate('/login');
       }
     } finally {
       setLoading(false);
     }
-  }, [selectedCollege, selectedDepartment, selectedYear, navigate]);
+  }, [selectedDepartment, selectedYear, navigate]);
 
   useEffect(() => {
-    // Check authentication and get user data
     const userData = JSON.parse(localStorage.getItem('user'));
     if (!userData || userData.role !== 'registrar') {
       navigate('/login');
       return;
     }
     setUser(userData);
-    
-    // Set the college filter to the registrar's college and disable changing it
-    if (userData.college) {
-      setSelectedCollege(userData.college);
-    }
   }, [navigate]);
 
   useEffect(() => {
@@ -111,26 +95,23 @@ const StudentManagement = () => {
   };
 
   const filteredStudents = students.filter(student => {
+    const fullName = `${student.fullName}`;
     const matchesSearch = 
-      student.fullName?.toLowerCase().includes(filter.toLowerCase()) ||
-      student.studentNumber?.toLowerCase().includes(filter.toLowerCase()) ||
-      student.email?.toLowerCase().includes(filter.toLowerCase());
+      fullName.toLowerCase().includes(filter.toLowerCase()) ||
+      student.email.toLowerCase().includes(filter.toLowerCase()) ||
+      student.studentNumber.toLowerCase().includes(filter.toLowerCase());
     
-    const matchesCollege = selectedCollege === '' || selectedCollege === 'All Colleges' || 
-      student.college === selectedCollege;
-    
-    const matchesDepartment = selectedDepartment === '' || selectedDepartment === 'All Departments' || 
+    const matchesDepartment = selectedDepartment === 'All Departments' || 
       student.department?.name === selectedDepartment;
     
-    const matchesYear = selectedYear === '' || selectedYear === 'All Years' || 
+    const matchesYear = selectedYear === 'All Years' || 
       student.yearOfStudy === selectedYear;
     
-    return matchesSearch && matchesCollege && matchesDepartment && matchesYear;
+    return matchesSearch && matchesDepartment && matchesYear;
   });
 
   return (
     <div className="dashboard-container">
-      {/* Header */}
       <header className="dashboard-header">
         <div className="logo">
           <span className="graduation-icon">👨‍💼</span>
@@ -142,7 +123,6 @@ const StudentManagement = () => {
       </header>
 
       <div className="dashboard-layout">
-        {/* Sidebar Navigation */}
         <nav className="dashboard-nav">
           <ul>
             <li onClick={() => navigate('/registrar')}>
@@ -165,7 +145,6 @@ const StudentManagement = () => {
               <span>🏛️</span>
               Departments
             </li>
-
             <li onClick={() => navigate('/registrar/notifications')} className="notification-item">
               <span>🔔</span>
               Notifications
@@ -178,7 +157,6 @@ const StudentManagement = () => {
           </ul>
         </nav>
 
-        {/* Main Content */}
         <main className="dashboard-main">
           <div className="page-header">
             <h1>Student Management</h1>
@@ -195,13 +173,12 @@ const StudentManagement = () => {
             </div>
             
             <div className="filter-dropdowns">
-              
               <select 
                 value={selectedDepartment} 
                 onChange={(e) => setSelectedDepartment(e.target.value)}
                 className="filter-select"
               >
-                {filteredDepartmentOptions.map((option, index) => (
+                {departmentOptions.map((option, index) => (
                   <option key={index} value={option}>{option}</option>
                 ))}
               </select>
@@ -221,48 +198,44 @@ const StudentManagement = () => {
           {loading ? (
             <div className="loading-spinner">Loading student data...</div>
           ) : (
-            <>
-              <div className="data-table-container">
-                <table className="data-table">
-                  <thead>
+            <div className="data-table-container">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>Student Number</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Department</th>
+                    <th>Year</th>
+                    <th>Course</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredStudents.length === 0 ? (
                     <tr>
-                      <th>Student Number</th>
-                      <th>Name</th>
-                      <th>Email</th>
-                      <th>College</th>
-                      <th>Department</th>
-                      <th>Year</th>
-                      <th>Course</th>
+                      <td colSpan="7" className="no-data">No students match your filters</td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {filteredStudents.length === 0 ? (
-                      <tr>
-                        <td colSpan="7" className="no-data">No students match your filters</td>
+                  ) : (
+                    filteredStudents.map(student => (
+                      <tr key={student.id}>
+                        <td>{student.studentNumber}</td>
+                        <td>{student.fullName}</td>
+                        <td>{student.email}</td>
+                        <td>{student.department?.name}</td>
+                        <td>{student.yearOfStudy}</td>
+                        <td>{student.course}</td>
+                        <td className="actions-cell">
+                          <button className="icon-button view-button" title="View Details">👁️</button>
+                          <button className="icon-button edit-button" title="Edit">✏️</button>
+                          <button className="icon-button delete-button" title="Delete">🗑️</button>
+                        </td>
                       </tr>
-                    ) : (
-                      filteredStudents.map(student => (
-                        <tr key={student.id}>
-                          <td>{student.studentNumber}</td>
-                          <td>{student.fullName}</td>
-                          <td>{student.email}</td>
-                          <td>{student.college}</td>
-                          <td>{student.department.name}</td>
-                          <td>{student.yearOfStudy}</td>
-                          <td>{student.course}</td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-              
-              <div className="pagination-controls">
-                <button className="pagination-button" disabled>&lt; Previous</button>
-                <span className="page-indicator">Page 1 of 1</span>
-                <button className="pagination-button" disabled>Next &gt;</button>
-              </div>
-            </>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           )}
         </main>
       </div>

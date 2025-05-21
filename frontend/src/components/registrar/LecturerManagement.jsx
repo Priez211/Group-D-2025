@@ -22,7 +22,7 @@ const LecturerManagement = () => {
   const [lecturers, setLecturers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('');
-  const [selectedDepartment, setSelectedDepartment] = useState('');
+  const [selectedDepartment, setSelectedDepartment] = useState('All Departments');
 
   const departmentOptions = [
     'All Departments',
@@ -85,13 +85,13 @@ const LecturerManagement = () => {
   };
 
   const filteredLecturers = lecturers.filter(lecturer => {
-    const fullName = `${lecturer.user?.first_name} ${lecturer.user?.last_name}`;
+    const fullName = `${lecturer.fullName}`;
     const matchesSearch = 
       fullName.toLowerCase().includes(filter.toLowerCase()) ||
-      lecturer.user?.email?.toLowerCase().includes(filter.toLowerCase()) ||
-      lecturer.department?.name?.toLowerCase().includes(filter.toLowerCase());
+      lecturer.email.toLowerCase().includes(filter.toLowerCase()) ||
+      lecturer.lecturerId.toLowerCase().includes(filter.toLowerCase());
     
-    const matchesDepartment = selectedDepartment === '' || selectedDepartment === 'All Departments' || 
+    const matchesDepartment = selectedDepartment === 'All Departments' || 
       lecturer.department?.name === selectedDepartment;
     
     return matchesSearch && matchesDepartment;
@@ -160,7 +160,7 @@ const LecturerManagement = () => {
             <div className="search-bar">
               <input
                 type="text"
-                placeholder="Search by name, email or department..."
+                placeholder="Search by name, ID or email..."
                 value={filter}
                 onChange={handleFilterChange}
               />
@@ -182,50 +182,40 @@ const LecturerManagement = () => {
           {loading ? (
             <div className="loading-spinner">Loading lecturer data...</div>
           ) : (
-            <>
-              <div className="data-table-container">
-                <table className="data-table">
-                  <thead>
+            <div className="data-table-container">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>Lecturer ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Department</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredLecturers.length === 0 ? (
                     <tr>
-                      <th>Name</th>
-                      <th>Email</th>
-                      <th>Department</th>
-                      <th>Courses</th>
-                      <th>Active Issues</th>
-                      <th>Actions</th>
+                      <td colSpan="5" className="no-data">No lecturers match your filters</td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {filteredLecturers.length === 0 ? (
-                      <tr>
-                        <td colSpan="6" className="no-data">No lecturers match your filters</td>
+                  ) : (
+                    filteredLecturers.map(lecturer => (
+                      <tr key={lecturer.id}>
+                        <td>{lecturer.lecturerId}</td>
+                        <td>{lecturer.fullName}</td>
+                        <td>{lecturer.email}</td>
+                        <td>{lecturer.department?.name}</td>
+                        <td className="actions-cell">
+                          <button className="icon-button view-button" title="View Details">👁️</button>
+                          <button className="icon-button edit-button" title="Edit">✏️</button>
+                          <button className="icon-button delete-button" title="Delete">🗑️</button>
+                        </td>
                       </tr>
-                    ) : (
-                      filteredLecturers.map(lecturer => (
-                        <tr key={lecturer.id}>
-                          <td>{`${lecturer.user.first_name} ${lecturer.user.last_name}`}</td>
-                          <td>{lecturer.user.email}</td>
-                          <td>{lecturer.department.name}</td>
-                          <td>{lecturer.courses?.length || 0} courses</td>
-                          <td>{lecturer.active_issues_count || 0}</td>
-                          <td className="actions-cell">
-                            <button className="icon-button view-button" title="View Details">👁️</button>
-                            <button className="icon-button edit-button" title="Edit">✏️</button>
-                            <button className="icon-button delete-button" title="Delete">🗑️</button>
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-              
-              <div className="pagination-controls">
-                <button className="pagination-button" disabled>&lt; Previous</button>
-                <span className="page-indicator">Page 1 of 1</span>
-                <button className="pagination-button" disabled>Next &gt;</button>
-              </div>
-            </>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           )}
         </main>
       </div>
