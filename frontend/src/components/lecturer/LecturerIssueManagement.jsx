@@ -90,9 +90,9 @@ const LecturerIssueManagement = () => {
               Notifications
               <NotificationBadge />
             </li>
-            <li onClick={() => navigate('/lecturer/profile')}>
-              <span>👤</span>
-              Profile
+            <li onClick={() => navigate('/lecturer/settings')}>
+              <span>⚙️</span>
+              Settings
             </li>
           </ul>
         </nav>
