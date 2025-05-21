@@ -75,7 +75,7 @@ const LecturerDashboard = () => {
       </header>
 
       <div className="dashboard-layout">
-      <nav className="dashboard-nav">
+        <nav className="dashboard-nav">
           <ul>
             <li className="active">
               <span>🏠</span>
@@ -96,34 +96,55 @@ const LecturerDashboard = () => {
             </li>
           </ul>
         </nav>
-        
+
         <main className="dashboard-main">
           {loading ? (
             <div className="loading-spinner">Loading...</div>
           ) : error ? (
             <div className="error-message">{error}</div>
           ) : (
-            <div className="dashboard-content">
-              <h2>Welcome, {user?.name || 'Lecturer'}</h2>
+            <>
+              <div className="welcome-section">
+                <h2>Welcome, {user?.first_name || 'Lecturer'}</h2>
+                <p>Here's an overview of your assigned academic issues</p>
+              </div>
+
               <div className="dashboard-stats">
                 <div className="stat-card">
-                  <h3>Total Issues</h3>
-                  <p>{issues.length}</p>
+                  <div className="stat-header">
+                    <h3>Total Issues</h3>
+                    <span className="stat-number">{issues.length}</span>
+                  </div>
                 </div>
+
                 <div className="stat-card">
-                  <h3>Open Issues</h3>
-                  <p>{issues.filter(issue => issue.status?.toLowerCase() === 'open').length}</p>
+                  <div className="stat-header">
+                    <h3>Open Issues</h3>
+                    <span className="stat-number">
+                      {issues.filter(issue => issue.status?.toLowerCase() === 'open').length}
+                    </span>
+                  </div>
                 </div>
+
                 <div className="stat-card">
-                  <h3>In Progress</h3>
-                  <p>{issues.filter(issue => issue.status?.toLowerCase() === 'in_progress').length}</p>
+                  <div className="stat-header">
+                    <h3>In Progress</h3>
+                    <span className="stat-number">
+                      {issues.filter(issue => issue.status?.toLowerCase() === 'in_progress').length}
+                    </span>
+                  </div>
                 </div>
+
                 <div className="stat-card">
-                  <h3>Resolved</h3>
-                  <p>{issues.filter(issue => issue.status?.toLowerCase() === 'resolved').length}</p>
+                  <div className="stat-header">
+                    <h3>Resolved</h3>
+                    <span className="stat-number">
+                      {issues.filter(issue => issue.status?.toLowerCase() === 'resolved').length}
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
+            </>
           )}
         </main>
       </div>
