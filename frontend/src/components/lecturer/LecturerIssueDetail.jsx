@@ -85,18 +85,18 @@ const LecturerIssueDetail = () => {
               <span>🏠</span>
               Dashboard
             </li>
-            <li onClick={() => navigate('/lecturer/issues')} className="active">
+            <li onClick={() => navigate('/lecturer/issues')}>
               <span>📝</span>
               Manage Issues
             </li>
-            <li onClick={() => navigate('/lecturer/notifications')} className="notification-item">
+            <li onClick={() => navigate('/lecturer/notifications')}>
               <span>🔔</span>
               Notifications
               <NotificationBadge />
             </li>
-            <li onClick={() => navigate('/lecturer/profile')}>
-              <span>👤</span>
-              Profile
+            <li onClick={() => navigate('/lecturer/settings')}>
+              <span>⚙️</span>
+              Settings
             </li>
           </ul>
         </nav>
