@@ -161,7 +161,7 @@ const LecturerIssueManagement = () => {
                     </tr>
                   ) : (
                     filteredIssues.map(issue => (
-                      <tr key={issue.issue_id} onClick={() => navigate(`/lecturer/issues/${issue.issue_id}`)}>
+                      <tr key={issue.issue_id} className="issue-row" onClick={() => navigate(`/lecturer/issues/${issue.issue_id}`)}>
                         <td>{issue.title}</td>
                         <td>{issue.student?.fullName || 'N/A'}</td>
                         <td>
@@ -175,17 +175,16 @@ const LecturerIssueManagement = () => {
                           </span>
                         </td>
                         <td>{issue.courseUnit}</td>
-                        <td className="actions-cell">
+                        <td className="actions-cell" onClick={(e) => e.stopPropagation()}>
                           <select
                             value={issue.status}
                             onChange={(e) => handleUpdateStatus(issue.issue_id, e.target.value)}
                             className="status-select"
-                            onClick={(e) => e.stopPropagation()}
                           >
-                            <option key="open" value="open">Open</option>
-                            <option key="in_progress" value="in_progress">In Progress</option>
-                            <option key="resolved" value="resolved">Resolved</option>
-                            <option key="closed" value="closed">Closed</option>
+                            <option value="open">Open</option>
+                            <option value="in_progress">In Progress</option>
+                            <option value="resolved">Resolved</option>
+                            <option value="closed">Closed</option>
                           </select>
                         </td>
                       </tr>
