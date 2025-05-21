@@ -152,9 +152,11 @@ CORS_ALLOW_CREDENTIALS = True
 
 CORS_ORIGIN_WHITELIST =['http://localhost:5173',
                         'https://academicissuetrackingsysgroupd.vercel.app/',
-                        'http://127.0.0.1:5173,https://group-d-2025-production.up.railway.app/']
+                        'http://127.0.0.1:5173',
+                        'https://group-d-2025-production.up.railway.app/']
 
-ALLOWED_HOSTS = ['https://academicissuetrackingsysgroupd.vercel.app/',]
+ALLOWED_HOSTS = ['https://academicissuetrackingsysgroupd.vercel.app/',
+                 'https://group-d-2025-production.up.railway.app/',]
 
 CORS_ALLOWED_ORIGINS = [
     "https://academicissuetrackingsysgroupd.vercel.app",
