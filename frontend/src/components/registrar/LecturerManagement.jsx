@@ -2,11 +2,9 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import UserProfile from '../UserProfile';
 import NotificationBadge from '../NotificationBadge';
-import axios from 'axios';
+import { getLecturers } from '../../services/api';
 import '../../styles/Dashboard.css';
 import '../../styles/ManagementPage.css';
-
-const API_URL = 'https://group-d-2025-production.up.railway.app/api';
 
 // Map departments to their colleges for filtering
 const DEPARTMENT_FACULTY_MAP = {
@@ -35,30 +33,17 @@ const LecturerManagement = () => {
   const fetchLecturers = useCallback(async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
       const params = {};
       
       if (selectedDepartment && selectedDepartment !== 'All Departments') {
         params.department = selectedDepartment;
       }
 
-      const response = await axios.get(`${API_URL}/lecturers`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
-        params
-      });
-
-      if (response.data) {
-        setLecturers(Array.isArray(response.data) ? response.data : []);
-      } else {
-        setLecturers([]);
-      }
+      const data = await getLecturers(params);
+      setLecturers(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Error fetching lecturers:', error);
-      if (error.response && error.response.status === 401) {
+      if (error.message === 'Authentication required. Please log in again.') {
         navigate('/login');
       }
     } finally {
