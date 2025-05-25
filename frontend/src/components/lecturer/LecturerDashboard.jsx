@@ -105,7 +105,7 @@ const LecturerDashboard = () => {
             <>
               <div className="welcome-section">
                 <h2>Welcome, {user?.first_name || 'Lecturer'}</h2>
-                <p>Here's an overview of your assigned academic issues</p>
+                <p>Here's an overview of issues assigned to you</p>
               </div>
 
               <div className="dashboard-stats">
