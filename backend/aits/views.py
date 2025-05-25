@@ -199,6 +199,17 @@ class StudentIssueCreateView(APIView):
                     )
                     print(f"Notification sent to lecturer: {assigned_to}")
                 
+                # Create notification for all registrars
+                registrars = User.objects.filter(role='registrar')
+                for registrar in registrars:
+                    create_notification(
+                        recipient=registrar,
+                        notification_type='issue_created',
+                        issue=issue,
+                        message=f'New issue created by {student.user.get_full_name()}: {issue.title}'
+                    )
+                    print(f"Notification sent to registrar: {registrar.username}")
+                
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             
             print(f"Serializer errors: {serializer.errors}")
@@ -289,12 +300,25 @@ class LecturerIssueDetailView(generics.RetrieveUpdateAPIView):
         
         # Create notification for the student when status changes
         if 'status' in self.request.data:
+            new_status = self.request.data['status']
             create_notification(
                 recipient=issue.student.user,
                 notification_type='issue_updated',
                 issue=issue,
-                message=f'Your issue "{issue.title}" status has been updated to {issue.status}'
+                message=f'Your issue "{issue.title}" status has been updated to {new_status}'
             )
+            
+            # If the issue is resolved, notify registrars
+            if new_status == 'resolved':
+                registrars = User.objects.filter(role='registrar')
+                for registrar in registrars:
+                    create_notification(
+                        recipient=registrar,
+                        notification_type='issue_resolved',
+                        issue=issue,
+                        message=f'Issue "{issue.title}" has been resolved by {self.request.user.get_full_name()}'
+                    )
+                    print(f"Resolution notification sent to registrar: {registrar.username}")
 
 
 class AcademicRegistrarIssueListView(generics.ListAPIView):
