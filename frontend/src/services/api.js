@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'https://group-d-2025-production.up.railway.app/';
+const API_URL = 'https://group-d-2025-production.up.railway.app';
 
 const api = axios.create({
   baseURL: API_URL,
@@ -290,10 +290,22 @@ export const markNotificationRead = async (notificationId) => {
   }
 };
 
-export const getStudents = async () => {
+export const getStudents = async (filters = {}) => {
   try {
     console.log('Fetching all students');
-    const response = await api.get('/students', {
+    const params = new URLSearchParams();
+    if (filters.department) {
+      params.append('department', filters.department);
+    }
+    if (filters.year) {
+      params.append('year', filters.year);
+    }
+
+    const queryString = params.toString();
+    const url = `/students${queryString ? `?${queryString}` : ''}`;
+    console.log('Fetching students from:', url);
+
+    const response = await api.get(url, {
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
@@ -319,6 +331,7 @@ export const getStudents = async () => {
     }
   }
 };
+
 export const getRegistrarIssues = async () => {
   try {
     const response = await api.get('/registrar/issues', {
