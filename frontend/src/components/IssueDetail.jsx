@@ -215,7 +215,6 @@ const IssueDetail = () => {
       <div className="dashboard-container">
         <header className="dashboard-header">
           <div className="logo">
-            <span className="graduation-icon">{user?.role === 'registrar' ? '👨‍💼' : '👨‍🎓'}</span>
             <h1>AITs</h1>
           </div>
           <div className="user-menu">
@@ -232,7 +231,6 @@ const IssueDetail = () => {
       <div className="dashboard-container">
         <header className="dashboard-header">
           <div className="logo">
-            <span className="graduation-icon">{user?.role === 'registrar' ? '👨‍💼' : '👨‍🎓'}</span>
             <h1>AITs</h1>
           </div>
           <div className="user-menu">
@@ -306,7 +304,6 @@ const IssueDetail = () => {
     <div className="dashboard-container">
       <header className="dashboard-header">
         <div className="logo">
-          <span className="graduation-icon">{user?.role === 'registrar' ? '👨‍💼' : '👨‍🎓'}</span>
           <h1>AITs</h1>
         </div>
         <div className="user-menu">

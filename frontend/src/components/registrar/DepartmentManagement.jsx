@@ -147,7 +147,6 @@ const DepartmentManagement = () => {
       {/* Header */}
       <header className="dashboard-header">
         <div className="logo">
-          <span className="graduation-icon">👨‍💼</span>
           <h1>AITs</h1>
         </div>
         <div className="user-menu">
