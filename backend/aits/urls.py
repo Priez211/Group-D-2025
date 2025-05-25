@@ -17,7 +17,8 @@ from .views import (
     get_notifications,
     mark_notification_read,
     delete_notification,
-    clear_all_notifications
+    clear_all_notifications,
+    update_issue_status
 )
 from . import views
 urlpatterns = [
@@ -38,6 +39,7 @@ urlpatterns = [
     path('lecturer/issues/', LecturerIssueListView.as_view(), name='lecturer-issues-slash'),
     path('lecturer/issues/<int:pk>', LecturerIssueDetailView.as_view(), name='lecturer-issue-detail'),
     path('lecturer/issues/<int:pk>/', LecturerIssueDetailView.as_view(), name='lecturer-issue-detail-slash'),
+    path('lecturer/issues/<int:pk>/status', update_issue_status, name='lecturer-issue-status-update'),
     
     # Issue routes
     path('issues/<int:pk>', StudentIssueDetailView.as_view(), name='issue-detail'),
@@ -49,6 +51,7 @@ urlpatterns = [
     path('registrar/issues', AcademicRegistrarIssueListView.as_view(), name='registrar-issues'),
     path('registrar/issues/<int:pk>', AcademicRegistrarIssueDetailView.as_view(), name='registrar-issue-detail'),
     path('registrar/issues/<int:pk>/', AcademicRegistrarIssueDetailView.as_view(), name='registrar-issue-detail-slash'),
+    path('registrar/issues/<int:pk>/status', update_issue_status, name='registrar-issue-status-update'),
     
     # Notification routes
     path('notifications', get_notifications, name='get-notifications'),

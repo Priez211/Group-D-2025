@@ -635,3 +635,72 @@ from django.http import HttpResponse
 
 def home(request):
     return HttpResponse("Welcome to the homepage!")
+
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
+def update_issue_status(request, pk):
+    try:
+        # Get the issue
+        issue = Issue.objects.get(pk=pk)
+        
+        # Check permissions based on user role
+        if request.user.role == 'lecturer':
+            if issue.assigned_to != request.user.lecturer_profile:
+                return Response(
+                    {'error': 'You are not authorized to update this issue'},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+        elif request.user.role == 'registrar':
+            pass  # Registrars can update any issue
+        else:
+            return Response(
+                {'error': 'You are not authorized to update issue status'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        # Update the status
+        if 'status' not in request.data:
+            return Response(
+                {'error': 'Status field is required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+            
+        old_status = issue.status
+        issue.status = request.data['status']
+        issue.save()
+        
+        # Create notification for the student
+        create_notification(
+            recipient=issue.student.user,
+            notification_type='issue_updated',
+            issue=issue,
+            message=f'Your issue "{issue.title}" status has been updated to {issue.status}'
+        )
+        
+        # If the issue is resolved, notify registrars
+        if issue.status == 'resolved' and old_status != 'resolved':
+            registrars = User.objects.filter(role='registrar')
+            for registrar in registrars:
+                create_notification(
+                    recipient=registrar,
+                    notification_type='issue_resolved',
+                    issue=issue,
+                    message=f'Issue "{issue.title}" has been resolved by {request.user.get_full_name()}'
+                )
+                print(f"Resolution notification sent to registrar: {registrar.username}")
+        
+        # Return the updated issue data
+        serializer = IssueSerializer(issue)
+        return Response(serializer.data)
+        
+    except Issue.DoesNotExist:
+        return Response(
+            {'error': 'Issue not found'},
+            status=status.HTTP_404_NOT_FOUND
+        )
+    except Exception as e:
+        print(f"Error updating issue status: {str(e)}")
+        return Response(
+            {'error': 'Failed to update issue status', 'detail': str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
