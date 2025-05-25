@@ -467,7 +467,11 @@ export const getLecturers = async (filters = {}) => {
       params.append('department', filters.department);
     }
 
-    const response = await api.get(`/lecturers?${params.toString()}`, {
+    const queryString = params.toString();
+    const url = `/lecturers${queryString ? `?${queryString}` : ''}`;
+    console.log('Fetching lecturers from:', url);
+
+    const response = await api.get(url, {
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
@@ -478,10 +482,17 @@ export const getLecturers = async (filters = {}) => {
       throw new Error('No data received from server');
     }
     
+    console.log('Received lecturers:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error fetching lecturers:', error);
-    throw error.response?.data || error.message;
+    if (error.response) {
+      throw error.response.data;
+    } else if (error.request) {
+      throw new Error('No response from server');
+    } else {
+      throw error;
+    }
   }
 };
 
