@@ -314,41 +314,19 @@ const IssueDetail = () => {
       <div className="dashboard-layout">
         <nav className="dashboard-nav">
           <ul>
-            <li onClick={handleHomeNavigation}>
+            <li onClick={() => navigate('/dashboard')}>
               <span>🏠</span>
               Home
             </li>
-            {user?.role === 'registrar' ? (
-              <>
-                <li className="active">
-                  <span>📝</span>
-                  Issues
-                </li>
-                <li onClick={() => navigate('/registrar/students')}>
-                  <span>👨‍🎓</span>
-                  Students
-                </li>
-                <li onClick={() => navigate('/registrar/lecturers')}>
-                  <span>👨‍🏫</span>
-                  Lecturers
-                </li>
-                <li onClick={() => navigate('/registrar/departments')}>
-                  <span>🏛️</span>
-                  Departments
-                </li>
-              </>
-            ) : (
-              <li onClick={() => navigate('/my-issues')}>
-                <span>📝</span>
-                My Issues
-              </li>
-            )}
-            <li onClick={() => navigate(getNotificationsPath())} className="notification-item">
+            <li onClick={() => navigate('/my-issues')}>
+              <span>📝</span>
+              My Issues
+            </li>
+            <li onClick={() => navigate('/notifications')} className="notification-item">
               <span>🔔</span>
               Notifications
-              <NotificationBadge />
             </li>
-            <li>
+            <li onClick={() => navigate('/settings')}>
               <span>⚙️</span>
               Settings
             </li>

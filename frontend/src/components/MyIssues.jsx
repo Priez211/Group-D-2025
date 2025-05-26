@@ -6,12 +6,14 @@ import NotificationBadge from './NotificationBadge';
 import '../styles/Dashboard.css';
 
 const MyIssues = () => {
+  // State variables
   const navigate = useNavigate();
   const [issues, setIssues] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [user, setUser] = useState(null);
 
+  // Load user data and issues on component mount
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem('user'));
     if (!userData) {
@@ -22,10 +24,13 @@ const MyIssues = () => {
     fetchIssues();
   }, [navigate]);
 
+  // API Functions
   const fetchIssues = async () => {
     try {
       setLoading(true);
       const data = await getStudentIssues();
+      
+      // Handle API response
       if (Array.isArray(data)) {
         setIssues(data);
       } else if (data && typeof data === 'object') {
@@ -43,33 +48,25 @@ const MyIssues = () => {
     }
   };
 
-  const handleAddNewIssue = () => {
-    navigate('/add-issue');
-  };
-
+  // Navigation handlers
+  const handleAddNewIssue = () => navigate('/add-issue');
   const handleIssueClick = (issueId) => {
     if (!issueId) {
       console.error('No issue ID provided');
       return;
     }
-    // For students, consistently use /issue/:issueId
     navigate(`/issue/${issueId}`);
   };
 
-  // Setting colour changes for the different issue statuses
+  // Helper functions
   const getStatusColor = (status) => {
-    switch (status?.toLowerCase()) {
-      case 'open':
-        return 'gray';
-      case 'in_progress':
-        return 'blue';
-      case 'resolved':
-        return 'green';
-      case 'closed':
-        return 'red';
-      default:
-        return 'gray';
-    }
+    const colors = {
+      open: 'gray',
+      in_progress: 'blue',
+      resolved: 'green',
+      closed: 'red'
+    };
+    return colors[status?.toLowerCase()] || 'gray';
   };
 
   const formatDate = (dateString) => {
@@ -89,11 +86,12 @@ const MyIssues = () => {
       .join(' ');
   };
 
+  // Render component
   return (
     <div className="dashboard-container">
+      {/* Header */}
       <header className="dashboard-header">
         <div className="logo">
-          <span className="graduation-icon">👨‍🎓</span>
           <h1>AITs</h1>
         </div>
         <div className="user-menu">
@@ -102,36 +100,36 @@ const MyIssues = () => {
       </header>
 
       <div className="dashboard-layout">
+        {/* Navigation Menu */}
         <nav className="dashboard-nav">
           <ul>
             <li onClick={() => navigate('/dashboard')}>
-              <span>🏠</span>
-              Home
+              <span>Home</span>
             </li>
             <li className="active">
-              <span>📝</span>
-              My Issues
+              <span>My Issues</span>
             </li>
             <li onClick={() => navigate('/notifications')} className="notification-item">
-              <span>🔔</span>
-              Notifications
+              <span>Notifications</span>
               <NotificationBadge />
             </li>
-            <li>
-              <span>⚙️</span>
-              Settings
+            <li onClick={() => navigate('/settings')}>
+              <span>Settings</span>
             </li>
           </ul>
         </nav>
 
+        {/* Main Content */}
         <main className="dashboard-main">
+          {/* Page Header */}
           <div className="page-header">
             <h1>My Issues</h1>
             <button className="add-issue-button" onClick={handleAddNewIssue}>
-              <span>➕</span> Add New Issue
+              Add New Issue
             </button>
           </div>
           
+          {/* Issues List */}
           <section className="all-issues">
             {loading ? (
               <div className="loading-spinner">Loading...</div>
@@ -140,6 +138,7 @@ const MyIssues = () => {
             ) : (
               <div className="issues-list">
                 {issues.length === 0 ? (
+                  // Empty state
                   <div className="no-issues">
                     <p>No issues found.</p>
                     <button className="add-issue-button" onClick={handleAddNewIssue}>
@@ -147,6 +146,7 @@ const MyIssues = () => {
                     </button>
                   </div>
                 ) : (
+                  // Issues grid
                   issues
                     .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
                     .map((issue) => {
@@ -158,6 +158,7 @@ const MyIssues = () => {
                           onClick={() => handleIssueClick(issueId)}
                         >
                           <div className="issue-content">
+                            {/* Issue header */}
                             <div className="issue-header">
                               <h3>{issue.title || formatCategory(issue.category)}</h3>
                               <div className="issue-metadata">
@@ -165,6 +166,8 @@ const MyIssues = () => {
                                 <span className="issue-date">{formatDate(issue.created_at)}</span>
                               </div>
                             </div>
+                            
+                            {/* Issue details */}
                             <p className="issue-description">{issue.description}</p>
                             <div className="issue-status">
                               <span className={`status-badge ${issue.status?.toLowerCase()}`}>

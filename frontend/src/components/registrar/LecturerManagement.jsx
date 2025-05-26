@@ -118,13 +118,12 @@ const LecturerManagement = () => {
               <span>🏛️</span>
               Departments
             </li>
-
             <li onClick={() => navigate('/registrar/notifications')} className="notification-item">
               <span>🔔</span>
               Notifications
               <NotificationBadge />
             </li>
-            <li>
+            <li onClick={() => navigate('/settings')}>
               <span>⚙️</span>
               Settings
             </li>

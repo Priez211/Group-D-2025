@@ -114,11 +114,11 @@ const StudentDashboard = () => {
               <span>📝</span>
               My Issues
             </li>
-            <li onClick={() => navigate('/notifications')}>
+            <li onClick={() => navigate('/notifications')} className="notification-item">
               <span>🔔</span>
               Notifications
             </li>
-            <li>
+            <li onClick={() => navigate('/settings')}>
               <span>⚙️</span>
               Settings
             </li>

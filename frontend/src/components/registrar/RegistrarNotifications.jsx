@@ -8,13 +8,18 @@ import '../../styles/Notifications.css';
 
 const RegistrarNotifications = () => {
   const navigate = useNavigate();
+  
+  // State variables
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [user, setUser] = useState(null);
-  const [filter, setFilter] = useState('all'); // all, unread, issues, students, departments
+  const [filter, setFilter] = useState('all');
+  
+  // Get notification context
   const { clearUnreadStatus } = useNotifications();
 
+  // Load user data and fetch notifications
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem('user'));
     if (!userData || userData.role !== 'registrar') {
@@ -23,14 +28,16 @@ const RegistrarNotifications = () => {
     }
     setUser(userData);
     fetchNotifications();
-    // Clear unread status when notifications page is opened
     clearUnreadStatus();
   }, [navigate, clearUnreadStatus]);
 
+  // Get notifications from backend
   const fetchNotifications = async () => {
     try {
       setLoading(true);
       const data = await getNotifications();
+      
+      // Handle different response formats
       if (Array.isArray(data)) {
         setNotifications(data);
       } else if (data && typeof data === 'object') {
@@ -48,6 +55,7 @@ const RegistrarNotifications = () => {
     }
   };
 
+  // Format date to readable string
   const formatDate = (dateString) => {
     if (!dateString) return '';
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -59,9 +67,10 @@ const RegistrarNotifications = () => {
     });
   };
 
+  // Handle clicking on a notification
   const handleNotificationClick = async (notification) => {
     try {
-      // Mark notification as read if it isn't already
+      // Mark as read if needed
       if (!notification.is_read) {
         await markNotificationRead(notification.id);
         setNotifications(notifications.map(n => 
@@ -69,7 +78,7 @@ const RegistrarNotifications = () => {
         ));
       }
 
-      // Navigate based on notification type and get the correct ID
+      // Navigate based on notification type
       if (notification.issue) {
         const issueId = notification.issue.issue_id || notification.issue.id || notification.issue._id;
         if (issueId) {
@@ -85,6 +94,7 @@ const RegistrarNotifications = () => {
     }
   };
 
+  // Filter notifications based on selected type
   const getFilteredNotifications = () => {
     return notifications.filter(notification => {
       switch (filter) {
@@ -102,15 +112,17 @@ const RegistrarNotifications = () => {
     });
   };
 
+  // Get appropriate icon for notification type
   const getNotificationIcon = (type) => {
     if (type.includes('issue')) {
-      return type.includes('resolved') ? '✅' : 
-             type.includes('created') ? '📝' : 
-             type.includes('closed') ? '🔒' : '🔄';
+      if (type.includes('resolved')) return '✓';
+      if (type.includes('created')) return '+';
+      if (type.includes('closed')) return 'x';
+      return '⟳';
     }
-    if (type.includes('student')) return '👨‍🎓';
-    if (type.includes('department')) return '🏛️';
-    return '📢';
+    if (type.includes('student')) return 'S';
+    if (type.includes('department')) return 'D';
+    return '!';
   };
 
   return (
@@ -125,6 +137,7 @@ const RegistrarNotifications = () => {
       </header>
 
       <div className="dashboard-layout">
+        {/* Navigation Menu */}
         <nav className="dashboard-nav">
           <ul>
             <li onClick={() => navigate('/registrar')}>
@@ -147,19 +160,19 @@ const RegistrarNotifications = () => {
               <span>🏛️</span>
               Departments
             </li>
-            
             <li className="active notification-item">
               <span>🔔</span>
               Notifications
               <NotificationBadge />
             </li>
-            <li>
+            <li onClick={() => navigate('/settings')}>
               <span>⚙️</span>
               Settings
             </li>
           </ul>
         </nav>
 
+        {/* Main Content */}
         <main className="dashboard-main">
           <div className="page-header">
             <h1>Notifications</h1>
@@ -178,6 +191,7 @@ const RegistrarNotifications = () => {
             </div>
           </div>
           
+          {/* Notifications List */}
           <section className="notifications-section">
             {loading ? (
               <div className="loading-spinner">Loading...</div>
@@ -196,22 +210,19 @@ const RegistrarNotifications = () => {
                     .map((notification) => (
                       <div
                         key={notification.id}
-                        className={`notification-card ${notification.is_read ? 'read' : 'unread'}`}
+                        className={`notification-item ${!notification.is_read ? 'unread' : ''}`}
                         onClick={() => handleNotificationClick(notification)}
                       >
+                        <div className="notification-icon">
+                          {getNotificationIcon(notification.notification_type)}
+                        </div>
                         <div className="notification-content">
-                          <div className="notification-header">
-                            <span className="notification-type">
-                              {getNotificationIcon(notification.notification_type)}
-                            </span>
-                            <span className="notification-date">
-                              {formatDate(notification.created_at)}
-                            </span>
-                          </div>
-                          <p className="notification-message">{notification.message}</p>
-                          {!notification.is_read && (
-                            <span className="unread-indicator">New</span>
-                          )}
+                          <p className="notification-message">
+                            {notification.message}
+                          </p>
+                          <span className="notification-time">
+                            {formatDate(notification.created_at)}
+                          </span>
                         </div>
                       </div>
                     ))

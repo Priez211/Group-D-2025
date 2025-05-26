@@ -78,18 +78,18 @@ const LecturerDashboard = () => {
           <ul>
             <li className="active">
               <span>🏠</span>
-              Dashboard
+              Home
             </li>
             <li onClick={() => navigate('/lecturer/issues')}>
               <span>📝</span>
-              Manage Issues
+              Issues
             </li>
             <li onClick={() => navigate('/lecturer/notifications')} className="notification-item">
               <span>🔔</span>
               Notifications
               <NotificationBadge />
             </li>
-            <li onClick={() => navigate('/lecturer/settings')}>
+            <li onClick={() => navigate('/settings')}>
               <span>⚙️</span>
               Settings
             </li>

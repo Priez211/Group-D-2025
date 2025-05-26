@@ -59,7 +59,7 @@ const RegistrarDashboard = () => {
               Notifications
               <NotificationBadge />
             </li>
-            <li>
+            <li onClick={() => navigate('/settings')}>
               <span>⚙️</span>
               Settings
             </li>

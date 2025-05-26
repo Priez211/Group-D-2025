@@ -1,17 +1,22 @@
+# Import Django modules
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
 
+
+# User model with role-based authentication
 class User(AbstractUser):
+    # Role choices for different user types
     ROLES = (
         ('student', 'Student'),
         ('lecturer', 'Lecturer'),
         ('registrar', 'Academic Registrar'),
     )
+    
     role = models.CharField(max_length=10, choices=ROLES, default='student')
     email = models.EmailField(unique=True)
 
-    # Add unique related_name to avoid clashes
+    # Add custom related names to avoid clashes with default User model
     groups = models.ManyToManyField(
         'auth.Group',
         related_name='aits_user_set',
@@ -31,6 +36,7 @@ class User(AbstractUser):
         return self.username
 
 
+# Department model for organizing colleges and faculties
 class Department(models.Model):
     name = models.CharField(max_length=100, unique=True)
     faculty = models.CharField(max_length=100)
@@ -39,6 +45,7 @@ class Department(models.Model):
         return self.name
 
 
+# Lecturer model linked to User and Department
 class Lecturer(models.Model):
     user = models.OneToOneField(
         User, 
@@ -55,7 +62,9 @@ class Lecturer(models.Model):
         return self.user.get_full_name()
 
 
+# Student model with college and course information
 class Student(models.Model):
+    # Choices for student information
     COLLEGE_CHOICES = (
         ('College of Computing', 'College of Computing'),
         ('College Of Humanity And Social Sciences', 'College Of Humanity And Social Sciences'),
@@ -76,36 +85,29 @@ class Student(models.Model):
         ('Third Year', 'Third Year'),
     )
     
+    # Link to User model
     user = models.OneToOneField(
         User, 
         on_delete=models.CASCADE, 
         related_name='student_profile'
     )
-    college = models.CharField(
-        max_length=100, 
-        choices=COLLEGE_CHOICES
-    )
+    
+    # Student details
+    college = models.CharField(max_length=100, choices=COLLEGE_CHOICES)
     department = models.ForeignKey(
         Department, 
         on_delete=models.SET_NULL, 
         null=True, 
         related_name='students'
     )
-    year_of_study = models.CharField(
-        max_length=20, 
-        choices=YEAR_CHOICES
-    )
-    course = models.CharField(
-        max_length=100, 
-        choices=COURSE_CHOICES
-    )
-
-    
+    year_of_study = models.CharField(max_length=20, choices=YEAR_CHOICES)
+    course = models.CharField(max_length=100, choices=COURSE_CHOICES)
 
     def __str__(self):
         return self.user.get_full_name()
 
 
+# Academic Registrar model
 class AcademicRegistrar(models.Model):
     COLLEGE_CHOICES = (
         ('College of Computing', 'College of Computing'),
@@ -119,10 +121,7 @@ class AcademicRegistrar(models.Model):
         on_delete=models.CASCADE, 
         related_name='registrar_profile'
     )
-    college = models.CharField(
-        max_length=100, 
-        choices=COLLEGE_CHOICES
-    )
+    college = models.CharField(max_length=100, choices=COLLEGE_CHOICES)
     department = models.ForeignKey(
         Department, 
         on_delete=models.CASCADE, 
@@ -133,7 +132,9 @@ class AcademicRegistrar(models.Model):
         return self.user.get_full_name()
 
 
+# Issue model for tracking student issues
 class Issue(models.Model):
+    # Choices for issue categorization and status
     CATEGORIES = (
         ('academic', 'Academic Issues'),
         ('technical', 'Technical Issues'),
@@ -142,17 +143,20 @@ class Issue(models.Model):
         ('registration', 'Registration Issues'),
         ('other', 'Other Issues'),
     )
+    
     STATUSES = (
         ('open', 'Open'),
         ('in_progress', 'In Progress'),
         ('resolved', 'Resolved'),
         ('closed', 'Closed'),
     )
+    
     PRIORITIES = (
         ('low', 'Low'),
         ('medium', 'Medium'),
         ('high', 'High'),
     )
+    
     COURSE_UNITS = (
         ('CSC1100', 'CSC1100 - Programming Fundamentals'),
         ('CSC1200', 'CSC1200 - Data Structures'),
@@ -160,58 +164,42 @@ class Issue(models.Model):
         ('CSC2200', 'CSC2200 - Web Development'),
         ('CSC3100', 'CSC3100 - Software Engineering'),
     )
+    
     YEAR_CHOICES = (
         ('1', 'First Year'),
         ('2', 'Second Year'),
         ('3', 'Third Year'),
     )
+    
     SEMESTER_CHOICES = (
         ('1', 'Semester 1'),
         ('2', 'Semester 2'),
     )
     
+    # Basic issue information
     issue_id = models.AutoField(primary_key=True, serialize=False)
     title = models.CharField(max_length=200)
     category = models.CharField(max_length=20, choices=CATEGORIES)
     description = models.TextField()
-    status = models.CharField(
-        max_length=20, 
-        choices=STATUSES, 
-        default='open'
-    )
-    priority = models.CharField(
-        max_length=10, 
-        choices=PRIORITIES, 
-        default='medium'
-    )
-    courseUnit = models.CharField(
-        max_length=10,
-        choices=COURSE_UNITS,
-        null=True,
-        blank=True
-    )
-    yearOfStudy = models.CharField(
-        max_length=1,
-        choices=YEAR_CHOICES,
-        null=True,
-        blank=True
-    )
-    semester = models.CharField(
-        max_length=1,
-        choices=SEMESTER_CHOICES,
-        null=True,
-        blank=True
-    )
+    
+    # Issue status and priority
+    status = models.CharField(max_length=20, choices=STATUSES, default='open')
+    priority = models.CharField(max_length=10, choices=PRIORITIES, default='medium')
+    
+    # Course-related information
+    courseUnit = models.CharField(max_length=10, choices=COURSE_UNITS, null=True, blank=True)
+    yearOfStudy = models.CharField(max_length=1, choices=YEAR_CHOICES, null=True, blank=True)
+    semester = models.CharField(max_length=1, choices=SEMESTER_CHOICES, null=True, blank=True)
+    
+    # File attachments
     attachment = models.FileField(
         upload_to='issue_attachments/%Y/%m/%d/',
         null=True,
         blank=True
     )
-    student = models.ForeignKey(
-        Student, 
-        on_delete=models.CASCADE, 
-        related_name='issues'
-    )
+    
+    # Relationships
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='issues')
     assigned_to = models.ForeignKey(
         Lecturer, 
         on_delete=models.SET_NULL, 
@@ -219,30 +207,36 @@ class Issue(models.Model):
         blank=True, 
         related_name='assigned_issues'
     )
+    
+    # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def save(self, *args, **kwargs):
+        # Set priority based on category if not already set
         if not self.priority:
             self.priority = self.get_priority_for_category()
         super().save(*args, **kwargs)
 
     def get_priority_for_category(self):
+        # Default priorities for different issue categories
         priority_map = {
             'academic': 'high',
             'examination': 'high',
-            'technical': 'medium',
-            'administrative': 'medium',
             'registration': 'medium',
-            'other': 'low',
+            'technical': 'medium',
+            'administrative': 'low',
+            'other': 'low'
         }
-        return priority_map.get(self.category, 'low')
+        return priority_map.get(self.category, 'medium')
 
     def __str__(self):
-        return f"{self.title} ({self.get_status_display()})"
+        return f"{self.title} - {self.student}"
 
 
+# Notification model for system notifications
 class Notification(models.Model):
+    # Types of notifications
     NOTIFICATION_TYPES = (
         ('issue_created', 'New Issue Created'),
         ('issue_updated', 'Issue Updated'),
@@ -251,6 +245,7 @@ class Notification(models.Model):
         ('comment_added', 'New Comment Added'),
     )
 
+    # Notification fields
     recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
     notification_type = models.CharField(max_length=20, choices=NOTIFICATION_TYPES)
     issue = models.ForeignKey(Issue, on_delete=models.CASCADE, related_name='notifications')

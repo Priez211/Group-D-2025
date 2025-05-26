@@ -148,7 +148,7 @@ const AddNewIssue = () => {
               Notifications
               <NotificationBadge />
             </li>
-            <li>
+            <li onClick={() => navigate('/settings')}>
               <span>⚙️</span>
               Settings
             </li>

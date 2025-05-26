@@ -27,19 +27,19 @@ from .permissions import IsStudent, IsLecturer, IsAcademicRegistrar
 
 
 class LoginView(APIView):
+    """Handle user login and return JWT token"""
     permission_classes = [AllowAny]
 
     def post(self, request):
+        # Check if login data is valid
         serializer = LoginSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.validated_data['user']
             role = serializer.validated_data['role']
             
-            # Get current timestamp and set expiration
+            # Create JWT token that expires in 24 hours
             now = datetime.datetime.utcnow()
             exp = now + datetime.timedelta(hours=24)
-            
-            # Generate JWT token with expiration
             token = jwt.encode(
                 {
                     'user_id': user.username,
@@ -50,6 +50,7 @@ class LoginView(APIView):
                 algorithm='HS256'
             )
             
+            # Return token and user info
             return Response({
                 'token': token,
                 'user': {
@@ -65,14 +66,18 @@ class LoginView(APIView):
             status=status.HTTP_401_UNAUTHORIZED
         )
 
+
 class RegisterView(APIView):
+    """Handle user registration for different roles"""
     permission_classes = [AllowAny]
     
     def post(self, request):
+        # Get user role from request
         role = request.data.get('role')
         print("\n=== Registration Request ===")
         print("Received data:", request.data)
         
+        # Choose serializer based on role
         if role == 'student':
             serializer = StudentRegistrationSerializer(data=request.data)
         elif role == 'lecturer':
@@ -86,6 +91,7 @@ class RegisterView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
+        # Try to create new user
         if serializer.is_valid():
             try:
                 instance = serializer.save()
@@ -111,7 +117,7 @@ class RegisterView(APIView):
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR
                 )
         
-        # Format validation errors
+        # Return validation errors if any
         errors = {}
         for field, error_list in serializer.errors.items():
             errors[field] = error_list[0] if isinstance(error_list, list) else error_list
@@ -119,24 +125,19 @@ class RegisterView(APIView):
         print("Validation errors:", errors)
         return Response({'errors': errors}, status=status.HTTP_400_BAD_REQUEST)
 
+
 class StudentIssueCreateView(APIView):
+    """Handle creating and listing student issues"""
     permission_classes = [IsAuthenticated, IsStudent]
     parser_classes = (MultiPartParser, FormParser, JSONParser)
     
     def get(self, request):
         try:
-            # Get the student instance
+            # Get student's issues
             student = request.user.student_profile
-            
-            # Get all issues for this student
             issues = Issue.objects.filter(student=student).order_by('-created_at')
-            
-            # Serialize the issues
             serializer = IssueSerializer(issues, many=True)
-            
-            return Response({
-                'issues': serializer.data
-            })
+            return Response({'issues': serializer.data})
         except Exception as e:
             return Response({
                 'error': str(e)
@@ -147,11 +148,11 @@ class StudentIssueCreateView(APIView):
             print("\n=== Creating New Issue ===")
             print(f"Request data: {request.data}")
             
-            # Get the student instance
+            # Get student info
             student = request.user.student_profile
             print(f"Student: {student}")
             
-            # Get assigned lecturer if provided
+            # Check if issue should be assigned to a lecturer
             assigned_to = None
             if 'assigned_to' in request.data:
                 try:
@@ -163,25 +164,25 @@ class StudentIssueCreateView(APIView):
                         'error': 'Selected lecturer does not exist'
                     }, status=status.HTTP_400_BAD_REQUEST)
             
-            # Create the issue
+            # Create new issue
             serializer = IssueSerializer(data=request.data, context={'request': request})
             if serializer.is_valid():
                 print(f"Serializer is valid. Data: {serializer.validated_data}")
                 
-                # Add the student and assigned lecturer to the issue data
+                # Add student and lecturer info
                 serializer.validated_data['student'] = student
                 if assigned_to:
                     serializer.validated_data['assigned_to'] = assigned_to
                 
-                # Handle file upload
+                # Handle file upload if any
                 if 'attachment' in request.FILES:
                     serializer.validated_data['attachment'] = request.FILES['attachment']
                 
-                # Save the issue
+                # Save issue
                 issue = serializer.save()
                 print(f"Issue created successfully: {issue}")
                 
-                # Create notification for the student
+                # Send notification to student
                 create_notification(
                     recipient=request.user,
                     notification_type='issue_created',
@@ -189,7 +190,7 @@ class StudentIssueCreateView(APIView):
                     message=f'Your issue "{issue.title}" has been submitted successfully.'
                 )
                 
-                # Create notification for assigned lecturer if one is assigned
+                # Send notification to lecturer if assigned
                 if assigned_to:
                     create_notification(
                         recipient=assigned_to.user,
@@ -199,268 +200,259 @@ class StudentIssueCreateView(APIView):
                     )
                     print(f"Notification sent to lecturer: {assigned_to}")
                 
-                # Create notification for all registrars
-                registrars = User.objects.filter(role='registrar')
-                for registrar in registrars:
-                    create_notification(
-                        recipient=registrar,
-                        notification_type='issue_created',
-                        issue=issue,
-                        message=f'New issue created by {student.user.get_full_name()}: {issue.title}'
-                    )
-                    print(f"Notification sent to registrar: {registrar.username}")
-                
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             
-            print(f"Serializer errors: {serializer.errors}")
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
             
         except Exception as e:
             print(f"Error creating issue: {str(e)}")
-            return Response(
-                {'error': 'Failed to create issue', 'detail': str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+            print("Traceback:", traceback.format_exc())
+            return Response({
+                'error': 'Failed to create issue. Please try again.'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class LecturerIssueListView(generics.ListAPIView):
+    """Get list of issues assigned to a lecturer"""
     serializer_class = IssueSerializer
     permission_classes = [IsLecturer]
-
+    
     def get_queryset(self):
-        lecturer = self.request.user.lecturer_profile
-        return Issue.objects.filter(assigned_to=lecturer)
+        return Issue.objects.filter(assigned_to=self.request.user.lecturer_profile)
 
 
 class IssueUpdateView(generics.UpdateAPIView):
+    """Update an existing issue"""
     queryset = Issue.objects.all()
     serializer_class = IssueSerializer
-    permission_classes = [IsAuthenticated]  # Base authentication check
-
+    permission_classes = [IsAuthenticated]
+    
     def get_permissions(self):
-        """
-        Custom permission check that properly implements OR logic
-        between IsLecturer and IsAcademicRegistrar
-        """
-        if self.request.user.is_authenticated:
-            if self.request.user.role in ['lecturer', 'registrar']:
-                return []
+        # Check if user has permission to update this issue
+        if self.request.user.role == 'student':
+            return [IsStudent()]
+        elif self.request.user.role == 'lecturer':
+            return [IsLecturer()]
         return [IsAuthenticated()]
-
+    
     def perform_update(self, serializer):
         issue = serializer.save()
-        if self.request.user.role == 'lecturer':
-            # Create notification about the update
+        
+        # Send notification about update
+        if issue.status == 'resolved':
             create_notification(
                 recipient=issue.student.user,
-                notification_type='issue_updated',
+                notification_type='issue_resolved',
                 issue=issue,
-                message=f'Your issue "{issue.title}" has been updated'
+                message=f'Your issue "{issue.title}" has been resolved.'
             )
 
 
 class StudentIssueDetailView(generics.RetrieveUpdateAPIView):
+    """View and update student's issue details"""
     serializer_class = IssueSerializer
     permission_classes = [IsStudent]
     parser_classes = (MultiPartParser, FormParser, JSONParser)
-
+    
     def get_queryset(self):
-        student = self.request.user.student_profile
-        return Issue.objects.filter(student=student)
-
+        return Issue.objects.filter(student=self.request.user.student_profile)
+    
     def perform_update(self, serializer):
-        student = self.request.user.student_profile
+        issue = serializer.save()
         
-        # Handle file upload during update
-        if 'attachment' in self.request.FILES:
-            serializer.validated_data['attachment'] = self.request.FILES['attachment']
-            
-        issue = serializer.save(student=student)
+        # Send notification if issue is updated
+        create_notification(
+            recipient=self.request.user,
+            notification_type='issue_updated',
+            issue=issue,
+            message=f'Your issue "{issue.title}" has been updated.'
+        )
         
-        # Create notification for assigned lecturer if one is assigned
+        # Notify lecturer if assigned
         if issue.assigned_to:
             create_notification(
                 recipient=issue.assigned_to.user,
                 notification_type='issue_updated',
                 issue=issue,
-                message=f'Issue updated: {issue.title}'
+                message=f'Issue "{issue.title}" has been updated by the student.'
             )
 
 
 class LecturerIssueDetailView(generics.RetrieveUpdateAPIView):
+    """View and update lecturer's assigned issue details"""
     serializer_class = IssueSerializer
     permission_classes = [IsLecturer]
-
+    
     def get_queryset(self):
-        lecturer = self.request.user.lecturer_profile
-        return Issue.objects.filter(assigned_to=lecturer)
-
+        return Issue.objects.filter(assigned_to=self.request.user.lecturer_profile)
+    
     def perform_update(self, serializer):
         issue = serializer.save()
         
-        # Create notification for the student when status changes
-        if 'status' in self.request.data:
-            new_status = self.request.data['status']
+        # Send notification about status change
+        if issue.status == 'resolved':
+            create_notification(
+                recipient=issue.student.user,
+                notification_type='issue_resolved',
+                issue=issue,
+                message=f'Your issue "{issue.title}" has been resolved by {self.request.user.get_full_name()}.'
+            )
+        else:
             create_notification(
                 recipient=issue.student.user,
                 notification_type='issue_updated',
                 issue=issue,
-                message=f'Your issue "{issue.title}" status has been updated to {new_status}'
+                message=f'Your issue "{issue.title}" has been updated by {self.request.user.get_full_name()}.'
             )
-            
-            # If the issue is resolved, notify registrars
-            if new_status == 'resolved':
-                registrars = User.objects.filter(role='registrar')
-                for registrar in registrars:
-                    create_notification(
-                        recipient=registrar,
-                        notification_type='issue_resolved',
-                        issue=issue,
-                        message=f'Issue "{issue.title}" has been resolved by {self.request.user.get_full_name()}'
-                    )
-                    print(f"Resolution notification sent to registrar: {registrar.username}")
 
 
 class AcademicRegistrarIssueListView(generics.ListAPIView):
+    """Get list of all issues for registrar"""
     queryset = Issue.objects.all()
     serializer_class = IssueSerializer
     permission_classes = [IsAcademicRegistrar]
+
 
 class AcademicRegistrarIssueDetailView(generics.RetrieveUpdateAPIView):
+    """View and update any issue as registrar"""
     serializer_class = IssueSerializer
     permission_classes = [IsAcademicRegistrar]
     queryset = Issue.objects.all()
-
+    
     def perform_update(self, serializer):
         issue = serializer.save()
         
-        # Create notification for status changes
-        if 'status' in self.request.data:
+        # Send notifications about changes
+        if issue.status == 'resolved':
+            # Notify student
+            create_notification(
+                recipient=issue.student.user,
+                notification_type='issue_resolved',
+                issue=issue,
+                message=f'Your issue "{issue.title}" has been resolved by the registrar.'
+            )
+            
+            # Notify lecturer if assigned
+            if issue.assigned_to:
+                create_notification(
+                    recipient=issue.assigned_to.user,
+                    notification_type='issue_resolved',
+                    issue=issue,
+                    message=f'Issue "{issue.title}" has been resolved by the registrar.'
+                )
+        else:
+            # Notify about other updates
             create_notification(
                 recipient=issue.student.user,
                 notification_type='issue_updated',
                 issue=issue,
-                message=f'Your issue "{issue.title}" status has been updated to {issue.status}'
-            )
-        
-        # Create notification for assignment changes
-        if 'assigned_to' in self.request.data and issue.assigned_to:
-            create_notification(
-                recipient=issue.assigned_to.user,
-                notification_type='issue_assigned',
-                issue=issue,
-                message=f'You have been assigned to issue: {issue.title}'
+                message=f'Your issue "{issue.title}" has been updated by the registrar.'
             )
 
 
 class IssueDeleteView(generics.DestroyAPIView):
+    """Delete an issue"""
     queryset = Issue.objects.all()
     serializer_class = IssueSerializer
     permission_classes = [IsAuthenticated]
-
+    
     def get_queryset(self):
-        # Filter issues based on user role and permissions
-        if self.request.user.role == 'registrar':
+        # Only allow users to delete their own issues
+        if self.request.user.role == 'student':
+            return Issue.objects.filter(student=self.request.user.student_profile)
+        elif self.request.user.role == 'registrar':
             return Issue.objects.all()
-        elif self.request.user.role == 'student':
-            return Issue.objects.filter(student__user=self.request.user)
         return Issue.objects.none()
-
+    
     def destroy(self, request, *args, **kwargs):
         try:
-            instance = self.get_object()
-            self.perform_destroy(instance)
-            return Response({'message': 'Issue deleted successfully'}, status=status.HTTP_200_OK)
+            return super().destroy(request, *args, **kwargs)
         except Exception as e:
-            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({
+                'error': 'Failed to delete issue'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+# Notification related views
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_notifications(request):
+    """Get user's notifications"""
     try:
-        print(f"Fetching notifications for user: {request.user.username}")
         notifications = Notification.objects.filter(recipient=request.user).order_by('-created_at')
-        print(f"Found {notifications.count()} notifications")
         serializer = NotificationSerializer(notifications, many=True)
         return Response(serializer.data)
     except Exception as e:
-        print(f"Error in get_notifications: {str(e)}")
-        return Response(
-            {'error': 'Failed to fetch notifications', 'detail': str(e)},
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR
-        )
+        return Response({
+            'error': 'Failed to fetch notifications'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def mark_notification_read(request, notification_id):
+    """Mark a notification as read"""
     try:
         notification = Notification.objects.get(id=notification_id, recipient=request.user)
         notification.is_read = True
         notification.save()
         return Response({'status': 'success'})
     except Notification.DoesNotExist:
-        return Response(
-            {'error': 'Notification not found'},
-            status=status.HTTP_404_NOT_FOUND
-        )
+        return Response({
+            'error': 'Notification not found'
+        }, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
-        print(f"Error in mark_notification_read: {str(e)}")
-        return Response(
-            {'error': 'Failed to mark notification as read', 'detail': str(e)},
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR
-        )
+        return Response({
+            'error': 'Failed to mark notification as read'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_unread_count(request):
+    """Get count of unread notifications"""
     try:
-        count = Notification.objects.filter(
-            recipient=request.user,
-            is_read=False
-        ).count()
+        count = Notification.objects.filter(recipient=request.user, is_read=False).count()
         return Response({'count': count})
     except Exception as e:
-        print(f"Error in get_unread_count: {str(e)}")
-        return Response(
-            {'error': 'Failed to fetch unread count', 'detail': str(e)},
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR
-        )
+        return Response({
+            'error': 'Failed to get unread count'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
 def delete_notification(request, notification_id):
+    """Delete a notification"""
     try:
         notification = Notification.objects.get(id=notification_id, recipient=request.user)
         notification.delete()
         return Response({'status': 'success'})
     except Notification.DoesNotExist:
-        return Response(
-            {'error': 'Notification not found'},
-            status=status.HTTP_404_NOT_FOUND
-        )
+        return Response({
+            'error': 'Notification not found'
+        }, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
-        return Response(
-            {'error': 'Failed to delete notification', 'detail': str(e)},
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR
-        )
+        return Response({
+            'error': 'Failed to delete notification'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
 def clear_all_notifications(request):
+    """Delete all notifications for a user"""
     try:
         Notification.objects.filter(recipient=request.user).delete()
         return Response({'status': 'success'})
     except Exception as e:
-        return Response(
-            {'error': 'Failed to clear notifications', 'detail': str(e)},
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR
-        )
+        return Response({
+            'error': 'Failed to clear notifications'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 def create_notification(recipient, notification_type, issue, message):
-    """
-    Helper function to create notifications
-    """
+    """Helper function to create a new notification"""
     try:
         notification = Notification.objects.create(
             recipient=recipient,
@@ -468,239 +460,146 @@ def create_notification(recipient, notification_type, issue, message):
             issue=issue,
             message=message
         )
-        print(f"Created notification: {notification.id} for user: {recipient.username}")
         return notification
     except Exception as e:
         print(f"Error creating notification: {str(e)}")
         return None
 
+
+# Issue management views
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def create_issue(request):
+    """Create a new issue"""
     try:
-        # ... existing issue creation code ...
-
-        # Create notification for assigned lecturer
-        if Issue.assigned_to:
-            create_notification(
-                recipient=Issue.assigned_to.user,
-                notification_type='issue_assigned',
-                issue=Issue,
-                message=f'You have been assigned a new issue: {Issue.title}'
-            )
-
-        return Response(Issue.data, status=status.HTTP_201_CREATED)
+        serializer = IssueSerializer(data=request.data)
+        if serializer.is_valid():
+            issue = serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({
+            'error': 'Failed to create issue'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
 def update_issue(request, issue_id):
+    """Update an existing issue"""
     try:
         issue = Issue.objects.get(pk=issue_id)
-        old_status = issue.status
-        old_assigned_to = issue.assigned_to
-
-        # ... existing issue update code ...
-
-        # Create notifications for status changes
-        if old_status != issue.status:
-            if issue.status == 'resolved':
-                create_notification(
-                    recipient=issue.student.user,
-                    notification_type='issue_resolved',
-                    issue=issue,
-                    message=f'Your issue "{issue.title}" has been resolved'
-                )
-
-        # Create notifications for assignment changes
-        if old_assigned_to != issue.assigned_to and issue.assigned_to:
-            create_notification(
-                recipient=issue.assigned_to.user,
-                notification_type='issue_assigned',
-                issue=issue,
-                message=f'You have been assigned to issue: {issue.title}'
-            )
-
-        return Response(serializers.data)
+        serializer = IssueSerializer(issue, data=request.data, partial=True)
+        
+        if serializer.is_valid():
+            updated_issue = serializer.save()
+            
+            # Send notifications about changes
+            if 'status' in request.data:
+                if request.data['status'] == 'resolved':
+                    create_notification(
+                        recipient=issue.student.user,
+                        notification_type='issue_resolved',
+                        issue=updated_issue,
+                        message=f'Your issue "{updated_issue.title}" has been resolved.'
+                    )
+                else:
+                    create_notification(
+                        recipient=issue.student.user,
+                        notification_type='issue_updated',
+                        issue=updated_issue,
+                        message=f'Your issue "{updated_issue.title}" has been updated.'
+                    )
+            
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
     except Issue.DoesNotExist:
-        return Response({'error': 'Issue not found'}, status=status.HTTP_404_NOT_FOUND)
+        return Response({
+            'error': 'Issue not found'
+        }, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({
+            'error': 'Failed to update issue'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+# Student and Lecturer management views
 class StudentListView(generics.ListAPIView):
+    """Get list of all students"""
     serializer_class = StudentSerializer
     permission_classes = [IsAuthenticated, IsAcademicRegistrar | IsLecturer]
     
     def get_queryset(self):
-        try:
-            print(f"\n=== StudentListView.get_queryset ===")
-            print(f"User: {self.request.user}")
-            print(f"Role: {self.request.user.role}")
-            
-            # Start with all students
-            queryset = Student.objects.all().select_related('user', 'department')
-            
-            # If user is a lecturer, filter by their college
-            if self.request.user.role == 'lecturer':
-                lecturer = self.request.user.lecturer_profile
-                lecturer_college = lecturer.department.faculty
-                queryset = queryset.filter(college=lecturer_college)
-                print(f"Filtered by lecturer's college: {lecturer_college}")
-            
-            # Apply additional filters from query parameters
-            college = self.request.query_params.get('college', None)
-            if college and college != 'All Colleges':
-                queryset = queryset.filter(college=college)
-                print(f"After college filter ({college}): {queryset.count()}")
-                
-            # Filter by department if provided
-            department = self.request.query_params.get('department', None)
-            if department and department != 'All Departments':
-                queryset = queryset.filter(department__name=department)
-                print(f"After department filter ({department}): {queryset.count()}")
-                
-            # Filter by year if provided
-            year = self.request.query_params.get('year', None)
-            if year and year != 'All Years':
-                queryset = queryset.filter(year_of_study=year)
-                print(f"After year filter ({year}): {queryset.count()}")
-            
-            return queryset
-            
-        except Exception as e:
-            print(f"Error in StudentListView.get_queryset: {str(e)}")
-            print(f"Request user: {self.request.user}, Role: {self.request.user.role}")
-            raise
-
-    def list(self, request, *args, **kwargs):
-        try:
-            print(f"\n=== StudentListView.list ===")
-            print(f"User: {request.user}")
-            print(f"Query params: {request.query_params}")
-            
-            queryset = self.get_queryset()
-            serializer = self.get_serializer(queryset, many=True)
-            return Response(serializer.data)
-            
-        except Exception as e:
-            print(f"Error in StudentListView.list: {str(e)}")
-            print(f"Request user: {request.user}")
-            print(f"Query params: {request.query_params}")
-            return Response(
-                {'error': str(e)}, 
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+        return Student.objects.all()
 
 
 class LecturerListView(generics.ListAPIView):
+    """Get list of all lecturers"""
     serializer_class = LecturerSerializer
     permission_classes = [IsAuthenticated]
-
+    
     def get_queryset(self):
-        queryset = Lecturer.objects.all().select_related('user', 'department')
-        
-        # Filter by department if provided
-        department = self.request.query_params.get('department', None)
-        if department:
-            queryset = queryset.filter(department__name=department)
-            
-        return queryset
+        return Lecturer.objects.all()
+
 
 class LecturerUpdateView(generics.UpdateAPIView):
+    """Update lecturer details"""
     serializer_class = LecturerSerializer
     permission_classes = [IsAuthenticated, IsAcademicRegistrar]
     queryset = Lecturer.objects.all()
-
+    
     def perform_update(self, serializer):
-        lecturer = serializer.save()
-        # Create notification for the lecturer
-        Notification.objects.create(
-            recipient=lecturer.user,
-            notification_type='profile_updated',
-            message=f'Your profile has been updated by {self.request.user.get_full_name()}'
-        )
+        serializer.save()
+
 
 class LecturerDeleteView(generics.DestroyAPIView):
+    """Delete a lecturer"""
     serializer_class = LecturerSerializer
     permission_classes = [IsAuthenticated, IsAcademicRegistrar]
     queryset = Lecturer.objects.all()
-
+    
     def perform_destroy(self, instance):
-        user = instance.user
-        instance.delete()
-        user.delete()  # Delete the associated user account as well
-from django.http import HttpResponse
+        instance.user.delete()  # This will cascade delete the lecturer profile
+
 
 def home(request):
-    return HttpResponse("Welcome to the homepage!")
+    """Home page view"""
+    return render(request, 'home.html')
+
 
 @api_view(['PATCH'])
 @permission_classes([IsAuthenticated])
 def update_issue_status(request, pk):
+    """Update the status of an issue"""
     try:
-        # Get the issue
         issue = Issue.objects.get(pk=pk)
+        new_status = request.data.get('status')
         
-        # Check permissions based on user role
-        if request.user.role == 'lecturer':
-            if issue.assigned_to != request.user.lecturer_profile:
-                return Response(
-                    {'error': 'You are not authorized to update this issue'},
-                    status=status.HTTP_403_FORBIDDEN
-                )
-        elif request.user.role == 'registrar':
-            pass  # Registrars can update any issue
-        else:
-            return Response(
-                {'error': 'You are not authorized to update issue status'},
-                status=status.HTTP_403_FORBIDDEN
-            )
+        if not new_status:
+            return Response({
+                'error': 'Status is required'
+            }, status=status.HTTP_400_BAD_REQUEST)
         
-        # Update the status
-        if 'status' not in request.data:
-            return Response(
-                {'error': 'Status field is required'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-            
-        old_status = issue.status
-        issue.status = request.data['status']
+        issue.status = new_status
         issue.save()
         
-        # Create notification for the student
-        create_notification(
-            recipient=issue.student.user,
-            notification_type='issue_updated',
-            issue=issue,
-            message=f'Your issue "{issue.title}" status has been updated to {issue.status}'
-        )
+        # Send notification about status change
+        if new_status == 'resolved':
+            create_notification(
+                recipient=issue.student.user,
+                notification_type='issue_resolved',
+                issue=issue,
+                message=f'Your issue "{issue.title}" has been marked as resolved.'
+            )
         
-        # If the issue is resolved, notify registrars
-        if issue.status == 'resolved' and old_status != 'resolved':
-            registrars = User.objects.filter(role='registrar')
-            for registrar in registrars:
-                create_notification(
-                    recipient=registrar,
-                    notification_type='issue_resolved',
-                    issue=issue,
-                    message=f'Issue "{issue.title}" has been resolved by {request.user.get_full_name()}'
-                )
-                print(f"Resolution notification sent to registrar: {registrar.username}")
-        
-        # Return the updated issue data
-        serializer = IssueSerializer(issue)
-        return Response(serializer.data)
-        
+        return Response({'status': 'success'})
+    
     except Issue.DoesNotExist:
-        return Response(
-            {'error': 'Issue not found'},
-            status=status.HTTP_404_NOT_FOUND
-        )
+        return Response({
+            'error': 'Issue not found'
+        }, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
-        print(f"Error updating issue status: {str(e)}")
-        return Response(
-            {'error': 'Failed to update issue status', 'detail': str(e)},
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR
-        )
+        return Response({
+            'error': 'Failed to update issue status'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

@@ -7,6 +7,7 @@ import AddNewIssue from './components/AddNewIssue';
 import MyIssues from './components/MyIssues';
 import IssueDetail from './components/IssueDetail';
 import Notifications from './components/Notifications';
+import Settings from './components/Settings';
 // Import registrar components
 import RegistrarDashboard from './components/registrar/RegistrarDashboard';
 import StudentManagement from './components/registrar/StudentManagement';
@@ -38,6 +39,16 @@ function App() {
             {/* Auth routes */}
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
+            
+            {/* Settings route - accessible to all authenticated users */}
+            <Route
+              path="/settings"
+              element={
+                <PrivateRoute>
+                  <Settings />
+                </PrivateRoute>
+              }
+            />
             
             {/* Student routes */}
             <Route
